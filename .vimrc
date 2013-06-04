@@ -78,7 +78,10 @@ NeoBundle 'Shougo/unite.vim.git'
 NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vimfiler.vim'
 NeoBundle 'mattn/zencoding-vim'
+NeoBundle 'ujihisa/vimshell-ssh'
+NeoBundle 'nathanaelkane/vim-indent-guides'
 
 " vim-scripts repos
 NeoBundle 'L9'
@@ -274,6 +277,10 @@ nnoremap <c-n> :<c-u>tabnew<cr>
 nnoremap gb :<C-u>bn<CR>
 nnoremap gB :<C-u>bp<CR>
 nnoremap cb :<C-u>bd<CR>
+
+" VimShell
+" ƒVƒFƒ‹‚ð‹N“®
+nnoremap <silent> ,vs :VimShell<CR>
 
 
 
