@@ -82,8 +82,10 @@ NeoBundle 'Shougo/vimfiler.vim'
 NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'ujihisa/vimshell-ssh'
 NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'tpope/vim-fugitive'
 
 " vim-scripts repos
+NeoBundle 'sudo.vim'
 NeoBundle 'L9'
 NeoBundle 'FuzzyFinder'
 NeoBundle 'surround.vim'
@@ -204,17 +206,6 @@ augroup END
 
 
 
-
-" -----------------------
-" ステータスラインに文字コードと改行文字を表示する
-" -----------------------
-"
-" set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
-set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
-
-
-
-
 " -----------------------
 " FuzzyFinderから長いパスの中間を省略する関数をパクって最適化する
 " http://hail2u.net/blog/software/optimize-vim-statusline.html
@@ -232,6 +223,17 @@ function! SnipMid(str, len, mask)
 
   return (len_head > 0 ? a:str[: len_head - 1] : '') . a:mask . (len_tail > 0 ? a:str[-len_tail :] : '')
 endfunction
+
+
+" -----------------------
+" ステータスラインに文字コードと改行文字を表示する
+" -----------------------
+"
+ "set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+"set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
+
+
+
 
 "---------------------------------------------------------------------------
 " ファイル設定関連
@@ -307,13 +309,13 @@ let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 
 " zencoding setting 
 let g:user_zen_expandabbr_key = '<C-d>'
-let g:user_zen_settings = {
-¥  'html' : {
-¥    'snippets' : {
-¥     'img:sp' : "<img src=¥"[%url img=¥"#SPACE#¥"%]¥" alt=¥"¥" width=¥"1¥" height=¥"|¥" style=¥"border:none;¥" />",
-¥    },
-¥  },
-¥}
+"let g:user_zen_settings = {
+"¥  'html' : {
+"¥    'sippets' : {
+"¥     'img:sp' : "<img src=¥"[%url img=¥"#SPACE#¥"%]¥" alt=¥"¥" width=¥"1¥" height=¥"|¥" style=¥"border:none;¥" />",
+"¥    },
+"¥  },
+"¥}
 
 
 " -----------------------
