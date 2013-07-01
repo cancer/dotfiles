@@ -3,7 +3,7 @@
 " An example for a Japanese version vimrc file.
 " 日本語版のデフォルト設定ファイル(vimrc) - Vim7用試作
 "
-" Last Change: 04-Jan-2013.
+" Last Change: 24-Jun-2013.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -219,6 +219,9 @@ set title
 "
 " バックアップファイルを作成しない (次行の先頭の " を削除すれば有効になる)
 set nobackup
+" テンポラリファイルを作成しない
+set noswapfile
+
 
 
 
@@ -309,6 +312,7 @@ filetype plugin indent off
 if has('mac')
   echo 'has mac'
   let g:vimproc_dll_path = $VIMRUNTIME . '/autoload/vimproc_mac.so'
+  echo g:vimproc_dll_path
 elseif has('win32')
   let g:vimproc_dll_path = $VIMRUNTIME . '/bundle/vimproc/autoload/vimproc_win32.dll'
 elseif has('win64')
@@ -332,7 +336,8 @@ NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'git-mirror/vim-l9'
 NeoBundle 'vim-scripts/FuzzyFinder'
 NeoBundle 'vim-scripts/surround.vim'
-NeoBundle 'Lokaltog/vim-powerline'
+NeoBundle 'taichouchou2/alpaca_powertabline'
+NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'tpope/vim-fugitive'
@@ -452,7 +457,7 @@ let g:user_zen_settings = {
 "inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
 "
 "" AutoComplPop like behavior.
-"let g:neocomplcache_enable_auto_select = 1
+"let g:neocomplcace_enable_auto_select = 1
 "
 "" Shell like behavior(not recommended).
 ""set completeopt+=longest
@@ -511,162 +516,164 @@ autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
 autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=#ccdc90
 augroup END
 
-" vim-powerlineの設定
-set guifont=Inconsolata_for_Powerline:h11:cANSI
+" powerlineの設定
+"set guifont=Inconsolata_for_Powerline:h11:cANSI
+set guifont=Ricty-Regular:h11:cDEFAULT
 let g:Powerline_symbols='fancy'
-call Pl#Hi#Allocate({
-  \ 'black'          : 16,
-  \ 'white'          : 231,
-  \
-  \ 'darkestgreen'   : 22,
-  \ 'darkgreen'      : 28,
-  \
-  \ 'darkestcyan'    : 23,
-  \ 'mediumcyan'     : 117,
-  \
-  \ 'darkestblue'    : 24,
-  \ 'darkblue'       : 31,
-  \
-  \ 'darkestred'     : 52,
-  \ 'darkred'        : 88,
-  \ 'mediumred'      : 124,
-  \ 'brightred'      : 160,
-  \ 'brightestred'   : 196,
-  \
-  \
-  \ 'darkestyellow'  : 59,
-  \ 'darkyellow'     : 100,
-  \ 'darkestpurple'  : 55,
-  \ 'mediumpurple'   : 98,
-  \ 'brightpurple'   : 189,
-  \
-  \ 'brightorange'   : 208,
-  \ 'brightestorange': 214,
-  \
-  \ 'gray0'          : 233,
-  \ 'gray1'          : 235,
-  \ 'gray2'          : 236,
-  \ 'gray3'          : 239,
-  \ 'gray4'          : 240,
-  \ 'gray5'          : 241,
-  \ 'gray6'          : 244,
-  \ 'gray7'          : 245,
-  \ 'gray8'          : 247,
-  \ 'gray9'          : 250,
-  \ 'gray10'         : 252,
-  \ })
+"call Pl#Hi#Allocate({
+"  \ 'black'          : 16,
+"  \ 'white'          : 231,
+"  \
+"  \ 'darkestgreen'   : 22,
+"  \ 'darkgreen'      : 28,
+"  \
+"  \ 'darkestcyan'    : 23,
+"  \ 'mediumcyan'     : 117,
+"  \
+"  \ 'darkestblue'    : 24,
+"  \ 'darkblue'       : 31,
+"  \
+"  \ 'darkestred'     : 52,
+"  \ 'darkred'        : 88,
+"  \ 'mediumred'      : 124,
+"  \ 'brightred'      : 160,
+"  \ 'brightestred'   : 196,
+"  \
+"  \
+"  \ 'darkestyellow'  : 59,
+"  \ 'darkyellow'     : 100,
+"  \ 'darkestpurple'  : 55,
+"  \ 'mediumpurple'   : 98,
+"  \ 'brightpurple'   : 189,
+"  \
+"  \ 'brightorange'   : 208,
+"  \ 'brightestorange': 214,
+"  \
+"  \ 'gray0'          : 233,
+"  \ 'gray1'          : 235,
+"  \ 'gray2'          : 236,
+"  \ 'gray3'          : 239,
+"  \ 'gray4'          : 240,
+"  \ 'gray5'          : 241,
+"  \ 'gray6'          : 244,
+"  \ 'gray7'          : 245,
+"  \ 'gray8'          : 247,
+"  \ 'gray9'          : 250,
+"  \ 'gray10'         : 252,
+"  \ })
+"
 " 'n': normal mode
 " 'i': insert mode
 " 'v': visual mode
 " 'r': replace mode
 " 'N': not active
-let g:Powerline#Colorschemes#my#colorscheme = Pl#Colorscheme#Init([
-  \ Pl#Hi#Segments(['SPLIT'], {
-    \ 'n': ['white', 'gray2'],
-    \ 'N': ['gray0', 'gray0'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['mode_indicator'], {
-    \ 'i': ['darkestgreen', 'white', ['bold']],
-    \ 'n': ['darkestcyan', 'white', ['bold']],
-    \ 'v': ['darkestpurple', 'white', ['bold']],
-    \ 'r': ['mediumred', 'white', ['bold']],
-    \ 's': ['white', 'gray5', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['fileinfo', 'filename'], {
-    \ 'i': ['white', 'darkgreen', ['bold']],
-    \ 'n': ['white', 'darkblue', ['bold']],
-    \ 'v': ['white', 'mediumpurple', ['bold']],
-    \ 'r': ['white', 'brightred', ['bold']],
-    \ 'N': ['gray0', 'gray2', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['branch', 'scrollpercent', 'raw', 'filesize'], {
-    \ 'n': ['gray2', 'gray7'],
-    \ 'N': ['gray0', 'gray2'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['fileinfo.filepath', 'status'], {
-    \ 'n': ['gray10'],
-    \ 'N': ['gray5'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['static_str'], {
-    \ 'n': ['white', 'gray4'],
-    \ 'N': ['gray1', 'gray1'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['fileinfo.flags'], {
-    \ 'n': ['white'],
-    \ 'N': ['gray4'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['currenttag', 'fileformat', 'fileencoding', 'pwd', 'filetype', 'rvm:string', 'rvm:statusline', 'virtualenv:statusline', 'charcode', 'currhigroup'], {
-    \ 'n': ['gray9', 'gray4'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['lineinfo'], {
-    \ 'n': ['gray2', 'gray10'],
-    \ 'N': ['gray2', 'gray4'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['errors'], {
-    \ 'n': ['brightestorange', 'gray2', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['lineinfo.line.tot'], {
-    \ 'n': ['gray2'],
-    \ 'N': ['gray2'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['paste_indicator', 'ws_marker'], {
-    \ 'n': ['white', 'brightred', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['gundo:static_str.name', 'command_t:static_str.name'], {
-    \ 'n': ['white', 'mediumred', ['bold']],
-    \ 'N': ['brightred', 'darkestred', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['gundo:static_str.buffer', 'command_t:raw.line'], {
-    \ 'n': ['white', 'darkred'],
-    \ 'N': ['brightred', 'darkestred'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['gundo:SPLIT', 'command_t:SPLIT'], {
-    \ 'n': ['white', 'darkred'],
-    \ 'N': ['white', 'darkestred'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:focus', 'ctrlp:byfname'], {
-    \ 'n': ['brightpurple', 'darkestpurple'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:prev', 'ctrlp:next', 'ctrlp:pwd'], {
-    \ 'n': ['white', 'mediumpurple'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:item'], {
-    \ 'n': ['darkestpurple', 'white', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:marked'], {
-    \ 'n': ['brightestred', 'darkestpurple', ['bold']],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:count'], {
-    \ 'n': ['darkestpurple', 'white'],
-    \ }),
-  \
-  \ Pl#Hi#Segments(['ctrlp:SPLIT'], {
-    \ 'n': ['white', 'darkestpurple'],
-    \ }),
-  \ ])
-let g:Powerline_colorscheme='my'
+"let g:Powerline#Colorschemes#my#colorscheme = Pl#Colorscheme#Init([
+"  \ Pl#Hi#Segments(['SPLIT'], {
+"    \ 'n': ['white', 'gray2'],
+"    \ 'N': ['gray0', 'gray0'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['mode_indicator'], {
+"    \ 'i': ['darkestgreen', 'white', ['bold']],
+"    \ 'n': ['darkestcyan', 'white', ['bold']],
+"    \ 'v': ['darkestpurple', 'white', ['bold']],
+"    \ 'r': ['mediumred', 'white', ['bold']],
+"    \ 's': ['white', 'gray5', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['fileinfo', 'filename'], {
+"    \ 'i': ['white', 'darkgreen', ['bold']],
+"    \ 'n': ['white', 'darkblue', ['bold']],
+"    \ 'v': ['white', 'mediumpurple', ['bold']],
+"    \ 'r': ['white', 'brightred', ['bold']],
+"    \ 'N': ['gray0', 'gray2', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['branch', 'scrollpercent', 'raw', 'filesize'], {
+"    \ 'n': ['gray2', 'gray7'],
+"    \ 'N': ['gray0', 'gray2'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['fileinfo.filepath', 'status'], {
+"    \ 'n': ['gray10'],
+"    \ 'N': ['gray5'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['static_str'], {
+"    \ 'n': ['white', 'gray4'],
+"    \ 'N': ['gray1', 'gray1'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['fileinfo.flags'], {
+"    \ 'n': ['white'],
+"    \ 'N': ['gray4'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['currenttag', 'fileformat', 'fileencoding', 'pwd', 'filetype', 'rvm:string', 'rvm:statusline', 'virtualenv:statusline', 'charcode', 'currhigroup'], {
+"    \ 'n': ['gray9', 'gray4'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['lineinfo'], {
+"    \ 'n': ['gray2', 'gray10'],
+"    \ 'N': ['gray2', 'gray4'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['errors'], {
+"    \ 'n': ['brightestorange', 'gray2', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['lineinfo.line.tot'], {
+"    \ 'n': ['gray2'],
+"    \ 'N': ['gray2'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['paste_indicator', 'ws_marker'], {
+"    \ 'n': ['white', 'brightred', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['gundo:static_str.name', 'command_t:static_str.name'], {
+"    \ 'n': ['white', 'mediumred', ['bold']],
+"    \ 'N': ['brightred', 'darkestred', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['gundo:static_str.buffer', 'command_t:raw.line'], {
+"    \ 'n': ['white', 'darkred'],
+"    \ 'N': ['brightred', 'darkestred'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['gundo:SPLIT', 'command_t:SPLIT'], {
+"    \ 'n': ['white', 'darkred'],
+"    \ 'N': ['white', 'darkestred'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:focus', 'ctrlp:byfname'], {
+"    \ 'n': ['brightpurple', 'darkestpurple'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:prev', 'ctrlp:next', 'ctrlp:pwd'], {
+"    \ 'n': ['white', 'mediumpurple'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:item'], {
+"    \ 'n': ['darkestpurple', 'white', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:marked'], {
+"    \ 'n': ['brightestred', 'darkestpurple', ['bold']],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:count'], {
+"    \ 'n': ['darkestpurple', 'white'],
+"    \ }),
+"  \
+"  \ Pl#Hi#Segments(['ctrlp:SPLIT'], {
+"    \ 'n': ['white', 'darkestpurple'],
+"    \ }),
+"  \ ])
+let g:Powerline_colorscheme='skwp'
 " ステータスラインに文字コードと改行文字を表示する
 " set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
-set statusline=%{expand('%:p:t')}\ %<\(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}\)%=\ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
+"set statusline=%{expand('%:p:t')}\ %<\(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}\)%=\ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
 
 " FuzzyFinderから長いパスの中間を省略する関数をパクって最適化する
 " http://hail2u.net/blog/software/optimize-vim-statusline.html
@@ -746,6 +753,22 @@ nnoremap <silent> <Esc><Esc> <Esc>:nohlsearch<CR><Esc>
 
 " vimgrepで自動的にQuickFixを開く
 au QuickFixCmdPost vimgrep cw
+
+" Macっぽくペイン切り替え
+nnoremap <silent> <M-D-Right> <Esc><C-w>l
+nnoremap <silent> <M-D-Left> <Esc><C-w>h
+nnoremap <silent> <M-D-Up> <Esc><C-w>k
+nnoremap <silent> <M-D-Down> <Esc><C-w>j
+"
+"---------------------------------------------------------------------------
+" VimShellを良い感じに開く
+"
+nnoremap <silent> ,vs :VimShell<CR>
+
+"---------------------------------------------------------------------------
+" スペースインデントに再設定
+nnoremap <silent> ,si :set softtabstop=2 tabstop=2 shiftwidth=2 expandtab<CR>
+
 "---------------------------------------------------------------------------
 " for surround.vim
 " [key map]
@@ -811,3 +834,8 @@ hi IndentGuidesOdd  ctermbg=235
 hi IndentGuidesEven ctermbg=237
 au FileType coffee,ruby,javascript,python IndentGuidesEnable
 nmap <silent><Leader>ig <Plug>IndentGuidesToggle
+
+" 半透明(gvimrcでなぜかダメだった)
+set transparency=20
+nmap + :set transparency+=5<CR>
+nmap _ :set transparency-=5<CR>

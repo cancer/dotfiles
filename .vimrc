@@ -1,9 +1,9 @@
 "---------------------------------------------------------------------------
-" ŠÂ‹«İ’è
+" ç’°å¢ƒè¨­å®š
 
 
 " -----------------------
-" vimproc ‚Épath‚ğ’Ê‚·
+" vimproc ã«pathã‚’é€šã™
 " -----------------------
 
 if has('win64')
@@ -13,7 +13,7 @@ endif
 
 
 " -----------------------
-" _vimrc‚ğ—Ç‚¢Š´‚¶‚ÉŠJ‚­
+" _vimrcã‚’è‰¯ã„æ„Ÿã˜ã«é–‹ã
 " -----------------------
 
 let s:vimrcbody = '$VIM/_vimrc'
@@ -36,7 +36,7 @@ nnoremap ,<Tab> :<C-u>OpenMyGVimrc<CR>
 
 
 " -----------------------
-" F5‚ÅƒŠƒ[ƒh
+" F5ã§ãƒªãƒ­ãƒ¼ãƒ‰
 " -----------------------
 
 function! SourceIfExists(file)
@@ -46,7 +46,7 @@ function! SourceIfExists(file)
   echo 'Reloaded vimrc and gvimrc and ' . a:file . '.'
   FullScreen
 endfunction
-nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :source $MYGVIMRC<CR> :call SourceIfExists($FTPLUGIN .'\'. &filetype . '.vim')<CR>
+nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :source $MYGVIMRC<CR> :call SourceIfExists($FTPLUGIN .'Â¥'. &filetype . '.vim')<CR>
 
 " Map double-tap Esc to clear search highlights
 nnoremap <silent> <Esc><Esc> <Esc>:nohlsearch<CR><Esc>
@@ -54,16 +54,16 @@ nnoremap <silent> <Esc><Esc> <Esc>:nohlsearch<CR><Esc>
 
 
 "---------------------------------------------------------------------------
-" ƒvƒ‰ƒOƒCƒ“ŠÇ—
+" ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ç®¡ç†
 
 " -----------------------
-" NeoBundle‚Ì“Ç‚İ‚İ/İ’è
+" NeoBundleã®èª­ã¿è¾¼ã¿/è¨­å®š
 " -----------------------
 
 set nocompatible
 filetype off
 
-let $PATH = $PATH . ';C:\WorkSpace\tools\MinGW\bin;C:\WorkSpace\tools\MinGW\msys\1.0\bin;C:\Git\cmd;C:\Git\bin'
+let $PATH = $PATH . ';C:Â¥WorkSpaceÂ¥toolsÂ¥MinGWÂ¥bin;C:Â¥WorkSpaceÂ¥toolsÂ¥MinGWÂ¥msysÂ¥1.0Â¥bin;C:Â¥GitÂ¥cmd;C:Â¥GitÂ¥bin'
 
 if has('vim_starting')
   set runtimepath+=$VIMRUNTIME/bundle/neobundle.vim/
@@ -94,66 +94,66 @@ filetype plugin indent on     " required!
 
 
 "---------------------------------------------------------------------------
-" ŒŸõ‚Ì‹““®‚ÉŠÖ‚·‚éİ’è:
+" æ¤œç´¢ã®æŒ™å‹•ã«é–¢ã™ã‚‹è¨­å®š:
 
 " -----------------------
-" ƒCƒ“ƒNƒŠƒƒ“ƒ^ƒ‹ƒT[ƒ`
+" ã‚¤ãƒ³ã‚¯ãƒªãƒ¡ãƒ³ã‚¿ãƒ«ã‚µãƒ¼ãƒ
 " -----------------------
 set incsearch
 
 "---------------------------------------------------------------------------
-" •ÒW‚ÉŠÖ‚·‚éİ’è:
+" ç·¨é›†ã«é–¢ã™ã‚‹è¨­å®š:
 "
 " -----------------------
-" ƒ^ƒu‚Ì‰æ–Êã‚Å‚Ì•
+" ã‚¿ãƒ–ã®ç”»é¢ä¸Šã§ã®å¹…
 " -----------------------
 set tabstop=4
 
 " -----------------------
-" ƒ^ƒu•
+" ã‚¿ãƒ–å¹…
 " -----------------------
 set softtabstop=4
 
 " -----------------------
-" ƒ^ƒu‚ğ‘}“ü‚·‚é‚Æ‚«‚Ì•
+" ã‚¿ãƒ–ã‚’æŒ¿å…¥ã™ã‚‹ã¨ãã®å¹…
 " -----------------------
 set shiftwidth=4
 
 "---------------------------------------------------------------------------
-" GUIŒÅ—L‚Å‚Í‚È‚¢‰æ–Ê•\¦‚Ìİ’è:
+" GUIå›ºæœ‰ã§ã¯ãªã„ç”»é¢è¡¨ç¤ºã®è¨­å®š:
 
 " -----------------------
-" s”Ô†‚ğ”ñ•\¦ (number:•\¦)
+" è¡Œç•ªå·ã‚’éè¡¨ç¤º (number:è¡¨ç¤º)
 " -----------------------
 set number
 
 " -----------------------
-" ƒ^ƒu‚â‰üs‚ğ•\¦ (list:•\¦)
+" ã‚¿ãƒ–ã‚„æ”¹è¡Œã‚’è¡¨ç¤º (list:è¡¨ç¤º)
 " -----------------------
 set list
 
 " -----------------------
-" ‚Ç‚Ì•¶š‚Åƒ^ƒu‚â‰üs‚ğ•\¦‚·‚é‚©‚ğİ’è
+" ã©ã®æ–‡å­—ã§ã‚¿ãƒ–ã‚„æ”¹è¡Œã‚’è¡¨ç¤ºã™ã‚‹ã‹ã‚’è¨­å®š
 " -----------------------
 set listchars=tab:>-,extends:<,trail:-,eol:$
 
 " -----------------------
-" ‘SŠpƒXƒy[ƒXEs––‚ÌƒXƒy[ƒXEƒ^ƒu‚Ì‰Â‹‰»
+" å…¨è§’ã‚¹ãƒšãƒ¼ã‚¹ãƒ»è¡Œæœ«ã®ã‚¹ãƒšãƒ¼ã‚¹ãƒ»ã‚¿ãƒ–ã®å¯è¦–åŒ–
 " -----------------------
 
 if has("syntax")
     syntax on
 
-   " PODƒoƒO‘Îô
+   " PODãƒã‚°å¯¾ç­–
     syn sync fromstart
 
     function! ActivateInvisibleIndicator()
-        " ‰º‚Ìs‚Ì"@"‚Í‘SŠpƒXƒy[ƒX
-        syntax match InvisibleJISX0208Space "@" display containedin=ALL
+        " ä¸‹ã®è¡Œã®"ã€€"ã¯å…¨è§’ã‚¹ãƒšãƒ¼ã‚¹
+        syntax match InvisibleJISX0208Space "ã€€" display containedin=ALL
         highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
-        "syntax match InvisibleTrailedSpace "[ \t]\+$" display containedin=ALL
+        "syntax match InvisibleTrailedSpace "[ Â¥t]Â¥+$" display containedin=ALL
         "highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
-        "syntax match InvisibleTab "\t" display containedin=ALL
+        "syntax match InvisibleTab "Â¥t" display containedin=ALL
         "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
     endf
     augroup invisible
@@ -163,18 +163,18 @@ if has("syntax")
 endif
 
 "---------------------------------------------------------------------------
-" ƒtƒ@ƒCƒ‹‘€ì‚ÉŠÖ‚·‚éİ’è:
+" ãƒ•ã‚¡ã‚¤ãƒ«æ“ä½œã«é–¢ã™ã‚‹è¨­å®š:
 
 " -----------------------
-" ƒoƒbƒNƒAƒbƒvƒtƒ@ƒCƒ‹‚ğì¬‚µ‚È‚¢ (Ÿs‚Ìæ“ª‚Ì " ‚ğíœ‚·‚ê‚Î—LŒø‚É‚È‚é)
+" ãƒãƒƒã‚¯ã‚¢ãƒƒãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ä½œæˆã—ãªã„ (æ¬¡è¡Œã®å…ˆé ­ã® " ã‚’å‰Šé™¤ã™ã‚Œã°æœ‰åŠ¹ã«ãªã‚‹)
 " -----------------------
 set nobackup
 
 " ---------------------------------------------------------------------------
-" •ÒWŠÖ˜A
+" ç·¨é›†é–¢é€£
 
 " -----------------------
-"ƒNƒŠƒbƒvƒ{[ƒh‚ğOS‚Æ˜AŒg
+"ã‚¯ãƒªãƒƒãƒ—ãƒœãƒ¼ãƒ‰ã‚’OSã¨é€£æº
 " -----------------------
 
 if has('win32')
@@ -186,14 +186,14 @@ endif
 
 
 " -----------------------
-"ƒJ[ƒ\ƒ‹‚ğs“ªAs––‚Å~‚Ü‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+"ã‚«ãƒ¼ã‚½ãƒ«ã‚’è¡Œé ­ã€è¡Œæœ«ã§æ­¢ã¾ã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹
 " -----------------------
 set whichwrap=b,s,h,l,<,>,[,]
 
 "---------------------------------------------------------------------------
-" UIŠÖ˜A
+" UIé–¢é€£
 " -----------------------
-"“ü—Íƒ‚[ƒhAƒXƒe[ƒ^ƒXƒ‰ƒCƒ“‚ÌƒJƒ‰[‚ğ•ÏX
+"å…¥åŠ›ãƒ¢ãƒ¼ãƒ‰æ™‚ã€ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ©ã‚¤ãƒ³ã®ã‚«ãƒ©ãƒ¼ã‚’å¤‰æ›´
 " -----------------------
 
 augroup InsertHook
@@ -206,17 +206,17 @@ augroup END
 
 
 " -----------------------
-" ƒXƒe[ƒ^ƒXƒ‰ƒCƒ“‚É•¶šƒR[ƒh‚Æ‰üs•¶š‚ğ•\¦‚·‚é
+" ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ãƒ©ã‚¤ãƒ³ã«æ–‡å­—ã‚³ãƒ¼ãƒ‰ã¨æ”¹è¡Œæ–‡å­—ã‚’è¡¨ç¤ºã™ã‚‹
 " -----------------------
 "
-" set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
-set statusline=%{expand('%:p:t')}\ %<\(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}\)%=\ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
+" set statusline=%<%fÂ¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+set statusline=%{expand('%:p:t')}Â¥ %<Â¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}Â¥)%=Â¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
 
 
 
 
 " -----------------------
-" FuzzyFinder‚©‚ç’·‚¢ƒpƒX‚Ì’†ŠÔ‚ğÈ—ª‚·‚éŠÖ”‚ğƒpƒN‚Á‚ÄÅ“K‰»‚·‚é
+" FuzzyFinderã‹ã‚‰é•·ã„ãƒ‘ã‚¹ã®ä¸­é–“ã‚’çœç•¥ã™ã‚‹é–¢æ•°ã‚’ãƒ‘ã‚¯ã£ã¦æœ€é©åŒ–ã™ã‚‹
 " http://hail2u.net/blog/software/optimize-vim-statusline.html
 " -----------------------
 
@@ -234,10 +234,10 @@ function! SnipMid(str, len, mask)
 endfunction
 
 "---------------------------------------------------------------------------
-" ƒtƒ@ƒCƒ‹İ’èŠÖ˜A
+" ãƒ•ã‚¡ã‚¤ãƒ«è¨­å®šé–¢é€£
 
 " -----------------------
-" fileencode ‚ğİ’è
+" fileencode ã‚’è¨­å®š
 " -----------------------
 
 set fileencodings=utf-8,euc-jp,sjis,cp932
@@ -245,9 +245,9 @@ set fileencodings=utf-8,euc-jp,sjis,cp932
 au BufNewFile,BufRead *.md setfiletype markdown
 
 " -----------------------
-" vimshellƒGƒ“ƒR[ƒfƒBƒ“ƒOƒGƒ‰[‘Îô
+" vimshellã‚¨ãƒ³ã‚³ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°ã‚¨ãƒ©ãƒ¼å¯¾ç­–
 " -----------------------
-"Windows7ƒ^[ƒ~ƒiƒ‹“à‚Ísjis‚È‚Ì‚Å
+"Windows7ã‚¿ãƒ¼ãƒŸãƒŠãƒ«å†…ã¯sjisãªã®ã§
 
 set termencoding=sjis
 
@@ -255,7 +255,7 @@ syntax on
 
 
 "---------------------------------------------------------------------------
-" ƒL[ƒ}ƒbƒvİ’è 
+" ã‚­ãƒ¼ãƒãƒƒãƒ—è¨­å®š 
 nnoremap ZZ <Nop>
 
 nnoremap j gj
@@ -279,41 +279,41 @@ nnoremap gB :<C-u>bp<CR>
 nnoremap cb :<C-u>bd<CR>
 
 " VimShell
-" ƒVƒFƒ‹‚ğ‹N“®
+" ã‚·ã‚§ãƒ«ã‚’èµ·å‹•
 nnoremap <silent> ,vs :VimShell<CR>
 
 
 
 " ---------------------------------------------------------------------------
-" ƒvƒ‰ƒOƒCƒ“ŒÂ•Êİ’è
+" ãƒ—ãƒ©ã‚°ã‚¤ãƒ³å€‹åˆ¥è¨­å®š
 
 " -----------------------
 " Fuf setting
 " -----------------------
 
 nnoremap <silent> <space>fb :FufBuffer!<CR>
-nnoremap <silent> <space>ff :FufFile! <C-r>=expand('%:~:.')[:-1-len(expand('%:~:.:t'))]<CR><CR>
-nnoremap <silent> <space>fd :FufDir! <C-r>=expand('%:p:~')[:-1-len(expand('%:p:~:t'))]<CR><CR>
+nnoremap <silent> <space>ff :FufFile! <C-r>=expand('%:â€¾:.')[:-1-len(expand('%:â€¾:.:t'))]<CR><CR>
+nnoremap <silent> <space>fd :FufDir! <C-r>=expand('%:p:â€¾')[:-1-len(expand('%:p:â€¾:t'))]<CR><CR>
 nnoremap <silent> <space>fm :FufMruFile<CR>
 nnoremap <silent> <Space>fc :FufRenewCache<CR>
 autocmd FileType fuf nmap <C-c> <ESC>
 let g:fuf_patternSeparator = ' '
 let g:fuf_modesDisable = ['mrucmd']
-let g:fuf_mrufile_exclude = '\v\.DS_Store|\.git|\.swp|\.svn'
+let g:fuf_mrufile_exclude = 'Â¥vÂ¥.DS_Store|Â¥.git|Â¥.swp|Â¥.svn'
 let g:fuf_mrufile_maxItem = 100
 let g:fuf_enumeratingLimit = 20
-let g:fuf_file_exclude = '\v\.DS_Store|\.git|\.swp|\.svn'
+let g:fuf_file_exclude = 'Â¥vÂ¥.DS_Store|Â¥.git|Â¥.swp|Â¥.svn'
 
 
 " zencoding setting 
 let g:user_zen_expandabbr_key = '<C-d>'
 let g:user_zen_settings = {
-\  'html' : {
-\    'snippets' : {
-\     'img:sp' : "<img src=\"[%url img=\"#SPACE#\"%]\" alt=\"\" width=\"1\" height=\"|\" style=\"border:none;\" />",
-\    },
-\  },
-\}
+Â¥  'html' : {
+Â¥    'snippets' : {
+Â¥     'img:sp' : "<img src=Â¥"[%url img=Â¥"#SPACE#Â¥"%]Â¥" alt=Â¥"Â¥" width=Â¥"1Â¥" height=Â¥"|Â¥" style=Â¥"border:none;Â¥" />",
+Â¥    },
+Â¥  },
+Â¥}
 
 
 " -----------------------
@@ -339,31 +339,31 @@ let g:neocomplcache_enable_underbar_completion = 1
 let g:neocomplcache_min_syntax_length = 3
 
 " buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder 
-let g:neocomplcache_lock_buffer_name_pattern = '\*fuf\*'
+let g:neocomplcache_lock_buffer_name_pattern = 'Â¥*fufÂ¥*'
 
 " Plugin key-mappings.
 inoremap <expr><C-g>     neocomplcache#undo_completion()
 inoremap <expr><C-l>     neocomplcache#complete_common_string()
 
 " SuperTab like snippets behavior.
-imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-"smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "Â¥<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "Â¥<C-n>" : "Â¥<TAB>"
+"smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "Â¥<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "Â¥<C-n>" : "Â¥<TAB>"
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
-inoremap <expr><CR>  neocomplcache#close_popup() . "\<CR>"
+inoremap <expr><CR>  neocomplcache#close_popup() . "Â¥<CR>"
 
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><C-h> neocomplcache#smart_close_popup()."Â¥<C-h>"
+inoremap <expr><BS> neocomplcache#smart_close_popup()."Â¥<C-h>"
 inoremap <expr><C-y>  neocomplcache#close_popup()
 inoremap <expr><C-e>  neocomplcache#cancel_popup()
 
 " For cursor moving in insert mode(Not recommended)
-inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
+inoremap <expr><Left>  neocomplcache#close_popup() . "Â¥<Left>"
+inoremap <expr><Right> neocomplcache#close_popup() . "Â¥<Right>"
+inoremap <expr><Up>    neocomplcache#close_popup() . "Â¥<Up>"
+inoremap <expr><Down>  neocomplcache#close_popup() . "Â¥<Down>"
 
 " AutoComplPop like behavior.
 let g:neocomplcache_enable_auto_select = 1
@@ -379,11 +379,11 @@ autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 if !exists('g:neocomplcache_omni_patterns')
   let g:neocomplcache_omni_patterns = {}
 endif
-let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
+let g:neocomplcache_omni_patterns.ruby = '[^. *Â¥t]Â¥.Â¥hÂ¥w*Â¥|Â¥hÂ¥w*::'
 "autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
-let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
+let g:neocomplcache_omni_patterns.php = '[^. Â¥t]->Â¥hÂ¥w*Â¥|Â¥hÂ¥w*::'
+let g:neocomplcache_omni_patterns.c = 'Â¥%(Â¥.Â¥|->Â¥)Â¥hÂ¥w*'
+let g:neocomplcache_omni_patterns.cpp = 'Â¥hÂ¥w*Â¥%(Â¥.Â¥|->Â¥)Â¥hÂ¥w*Â¥|Â¥hÂ¥w*::'
 
 
 
@@ -396,8 +396,8 @@ imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 
 " SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "Â¥<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "Â¥<C-n>" : "Â¥<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "Â¥<Plug>(neosnippet_expand_or_jump)" : "Â¥<TAB>"
 
 " For snippet_complete marker.
 if has('conceal')
@@ -430,23 +430,23 @@ endif
 " -----------------------
 
 " [key map]
-autocmd FileType html let b:surround_49  = "<h1>\r</h1>"
-autocmd FileType html let b:surround_50  = "<h2>\r</h2>"
-autocmd FileType html let b:surround_51  = "<h3>\r</h3>"
-autocmd FileType html let b:surround_52  = "<h4>\r</h4>"
-autocmd FileType html let b:surround_53  = "<h5>\r</h5>"
-autocmd FileType html let b:surround_54  = "<h6>\r</h6>"
+autocmd FileType html let b:surround_49  = "<h1>Â¥r</h1>"
+autocmd FileType html let b:surround_50  = "<h2>Â¥r</h2>"
+autocmd FileType html let b:surround_51  = "<h3>Â¥r</h3>"
+autocmd FileType html let b:surround_52  = "<h4>Â¥r</h4>"
+autocmd FileType html let b:surround_53  = "<h5>Â¥r</h5>"
+autocmd FileType html let b:surround_54  = "<h6>Â¥r</h6>"
 
-autocmd FileType html let b:surround_112 = "<p>\r</p>"
-autocmd FileType html let b:surround_117 = "<ul>\r</ul>"
-autocmd FileType html let b:surround_111 = "<ol>\r</ol>"
-autocmd FileType html let b:surround_108 = "<li>\r</li>"
-autocmd FileType html let b:surround_97  = "<a href=\"\">\r</a>"
-autocmd FileType html let b:surround_65  = "<a href=\"\r\"></a>"
-autocmd FileType html let b:surround_105 = "<img src=\"\r\" alt=\"\">"
-autocmd FileType html let b:surround_73  = "<img src=\"\" alt=\"\r\">"
-autocmd FileType html let b:surround_100 = "<div>\r</div>"
-autocmd FileType html let b:surround_68  = "<div class=\"section\">\r</div>"
+autocmd FileType html let b:surround_112 = "<p>Â¥r</p>"
+autocmd FileType html let b:surround_117 = "<ul>Â¥r</ul>"
+autocmd FileType html let b:surround_111 = "<ol>Â¥r</ol>"
+autocmd FileType html let b:surround_108 = "<li>Â¥r</li>"
+autocmd FileType html let b:surround_97  = "<a href=Â¥"Â¥">Â¥r</a>"
+autocmd FileType html let b:surround_65  = "<a href=Â¥"Â¥rÂ¥"></a>"
+autocmd FileType html let b:surround_105 = "<img src=Â¥"Â¥rÂ¥" alt=Â¥"Â¥">"
+autocmd FileType html let b:surround_73  = "<img src=Â¥"Â¥" alt=Â¥"Â¥rÂ¥">"
+autocmd FileType html let b:surround_100 = "<div>Â¥r</div>"
+autocmd FileType html let b:surround_68  = "<div class=Â¥"sectionÂ¥">Â¥r</div>"
 
 
 
@@ -459,7 +459,7 @@ nmap <Leader>sp "sp
 
 
 " -----------------------
-" vimgrep‚Å©“®“I‚ÉQuickFix‚ğŠJ‚­
+" vimgrepã§è‡ªå‹•çš„ã«QuickFixã‚’é–‹ã
 " -----------------------
 au QuickFixCmdPost vimgrep cw
 

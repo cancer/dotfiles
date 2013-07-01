@@ -3,7 +3,7 @@
 " An example for a Japanese version gvimrc file.
 " 日本語版のデフォルトGUI設定ファイル(gvimrc) - Vim7用試作
 "
-" Last Change: 07-Nov-2012.
+" Last Change: 10-Jun-2013.
 " Maintainer:  MURAOKA Taro <koron.kaoriya@gmail.com>
 "
 " 解説:
@@ -78,7 +78,7 @@ if has('win32')
     set ambiwidth=auto
   endif
 elseif has('mac')
-  set guifont=Osaka－等幅:h14
+  set guifont=Ricty-Regular:h14
 elseif has('xfontset')
   " UNIX用 (xfontsetを使用)
   set guifontset=a14,r14,k14
@@ -100,8 +100,8 @@ set ruler
 "ウィンドウを最大化
 if has("gui_running")
   if has('mac')
-    set fuoptions=maxvert,maxhorz
-    au GUIEnter * set fullscreen
+"    set fuoptions=maxvert,maxhorz
+"    au GUIEnter * set fullscreen
   elseif has('win32')
     au GUIEnter * simalt ~X
   endif
@@ -139,7 +139,7 @@ if has('multi_byte_ime') || has('xim')
     "set imactivatekey=s-space
   endif
   " 挿入モードでのIME状態を記憶させない場合、次行のコメントを解除
-  "inoremap <silent> <ESC> <ESC>:set iminsert=0<CR>
+  inoremap <silent> <ESC> <ESC>:set iminsert=0<CR>
 endif
 
 "---------------------------------------------------------------------------
@@ -210,7 +210,7 @@ endif
 
 gui
 " 半透明
-set transparency=20
+"set transparency=50
 
 
 
