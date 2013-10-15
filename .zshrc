@@ -5,15 +5,57 @@
 # =========================================================================
 
 # -------------------------------------------------------------------------
+# 文字コード
+#
+# -------------------------------------------------------------------------
+
+    export LANG=ja_JP.UTF-8
+
+# -------------------------------------------------------------------------
 # プロンプト
 #
 # -------------------------------------------------------------------------
 
-    PROMPT="[zsh %n@%m]%(#.#.$) "
+	autoload colors
+	colors
+
+	autoload -Uz vcs_info
+	zstyle ':vcs_info:*' enable git svn
+	zstyle ':vcs_info:git:*' check-for-changes true
+	zstyle ':vcs_info:git:*' stagedstr "+"
+	zstyle ':vcs_info:git:*' unstagedstr "*"
+	zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]}%}) %{$reset_color%}"
+
+	setopt prompt_subst
+	precmd () {
+		LANG=en_US.UTF-8 vcs_info
+		p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
+		p_window=${WINDOW:+" $WINDOW "}
+		if [ -z "${SSH_CONNECTION}" ]; then
+			p_info="[%n@%m$p_window]"
+		else
+			p_info="%{${fg[green]}%}[%n@%m$p_window]$%{${reset_color}%}"
+		fi
+	}
+
+	PROMPT='$p_info%(#.#.$) '
+	RPROMPT='$p_cdir ${vcs_info_msg_0_}'
+	PROMPT2='[%n]> ' 
+
+    #PROMPT="[zsh %n@%m]% "
+
     bindkey -e
+
+# -------------------------------------------------------------------------
+# パス
+#
+# -------------------------------------------------------------------------
+
     PATH=/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin
     export PATH
-    export LANG=ja_JP.UTF-8
+	export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
+	export BIN_PATH="/usr/local/bin"
+
     source ~/project/Dev/share/etc/mf-dev.zshrc
 
 # -------------------------------------------------------------------------
@@ -66,6 +108,32 @@
     # auto_list の補完候補一覧で、ls -F のようにファイルの種別をマーク表示
     setopt list_types
 
+	# 補完に色を付ける
+	zstyle ':completion:*' list-colors 'di=36' 'ln=35' 'ex=32'
+
+# -------------------------------------------------------------------------
+# alias
+#
+# -------------------------------------------------------------------------
+	if [ $(uname) = 'Darwin' ]; then
+		alias ls='ls -G'
+	else 
+		alias ls='ls --color'
+	fi
+
+    alias ll="ls -l"
+    alias la="ls -la"
+
+	alias -g L='|  less'
+	alias -g G='| grep'
+	alias -g GI='| grep -i'
+	alias -g T='| tail'
+	alias -g TF='| tail -f'
+
+	# lscolor
+	export LSCOLORS=gxfxxxxxcxxxxxxxxxgxgx
+	export LS_COLORS='di=01;36:ln=01;35:ex=01;32'
+
 # -------------------------------------------------------------------------
 # その他
 #
@@ -89,44 +157,17 @@
     # シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
     setopt NO_hup
 
-# -------------------------------------------------------------------------
-# alias
-#
-# -------------------------------------------------------------------------
-    alias ls='ls --color'
-    alias ll="ls -l"
-    alias la="ls -la"
-
     # xselのクリップボードをmacのクリップボードと同じコマンドに
     alias pbcopy='xsel --clipboard --input'
     alias pbpaste='xsel --clipboard --input'
 
-    #tmux
+    #tmuxでpbcopy
     alias tmux-copy='tmux save-buffer - | pbcopy'
 
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
+	# rbenv
+	export PATH="$HOME/.rbenv/bin:$PATH"
+	eval "$(rbenv init -)"
 
 
 
-# lscolor
-export LSCOLORS=CxGxcxdxCxegedabagacad
 
-# git completion
-#autoload bashcompinit
-#bashcompinit
-#source ~/git-completion.bash
-
-#autoload -Uz vcs_info
-#zstyle ':vcs_info:*' formats '(%s)-[%b]'
-#zstyle ':vcs_info:*' actionformats '(%s)-[%b|%a]'
-#precmd () {
-#  psvar=()
-#  LANG=en_US.UTF-8 vcs_info
-#  [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
-#}
-#RPROMPT="%1(v|%F{green}%1v%f|)"
-#
-export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
-
-export BIN_PATH="/usr/local/bin"
