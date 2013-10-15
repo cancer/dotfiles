@@ -1,3 +1,10 @@
+set sw=2 st=2 ts=2
+set encoding=utf-8
+set fileencodings=utf-8,sjis,euc-jp,iso-2022-jp,cp932
+set fileformats=unix,dos,mac
+if 1 && filereadable($VIM . '/vimrc_local.vim')
+  source $VIM/vimrc_kaoriya.vim
+endif
 "---------------------------------------------------------------------------
 " 環境設定
 
@@ -16,8 +23,13 @@ endif
 " _vimrcを良い感じに開く
 " -----------------------
 
-let s:vimrcbody = '$VIM/_vimrc'
-let s:gvimrcbody = '$VIM/_gvimrc'
+if has('win64')
+  let s:vimrcbody = '$VIM/_vimrc'
+  let s:gvimrcbody = '$VIM/_gvimrc'
+else
+  let s:vimrcbody = '$VIM/vimrc'
+  let s:gvimrcbody = '$VIM/gvimrc'
+endif
 let $MYVIMRC = expand(s:vimrcbody)
 let $MYGVIMRC = expand(s:gvimrcbody)
 
@@ -31,8 +43,13 @@ function! OpenFile(file)
 endfunction
 command! OpenMyVimrc call OpenFile(s:vimrcbody)
 command! OpenMyGVimrc call OpenFile(s:gvimrcbody)
-nnoremap ,, :<C-u>OpenMyVimrc<CR>
-nnoremap ,<Tab> :<C-u>OpenMyGVimrc<CR>
+
+if has('unix')
+  nnoremap ,, :OpenMyVimrc
+else
+  nnoremap ,, :<C-u>OpenMyVimrc<CR>
+  nnoremap ,<Tab> :<C-u>OpenMyGVimrc<CR>
+endif
 
 
 " -----------------------
@@ -83,6 +100,9 @@ NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'ujihisa/vimshell-ssh'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'taichouchou2/alpaca_powertabline'
+NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
+NeoBundle 'kchmck/vim-coffee-script'
 
 " vim-scripts repos
 NeoBundle 'sudo.vim'
@@ -109,17 +129,22 @@ set incsearch
 " -----------------------
 " タブの画面上での幅
 " -----------------------
-set tabstop=4
+set tabstop=2
 
 " -----------------------
 " タブ幅
 " -----------------------
-set softtabstop=4
+set softtabstop=2
 
 " -----------------------
 " タブを挿入するときの幅
 " -----------------------
-set shiftwidth=4
+set shiftwidth=2
+
+" -----------------------
+" タブを半角スペースで
+" -----------------------
+set expandtab
 
 "---------------------------------------------------------------------------
 " GUI固有ではない画面表示の設定:
@@ -137,7 +162,7 @@ set list
 " -----------------------
 " どの文字でタブや改行を表示するかを設定
 " -----------------------
-set listchars=tab:>-,extends:<,trail:-,eol:$
+set listchars=tab:>-,extends:<,trail:-
 
 " -----------------------
 " 全角スペース・行末のスペース・タブの可視化
@@ -164,6 +189,13 @@ if has("syntax")
     augroup END
 endif
 
+colorscheme desert
+"colorscheme wombat
+" wombatのVisualモードをdesert風(緑っぽいやつ)にする
+if g:colors_name ==? 'wombat'
+  hi Visual gui=none guifg=khaki guibg=olivedrab
+endif
+
 "---------------------------------------------------------------------------
 " ファイル操作に関する設定:
 
@@ -172,18 +204,40 @@ endif
 " -----------------------
 set nobackup
 
+" -----------------------
+" スワップファイルの作成場所を指定
+" -----------------------
+set noswapfile
+"set swapfile
+"set directory=~/.vim/vim_swap/
+
 " ---------------------------------------------------------------------------
 " 編集関連
+"
+set autoindent
+set cindent
+set showmatch
+set backspace=indent,eol,start
 
 " -----------------------
 "クリップボードをOSと連携
 " -----------------------
 
-if has('win32')
+if has('win32') || has('unix')
   set clipboard=unnamed
 else
   set clipboard=unnamed,autoselect
 endif
+
+" undoの永続化
+if has('persistent_undo')
+  set undodir=~/.vim/.vimundo
+  augroup vimrc-undofile
+    autocmd!
+    autocmd BufReadPre ~/* setlocal undofile
+  augroup END
+endif
+
 
 
 
@@ -203,6 +257,30 @@ autocmd!
 autocmd InsertEnter * highlight StatusLine guifg=#ccdc90 guibg=#2E4340
 autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=#ccdc90
 augroup END
+
+
+"---------------------------------------------------------------------------
+" コンソールでのカラー表示のための設定(暫定的にUNIX専用)¥
+if has('unix') && !has('gui_running') && !has('gui_macvim')
+  let uname = system('uname')
+  if uname =~? "linux"
+    set term=builtin_linux
+  elseif uname =~? "freebsd"
+    set term=builtin_cons25
+  elseif uname =~? "Darwin"
+    set term=beos-ansi
+  else
+    set term=builtin_xterm
+  endif
+  unlet uname
+endif
+
+"---------------------------------------------------------------------------
+" コンソール版で環境変数$DISPLAYが設定されていると起動が遅くなる件へ対応
+if !has('gui_running') && has('xterm_clipboard')
+  set clipboard=exclude:cons\\\|linux\\\|cygwin\\\|rxvt\\\|screen
+endif
+
 
 
 
@@ -228,12 +306,19 @@ endfunction
 " -----------------------
 " ステータスラインに文字コードと改行文字を表示する
 " -----------------------
-"
- "set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+
+"set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+
+" set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
+
+"set statusline=%<%f¥ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)¥ %P
+set laststatus=2
+
+"set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
+
 "set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
 
-
-
+set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
 
 "---------------------------------------------------------------------------
 " ファイル設定関連
@@ -244,33 +329,49 @@ endfunction
 
 set fileencodings=utf-8,euc-jp,sjis,cp932
 
+" markdown
 au BufNewFile,BufRead *.md setfiletype markdown
+" coffeescript
+au BufNewFile,BufRead *.coffee setfiletype coffeescript
 
 " -----------------------
 " vimshellエンコーディングエラー対策
 " -----------------------
 "Windows7ターミナル内はsjisなので
 
-set termencoding=sjis
+if has('win64')
+	set termencoding=sjis
+endif
 
 syntax on
 
 
 "---------------------------------------------------------------------------
 " キーマップ設定 
+" keymap
 nnoremap ZZ <Nop>
 
+" moving
 nnoremap j gj
 nnoremap k gk
 nnoremap gj j
 nnoremap gk k
-nnoremap <C-Up> 5k
-nnoremap <C-Down> 5j
-noremap <C-k> 5k
-noremap <C-j> 5j
+noremap <Space>h <Home>
+noremap <Space>l <End>
 
-
+" edit
+noremap <CR> i<CR><ESC>
 inoremap <C-z> <Esc>
+
+" brackets"
+inoremap {} {}<LEFT>
+inoremap [] []<LEFT>
+inoremap () ()<LEFT>
+inoremap "" ""<LEFT>
+inoremap '' ''<LEFT>
+inoremap <> <><LEFT>
+inoremap :; : ;<LEFT>
+inoremap []5 [% %]<LEFT><LEFT><LEFT>
 
 " open new tab
 nnoremap <c-n> :<c-u>tabnew<cr>
@@ -284,7 +385,11 @@ nnoremap cb :<C-u>bd<CR>
 " シェルを起動
 nnoremap <silent> ,vs :VimShell<CR>
 
-
+" unixでBSで文字を消せるように
+noremap  
+noremap!  
+noremap <BS> 
+noremap! <BS> 
 
 " ---------------------------------------------------------------------------
 " プラグイン個別設定
@@ -348,24 +453,24 @@ inoremap <expr><C-g>     neocomplcache#undo_completion()
 inoremap <expr><C-l>     neocomplcache#complete_common_string()
 
 " SuperTab like snippets behavior.
-imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "¥<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "¥<C-n>" : "¥<TAB>"
-"smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "¥<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "¥<C-n>" : "¥<TAB>"
+imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+"smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
-inoremap <expr><CR>  neocomplcache#close_popup() . "¥<CR>"
+"inoremap <expr><CR>  neocomplcache#close_popup() . "\<CR>"
 
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."¥<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."¥<C-h>"
+inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
 inoremap <expr><C-y>  neocomplcache#close_popup()
 inoremap <expr><C-e>  neocomplcache#cancel_popup()
 
 " For cursor moving in insert mode(Not recommended)
-inoremap <expr><Left>  neocomplcache#close_popup() . "¥<Left>"
-inoremap <expr><Right> neocomplcache#close_popup() . "¥<Right>"
-inoremap <expr><Up>    neocomplcache#close_popup() . "¥<Up>"
-inoremap <expr><Down>  neocomplcache#close_popup() . "¥<Down>"
+inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
+inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
+inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
+inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
 
 " AutoComplPop like behavior.
 let g:neocomplcache_enable_auto_select = 1
@@ -398,8 +503,8 @@ imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 
 " SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "¥<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "¥<C-n>" : "¥<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "¥<Plug>(neosnippet_expand_or_jump)" : "¥<TAB>"
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 " For snippet_complete marker.
 if has('conceal')
@@ -432,24 +537,23 @@ endif
 " -----------------------
 
 " [key map]
-autocmd FileType html let b:surround_49  = "<h1>¥r</h1>"
-autocmd FileType html let b:surround_50  = "<h2>¥r</h2>"
-autocmd FileType html let b:surround_51  = "<h3>¥r</h3>"
-autocmd FileType html let b:surround_52  = "<h4>¥r</h4>"
-autocmd FileType html let b:surround_53  = "<h5>¥r</h5>"
-autocmd FileType html let b:surround_54  = "<h6>¥r</h6>"
+autocmd FileType html let b:surround_49  = "<h1>\r</h1>"
+autocmd FileType html let b:surround_50  = "<h2>\r</h2>"
+autocmd FileType html let b:surround_51  = "<h3>\r</h3>"
+autocmd FileType html let b:surround_52  = "<h4>\r</h4>"
+autocmd FileType html let b:surround_53  = "<h5>\r</h5>"
+autocmd FileType html let b:surround_54  = "<h6>\r</h6>"
 
 autocmd FileType html let b:surround_112 = "<p>¥r</p>"
 autocmd FileType html let b:surround_117 = "<ul>¥r</ul>"
 autocmd FileType html let b:surround_111 = "<ol>¥r</ol>"
 autocmd FileType html let b:surround_108 = "<li>¥r</li>"
-autocmd FileType html let b:surround_97  = "<a href=¥"¥">¥r</a>"
-autocmd FileType html let b:surround_65  = "<a href=¥"¥r¥"></a>"
-autocmd FileType html let b:surround_105 = "<img src=¥"¥r¥" alt=¥"¥">"
-autocmd FileType html let b:surround_73  = "<img src=¥"¥" alt=¥"¥r¥">"
-autocmd FileType html let b:surround_100 = "<div>¥r</div>"
-autocmd FileType html let b:surround_68  = "<div class=¥"section¥">¥r</div>"
-
+autocmd FileType html let b:surround_97  = "<a href=\"\">\r</a>"
+autocmd FileType html let b:surround_65  = "<a href=\"\r\"></a>"
+autocmd FileType html let b:surround_105 = "<img src=\"\r\" alt=\"\">"
+autocmd FileType html let b:surround_73  = "<img src=\"\" alt=\"\r\">"
+autocmd FileType html let b:surround_100 = "<div>\r</div>"
+autocmd FileType html let b:surround_68  = "<div class=\"section\">\r</div>"
 
 
 
@@ -467,8 +571,3 @@ au QuickFixCmdPost vimgrep cw
 
 
 
-
-
-
-
-"
