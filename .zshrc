@@ -50,11 +50,12 @@ PROMPT2='[%n]> '
 bindkey -e
 
 # -------------------------------------------------------------------------
-# パス
+# PATH
 #
 # -------------------------------------------------------------------------
 
-PATH=/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin
+NPM_PATH=/usr/local/share/npm/bin
+PATH="$NPM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
 export PATH
 export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
@@ -118,24 +119,41 @@ zstyle ':completion:*' list-colors 'di=36' 'ln=35' 'ex=32'
 # alias
 #
 # -------------------------------------------------------------------------
+
+# ls
 if [ $(uname) = 'Darwin' ]; then
-alias ls='ls -G'
-else 
-alias ls='ls --color'
+	alias ls='ls -G'
+	else 
+	alias ls='ls --color'
 fi
 
 alias ll="ls -l"
 alias la="ls -la"
 
+# lscolor
+export LSCOLORS=gxfxxxxxcxxxxxxxxxgxgx
+export LS_COLORS='di=01;36:ln=01;35:ex=01;32'
+
+# dotfiles
+DOTFILES_BASE="~/dotfiles/"
+
+# edit
+alias edit="vi" 
+alias ezshrc="edit $DOTFILES_BASE.zshrc"
+alias evim="edit $DOTFILES_BASE.vimrc"
+alias etmux="edit $DOTFILES_BASE.tmux.conf"
+
+# source
+alias szshrc="source $DOTFILES_BASE.zshrc"
+alias svim="source $DOTFILES_BASE.vimrc"
+alias stmux="source $DOTFILES_BASE.tmux.conf"
+
+# global
 alias -g L='|  less'
 alias -g G='| grep'
 alias -g GI='| grep -i'
 alias -g T='| tail'
 alias -g TF='| tail -f'
-
-# lscolor
-export LSCOLORS=gxfxxxxxcxxxxxxxxxgxgx
-export LS_COLORS='di=01;36:ln=01;35:ex=01;32'
 
 # -------------------------------------------------------------------------
 # その他
@@ -168,11 +186,12 @@ alias pbpaste='xsel --clipboard --input'
 alias tmux-copy='tmux save-buffer - | pbcopy'
 
 
-if [ $MF_DEV ]; then
-
 # rbenv
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
+which rbenv > /dev/null 2>&1 
+if [ $? -eq 0 ]; then
+
+	export PATH="$HOME/.rbenv/bin:$PATH"
+	eval "$(rbenv init -)"
 
 fi
 
