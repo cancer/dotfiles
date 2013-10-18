@@ -1,3 +1,7 @@
+"---------------------------------------------------------------------------
+" 環境設定
+
+set nocompatible
 set sw=2 st=2 ts=2
 set encoding=utf-8
 set fileencodings=utf-8,sjis,euc-jp,iso-2022-jp,cp932
@@ -5,9 +9,6 @@ set fileformats=unix,dos,mac
 if 1 && filereadable($VIM . '/vimrc_local.vim')
   source $VIM/vimrc_kaoriya.vim
 endif
-"---------------------------------------------------------------------------
-" 環境設定
-
 
 " -----------------------
 " vimproc にpathを通す
@@ -67,51 +68,6 @@ nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :source $MYGVIMRC<CR> :call SourceI
 
 " Map double-tap Esc to clear search highlights
 nnoremap <silent> <Esc><Esc> <Esc>:nohlsearch<CR><Esc>
-
-
-
-"---------------------------------------------------------------------------
-" プラグイン管理
-
-" -----------------------
-" NeoBundleの読み込み/設定
-" -----------------------
-
-set nocompatible
-filetype off
-
-let $PATH = $PATH . ';C:¥WorkSpace¥tools¥MinGW¥bin;C:¥WorkSpace¥tools¥MinGW¥msys¥1.0¥bin;C:¥Git¥cmd;C:¥Git¥bin'
-
-if has('vim_starting')
-  set runtimepath+=$VIMRUNTIME/bundle/neobundle.vim/
-endif
-
-call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
-
-" originalrepos on github
-NeoBundle 'Shougo/neobundle.vim'
-NeoBundle 'Shougo/vimproc'
-NeoBundle 'Shougo/unite.vim.git'
-NeoBundle 'Shougo/neocomplcache'
-NeoBundle 'Shougo/neosnippet'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vimfiler.vim'
-NeoBundle 'mattn/zencoding-vim'
-NeoBundle 'ujihisa/vimshell-ssh'
-NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'taichouchou2/alpaca_powertabline'
-NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
-NeoBundle 'kchmck/vim-coffee-script'
-
-" vim-scripts repos
-NeoBundle 'sudo.vim'
-NeoBundle 'L9'
-NeoBundle 'FuzzyFinder'
-NeoBundle 'surround.vim'
-NeoBundle 'visSum.vim'
-
-filetype plugin indent on     " required!
 
 
 
@@ -200,12 +156,12 @@ endif
 " ファイル操作に関する設定:
 
 " -----------------------
-" バックアップファイルを作成しない (次行の先頭の " を削除すれば有効になる)
+" バックアップファイルの作成
 " -----------------------
 set nobackup
 
 " -----------------------
-" スワップファイルの作成場所を指定
+" スワップファイルの作成
 " -----------------------
 set noswapfile
 "set swapfile
@@ -268,7 +224,8 @@ if has('unix') && !has('gui_running') && !has('gui_macvim')
   elseif uname =~? "freebsd"
     set term=builtin_cons25
   elseif uname =~? "Darwin"
-    set term=beos-ansi
+    set term=builtin_xterm
+    "set term=beos-ansi
   else
     set term=builtin_xterm
   endif
@@ -391,8 +348,62 @@ noremap!  
 noremap <BS> 
 noremap! <BS> 
 
-" ---------------------------------------------------------------------------
-" プラグイン個別設定
+"---------------------------------------------------------------------------
+" プラグイン管理
+
+" -----------------------
+" NeoBundleの読み込み/設定
+" -----------------------
+
+filetype off
+
+"let $PATH = $PATH . ';C:¥WorkSpace¥tools¥MinGW¥bin;C:¥WorkSpace¥tools¥MinGW¥msys¥1.0¥bin;C:¥Git¥cmd;C:¥Git¥bin'
+
+if has('vim_starting')
+  set runtimepath+=$VIMRUNTIME/bundle/neobundle.vim/
+endif
+
+call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
+
+" originalrepos on github
+NeoBundle 'Shougo/neobundle.vim'
+NeoBundle 'Shougo/vimproc'
+NeoBundle 'Shougo/unite.vim.git'
+NeoBundle 'ujihisa/unite-colorscheme'
+NeoBundle 'Shougo/neocomplcache'
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'Shougo/vimshell'
+NeoBundle 'Shougo/vimfiler.vim'
+NeoBundle 'mattn/zencoding-vim'
+NeoBundle 'ujihisa/vimshell-ssh'
+NeoBundle 'nathanaelkane/vim-indent-guides'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'taichouchou2/alpaca_powertabline'
+NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
+NeoBundle 'kchmck/vim-coffee-script'
+
+" vim-scripts repos
+NeoBundle 'sudo.vim'
+NeoBundle 'L9'
+NeoBundle 'FuzzyFinder'
+NeoBundle 'surround.vim'
+NeoBundle 'visSum.vim'
+
+" colorschemes
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'croaker/mustang-vim'
+NeoBundle 'jeffreyiacono/vim-colors-wombat'
+NeoBundle 'nanotech/jellybeans.vim'
+NeoBundle 'vim-scripts/Lucius'
+NeoBundle 'vim-scripts/Zenburn'
+NeoBundle 'mrkn/mrkn256.vim'
+NeoBundle 'jpo/vim-railscasts-theme'
+NeoBundle 'therubymug/vim-pyte'
+NeoBundle 'tomasr/molokai'
+
+filetype plugin indent on     " required!
+
+
 
 " -----------------------
 " Fuf setting
@@ -412,7 +423,11 @@ let g:fuf_enumeratingLimit = 20
 let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 
 
+
+" -----------------------
 " zencoding setting 
+" -----------------------
+
 let g:user_zen_expandabbr_key = '<C-d>'
 "let g:user_zen_settings = {
 "¥  'html' : {
@@ -423,6 +438,30 @@ let g:user_zen_expandabbr_key = '<C-d>'
 "¥}
 
 
+
+" -----------------------
+" unite setting 
+" -----------------------
+
+" Enable unite in insert mode
+let g:unite_enable_start_insert=1
+" Enable yank history
+let g:unite_source_history_yank_enable=1
+" Define limit of mru files
+let g:unite_source_file_mru_limit=200
+" Open yunk history
+nnoremap <silent> <space>uy :<C-u>Unite history/yank<CR>
+" Open buffer
+nnoremap <silent> <space>ub :<C-u>Unite buffer<CR>
+" Open same directory files
+nnoremap <silent> <space>uf :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
+" Open register
+nnoremap <silent> <space>ur :<C-u>Unite -buffer-name=register register<CR>
+" Open most recent used file
+nnoremap <silent> <space>uu :<C-u>Unite file_mru buffer<CR>
+
+
+
 " -----------------------
 " neocomplcache setting 
 " -----------------------
@@ -430,23 +469,37 @@ let g:user_zen_expandabbr_key = '<C-d>'
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
 
-" enable neocomplcache
+" Enable neocomplcache
 let g:neocomplcache_enable_at_startup = 1
 
 " Use smartcase.
 let g:neocomplcache_enable_smart_case = 1
 
-" Use camel case completion.
-let g:neocomplcache_enable_camel_case_completion = 1
-"
-" Use underscore completion.
-let g:neocomplcache_enable_underbar_completion = 1
-
 " Set minimum syntax keyword length.
 let g:neocomplcache_min_syntax_length = 3
 
-" buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder 
+" Buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder 
 let g:neocomplcache_lock_buffer_name_pattern = '¥*fuf¥*'
+
+" Heavy features.
+" Use camel case completion.
+"let g:neocomplcache_enable_camel_case_completion = 1
+"
+" Use underscore completion.
+"let g:neocomplcache_enable_underbar_completion = 1
+
+" Define dictionary.
+let g:neocomplcache_dictionary_filetype_lists = {
+  \ 'default' : '',
+  \ 'vimshell' : $HOME.'/.vimshell_hist',
+  \ 'scheme' : $HOME.'/.gosh_completions'
+\ }
+
+" Define keyword.
+if !exists('g:neocomplcache_keyword_patterns')
+    let g:neocomplcache_keyword_patterns = {}
+endif
+let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
 
 " Plugin key-mappings.
 inoremap <expr><C-g>     neocomplcache#undo_completion()
@@ -458,8 +511,15 @@ imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
-"inoremap <expr><CR>  neocomplcache#close_popup() . "\<CR>"
-
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return neocomplcache#smart_close_popup() . "\<CR>"
+  " For no inserting <CR> key.
+  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+endfunction
+" <TAB>: completion.
+" use SuperTab
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
 inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
 inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
@@ -467,10 +527,10 @@ inoremap <expr><C-y>  neocomplcache#close_popup()
 inoremap <expr><C-e>  neocomplcache#cancel_popup()
 
 " For cursor moving in insert mode(Not recommended)
-inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
+"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
+"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
+"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
+"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
 
 " AutoComplPop like behavior.
 let g:neocomplcache_enable_auto_select = 1
@@ -478,7 +538,7 @@ let g:neocomplcache_enable_auto_select = 1
 " Enable omni completion.
 autocmd FileType css,scss setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType javascript,coffeescript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
@@ -487,7 +547,6 @@ if !exists('g:neocomplcache_omni_patterns')
   let g:neocomplcache_omni_patterns = {}
 endif
 let g:neocomplcache_omni_patterns.ruby = '[^. *¥t]¥.¥h¥w*¥|¥h¥w*::'
-"autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
 let g:neocomplcache_omni_patterns.php = '[^. ¥t]->¥h¥w*¥|¥h¥w*::'
 let g:neocomplcache_omni_patterns.c = '¥%(¥.¥|->¥)¥h¥w*'
 let g:neocomplcache_omni_patterns.cpp = '¥h¥w*¥%(¥.¥|->¥)¥h¥w*¥|¥h¥w*::'
@@ -533,7 +592,7 @@ endif
 
 
 " -----------------------
-" for surround.vim
+" surround.vim setting
 " -----------------------
 
 " [key map]

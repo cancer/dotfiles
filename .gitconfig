@@ -1,0 +1,19 @@
+[color]
+	ui = auto
+[core]
+	excludesfile = ~/dotfiles/.gitignore
+	editor = vi
+	pager = less -r
+[alias]
+	a = !git add . && git status
+	aa = !git add -A && git status
+	b = branch -a
+	c = commit -a
+	co = checkout
+	d = diff
+	l = log
+	ln = log --name-status
+	ls = log --stat
+	lo = log --oneline
+	s = status
+	st = stash
