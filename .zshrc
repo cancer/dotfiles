@@ -12,6 +12,20 @@
 export LANG=ja_JP.UTF-8
 
 # -------------------------------------------------------------------------
+# PATH
+#
+# -------------------------------------------------------------------------
+
+NPM_PATH=/usr/local/share/npm/bin
+PATH="$NPM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
+export PATH
+export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
+export BIN_PATH="/usr/local/bin"
+
+source ~/project/Dev/share/etc/mf-dev.zshrc
+
+
+# -------------------------------------------------------------------------
 # プロンプト
 #
 # -------------------------------------------------------------------------
@@ -32,13 +46,13 @@ zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]
 setopt prompt_subst
 precmd () {
 	LANG=en_US.UTF-8 vcs_info
-		p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
-		p_window=${WINDOW:+" $WINDOW "}
+  p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
+  p_window=${WINDOW:+" $WINDOW "}
 	if [ -z "${SSH_CONNECTION}" ]; then
 		p_info="[%n@%m$p_window]"
 	else
 		p_info="%{${fg[green]}%}[%n@%m$p_window]$%{${reset_color}%}"
-			fi
+  fi
 }
 
 PROMPT='$p_info%(#.#.$) '
@@ -48,19 +62,6 @@ PROMPT2='[%n]> '
 #PROMPT="[zsh %n@%m]% "
 
 bindkey -e
-
-# -------------------------------------------------------------------------
-# PATH
-#
-# -------------------------------------------------------------------------
-
-NPM_PATH=/usr/local/share/npm/bin
-PATH="$NPM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
-export PATH
-export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
-export BIN_PATH="/usr/local/bin"
-
-source ~/project/Dev/share/etc/mf-dev.zshrc
 
 # -------------------------------------------------------------------------
 # 履歴
