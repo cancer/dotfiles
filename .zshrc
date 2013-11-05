@@ -19,10 +19,12 @@ export LANG=ja_JP.UTF-8
 NPM_PATH=/usr/local/share/npm/bin
 PATH="$NPM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
 export PATH
-export PATH="~/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
+export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
 
-source ~/project/Dev/share/etc/mf-dev.zshrc
+if [ -f "~/project/Dev/share/etc/mf-dev.zshrc" ]; then
+	source ~/project/Dev/share/etc/mf-dev.zshrc
+fi
 
 
 # -------------------------------------------------------------------------
@@ -212,6 +214,9 @@ if [ $? -eq 0 ]; then
 
 fi
 
-
-
-
+# anyenv
+which anyenv > /dev/null 2>&1 
+if [ $? -eq 0 ]; then
+  export PATH="$HOME/.anyenv/bin:$PATH"
+  eval "$(anyenv init -)"
+fi
