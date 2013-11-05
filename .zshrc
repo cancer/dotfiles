@@ -34,29 +34,45 @@ autoload colors
 colors
 
 # vcs_infoでgitのbranchとか表示する
-autoload -Uz vcs_info
-zstyle ':vcs_info:*' enable git svn
-zstyle ':vcs_info:git:*' check-for-changes true
-zstyle ':vcs_info:git:*' stagedstr "+"
-zstyle ':vcs_info:git:*' unstagedstr "*"
-# %s:vcs名 %b:branch名 %c:stagedstr %u unstagedstr
-zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]}%}) %{$reset_color%}"
+  if [ $(uname) = 'Darwin' ]; then
+  autoload -Uz vcs_info
+  zstyle ':vcs_info:*' enable git svn
+  zstyle ':vcs_info:git:*' check-for-changes true
+  zstyle ':vcs_info:git:*' stagedstr "+"
+  zstyle ':vcs_info:git:*' unstagedstr "*"
+  # %s:vcs名 %b:branch名 %c:stagedstr %u unstagedstr
+  zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]}%}) %{$reset_color%}"
 
-# プロンプトが表示される度に実行
-setopt prompt_subst
-precmd () {
-	LANG=en_US.UTF-8 vcs_info
-  p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
-  p_window=${WINDOW:+" $WINDOW "}
-	if [ -z "${SSH_CONNECTION}" ]; then
-		p_info="[%n@%m$p_window]"
-	else
-		p_info="%{${fg[green]}%}[%n@%m$p_window]$%{${reset_color}%}"
-  fi
-}
+  # プロンプトが表示される度に実行
+  setopt prompt_subst
+  precmd () {
+    LANG=en_US.UTF-8 vcs_info
+    p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
+    p_window=${WINDOW:+" $WINDOW "}
+    if [ -z "${SSH_CONNECTION}" ]; then
+      p_info="[%n@%m$p_window]"
+    else
+      p_info="%{${fg[green]}%}[%n@%m$p_window]%{${reset_color}%}"
+    fi
+  }
+  RPROMPT='$p_cdir ${vcs_info_msg_0_}'
+else
+  # プロンプトが表示される度に実行
+  setopt prompt_subst
+  precmd () {
+    p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
+    p_window=${WINDOW:+" $WINDOW "}
+    if [ -z "${SSH_CONNECTION}" ]; then
+      p_info="[%n@%m$p_window]"
+    else
+      p_info="%{${fg[green]}%}[%n@%m$p_window]%{${reset_color}%}"
+    fi
+  }
+  RPROMPT='$p_cdir'
+fi
+
 
 PROMPT='$p_info%(#.#.$) '
-RPROMPT='$p_cdir ${vcs_info_msg_0_}'
 PROMPT2='[%n]> ' 
 
 #PROMPT="[zsh %n@%m]% "
