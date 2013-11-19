@@ -381,8 +381,10 @@ NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'taichouchou2/alpaca_powertabline'
 NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle 'editorconfig/editorconfig-vim'
 
 " vim-scripts repos
+" rconfig/editorconfig-vim
 NeoBundle 'sudo.vim'
 NeoBundle 'L9'
 NeoBundle 'FuzzyFinder'
