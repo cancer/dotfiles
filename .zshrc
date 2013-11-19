@@ -23,7 +23,7 @@ export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
 
 if [ -f "~/project/Dev/share/etc/mf-dev.zshrc" ]; then
-	source ~/project/Dev/share/etc/mf-dev.zshrc
+  . ~/project/Dev/share/etc/mf-dev.zshrc
 fi
 
 
@@ -36,7 +36,7 @@ autoload colors
 colors
 
 # vcs_infoでgitのbranchとか表示する
-  if [ $(uname) = 'Darwin' ]; then
+if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
   autoload -Uz vcs_info
   zstyle ':vcs_info:*' enable git svn
   zstyle ':vcs_info:git:*' check-for-changes true
@@ -140,11 +140,14 @@ zstyle ':completion:*' list-colors 'di=36' 'ln=35' 'ex=32'
 # -------------------------------------------------------------------------
 
 # ls
-if [ $(uname) = 'Darwin' ]; then
-	alias ls='ls -G'
-	else 
-	alias ls='ls --color'
-fi
+case ${OSTYPE} in
+  darwin*)
+    alias ls='ls -G'
+    ;;
+  linux*)
+    alias ls='ls --color'
+    ;;
+esac
 
 alias ll="ls -l"
 alias la="ls -la"
@@ -175,6 +178,15 @@ alias -g T='| tail'
 alias -g TF='| tail -f'
 
 # -------------------------------------------------------------------------
+# function
+#
+# -------------------------------------------------------------------------
+
+# scpのショートカット
+function scpf { scp $1 y-uno@y-uno.dev.mf.local:~/tmp }
+function scpd { scp -r $1 y-uno@y-uno.dev.mf.local:~/tmp }
+
+# -------------------------------------------------------------------------
 # その他
 #
 # -------------------------------------------------------------------------
@@ -197,9 +209,13 @@ setopt interactive_comments
 # シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
 setopt NO_hup
 
-# xselのクリップボードをmacのクリップボードと同じコマンドに
-alias pbcopy='xsel --clipboard --input'
-alias pbpaste='xsel --clipboard --input'
+# Linuxでもpbcopyを使いたい
+case ${OSTYPE} in
+  linux*)
+    alias pbcopy='xsel --clipboard --input'
+    alias pbpaste='xsel --clipboard --input'
+    ;;
+esac
 
 #tmuxでpbcopy
 alias tmux-copy='tmux save-buffer - | pbcopy'
