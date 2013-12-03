@@ -217,7 +217,7 @@ case ${OSTYPE} in
     ;;
 esac
 
-#tmuxでpbcopy
+# tmuxでpbcopy
 alias tmux-copy='tmux save-buffer - | pbcopy'
 
 
