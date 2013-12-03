@@ -220,6 +220,10 @@ esac
 # tmuxでpbcopy
 alias tmux-copy='tmux save-buffer - | pbcopy'
 
+# zmvを使う
+autoload -Uz zmv
+alias rename='noglob zmv -W'
+
 
 # rbenv
 which rbenv > /dev/null 2>&1 
