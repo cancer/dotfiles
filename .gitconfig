@@ -8,7 +8,8 @@
   a = !git add . && git status
   aa = !git add -A && git status
   b = branch -a
-  c = commit -a
+  c = commit
+  ca = commit -a
   co = checkout
   d = diff
   l = log
