@@ -291,6 +291,8 @@ set fileencodings=utf-8,euc-jp,sjis,cp932
 au BufNewFile,BufRead *.md setfiletype markdown
 " coffeescript
 au BufNewFile,BufRead *.coffee setfiletype coffeescript
+" handlebars
+au BufNewFile,BufRead *.hbs setfiletype html
 
 " -----------------------
 " vimshellエンコーディングエラー対策
@@ -375,7 +377,7 @@ NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vimfiler.vim'
-NeoBundle 'mattn/zencoding-vim'
+"NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'ujihisa/vimshell-ssh'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'tpope/vim-fugitive'
@@ -384,6 +386,7 @@ NeoBundle 'editorconfig/editorconfig-vim'
 NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
+NeoBundle 'mattn/emmet-vim'
 
 " vim-scripts repos
 " rconfig/editorconfig-vim
@@ -432,7 +435,18 @@ let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 " zencoding setting 
 " -----------------------
 
-let g:user_zen_expandabbr_key = '<C-d>'
+"let g:user_zen_expandabbr_key = '<C-d>'
+
+
+
+" -----------------------
+" emmet setting 
+" -----------------------
+
+let g:user_emmet_mode = 'i'
+let g:user_emmet_leader_key='<C-D>'
+let g:user_emmet_install_global = 0
+autocmd FileType html,css,scss EmmetInstall
 
 
 

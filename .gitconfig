@@ -6,7 +6,7 @@
   diff = diff-highlight | less
 [core]
   excludesfile = ~/dotfiles/.gitignore
-  editor = vi
+	editor = vim
   pager = less -r
 [alias]
   a = !git add . && git status

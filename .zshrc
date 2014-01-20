@@ -240,3 +240,16 @@ if [ $? -eq 0 ]; then
   export PATH="$HOME/.anyenv/bin:$PATH"
   eval "$(anyenv init -)"
 fi
+
+# OS Xのクイックルックでテキストのコピペを有効にする
+if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
+  QLEnableTextSelectionValue=$(defaults read com.apple.finder QLEnableTextSelection) >/dev/null 2>&1
+  if [[ $QLEnableTextSelectionValue -ne 1 ]]; then
+    echo "restart finder"
+    defaults write com.apple.finder QLEnableTextSelection -bool TRUE
+    killall Finder
+  else
+    echo "already enabled text selection"
+  fi
+fi
+
