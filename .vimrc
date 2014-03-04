@@ -320,7 +320,7 @@ noremap <Space>h <Home>
 noremap <Space>l <End>
 
 " edit
-noremap <CR> i<CR><ESC>
+"noremap <CR> i<CR><ESC> " cwでファイルがEnterで開けなくなるのでやめる
 inoremap <C-z> <Esc>
 
 " brackets"
