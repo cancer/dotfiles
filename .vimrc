@@ -29,8 +29,8 @@ if has('win64')
   let s:vimrcbody = '$VIM/_vimrc'
   let s:gvimrcbody = '$VIM/_gvimrc'
 else
-  let s:vimrcbody = '$VIM/vimrc'
-  let s:gvimrcbody = '$VIM/gvimrc'
+  let s:vimrcbody = '$HOME/vimrc'
+  let s:gvimrcbody = '$HOME/gvimrc'
 endif
 let $MYVIMRC = expand(s:vimrcbody)
 let $MYGVIMRC = expand(s:gvimrcbody)

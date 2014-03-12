@@ -22,8 +22,9 @@ export PATH
 export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
 
-if [ -f "~/project/Dev/share/etc/mf-dev.zshrc" ]; then
-  . ~/project/Dev/share/etc/mf-dev.zshrc
+mf_zshrc="$HOME/project/Dev/share/etc/mf-dev.zshrc"
+if [ -f $mf_zshrc ]; then
+  source $mf_zshrc
 fi
 
 
@@ -36,42 +37,27 @@ autoload colors
 colors
 
 # vcs_infoでgitのbranchとか表示する
-if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
-  autoload -Uz vcs_info
-  zstyle ':vcs_info:*' enable git svn
-  zstyle ':vcs_info:git:*' check-for-changes true
-  zstyle ':vcs_info:git:*' stagedstr "+"
-  zstyle ':vcs_info:git:*' unstagedstr "*"
-  # %s:vcs名 %b:branch名 %c:stagedstr %u unstagedstr
-  zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]}%}) %{$reset_color%}"
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' stagedstr "+"
+zstyle ':vcs_info:git:*' unstagedstr "*"
+# %s:vcs名 %b:branch名 %c:stagedstr %u unstagedstr
+zstyle ':vcs_info:*' formats "%{${fg[red]}%}(%s %b%{${fg[cyan]}%}%c%u%{${fg[red]}%}) %{$reset_color%}"
 
-  # プロンプトが表示される度に実行
-  setopt prompt_subst
-  precmd () {
-    LANG=en_US.UTF-8 vcs_info
-    p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
-    p_window=${WINDOW:+" $WINDOW "}
-    if [ -z "${SSH_CONNECTION}" ]; then
-      p_info="[%n@%m$p_window]"
-    else
-      p_info="%{${fg[green]}%}[%n@%m$p_window]%{${reset_color}%}"
-    fi
-  }
-  RPROMPT='$p_cdir ${vcs_info_msg_0_}'
-else
-  # プロンプトが表示される度に実行
-  setopt prompt_subst
-  precmd () {
-    p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
-    p_window=${WINDOW:+" $WINDOW "}
-    if [ -z "${SSH_CONNECTION}" ]; then
-      p_info="[%n@%m$p_window]"
-    else
-      p_info="%{${fg[green]}%}[%n@%m$p_window]%{${reset_color}%}"
-    fi
-  }
-  RPROMPT='$p_cdir'
-fi
+# プロンプトが表示される度に実行
+setopt prompt_subst
+precmd () {
+  LANG=en_US.UTF-8 vcs_info
+  p_cdir="%{${fg[yellow]}%}%~%{${reset_color}%}"
+  p_window=${WINDOW:+" $WINDOW "}
+  if [ -z "${SSH_CONNECTION}" ]; then
+    p_info="[%n@%m$p_window]"
+  else
+    p_info="%{${fg[green]}%}[%n@%m$p_window]%{${reset_color}%}"
+  fi
+}
+RPROMPT='$p_cdir ${vcs_info_msg_0_}'
 
 
 PROMPT='$p_info%(#.#.$) '
@@ -135,6 +121,70 @@ setopt list_types
 zstyle ':completion:*' list-colors 'di=36' 'ln=35' 'ex=32'
 
 # -------------------------------------------------------------------------
+# function
+#
+# -------------------------------------------------------------------------
+
+# scpのショートカット
+function scpf { scp $1 y-uno@y-uno.dev.mf.local:~/tmp }
+function scpd { scp -r $1 y-uno@y-uno.dev.mf.local:~/tmp }
+
+# -------------------------------------------------------------------------
+# その他
+#
+# -------------------------------------------------------------------------
+
+# コマンドラインの引数で --prefix=/usr などの = 以降でも補完できる
+setopt magic_equal_subst
+
+# 改行なくても表示
+unsetopt promptcr
+
+# Ctrl + D でログアウトしない
+setopt ignore_eof
+
+# Ctrl+S/Ctrl+Q によるフロー制御を使わないようにする
+setopt NO_flow_control
+
+# コマンドラインでも # 以降をコメントと見なす
+setopt interactive_comments
+
+# シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
+setopt NO_hup
+
+# Linuxでもpbcopyを使いたい
+if which xsel >/dev/null 2>&1 ; then
+  # Linux
+  alias -g C='| xsel --input --clipboard'
+elif which pbcopy >/dev/null 2>&1 ; then
+  # Mac
+  alias -g C='| pbcopy'
+fi
+
+# tmuxでpbcopy
+alias tmux-copy='tmux save-buffer - C'
+
+# zmvを使う
+autoload -Uz zmv
+alias rename='noglob zmv -W'
+
+# anyenv
+export PATH="$HOME/.anyenv/bin:$PATH"
+eval "$(anyenv init -)"
+
+# OS Xのクイックルックでテキストのコピペを有効にする
+if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
+  QLEnableTextSelectionValue=$(defaults read com.apple.finder QLEnableTextSelection) >/dev/null 2>&1
+  if [[ $QLEnableTextSelectionValue -ne 1 ]]; then
+    echo "restart finder"
+    defaults write com.apple.finder QLEnableTextSelection -bool TRUE
+    killall Finder
+  else
+    echo "already enabled text selection"
+  fi
+fi
+
+# -------------------------------------------------------------------------
 # alias
 #
 # -------------------------------------------------------------------------
@@ -176,80 +226,5 @@ alias -g G='| grep'
 alias -g GI='| grep -i'
 alias -g T='| tail'
 alias -g TF='| tail -f'
-
-# -------------------------------------------------------------------------
-# function
-#
-# -------------------------------------------------------------------------
-
-# scpのショートカット
-function scpf { scp $1 y-uno@y-uno.dev.mf.local:~/tmp }
-function scpd { scp -r $1 y-uno@y-uno.dev.mf.local:~/tmp }
-
-# -------------------------------------------------------------------------
-# その他
-#
-# -------------------------------------------------------------------------
-
-# コマンドラインの引数で --prefix=/usr などの = 以降でも補完できる
-setopt magic_equal_subst
-
-# 改行なくても表示
-unsetopt promptcr
-
-# Ctrl + D でログアウトしない
-setopt ignore_eof
-
-# Ctrl+S/Ctrl+Q によるフロー制御を使わないようにする
-setopt NO_flow_control
-
-# コマンドラインでも # 以降をコメントと見なす
-setopt interactive_comments
-
-# シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
-setopt NO_hup
-
-# Linuxでもpbcopyを使いたい
-case ${OSTYPE} in
-  linux*)
-    alias pbcopy='xsel --clipboard --input'
-    alias pbpaste='xsel --clipboard --input'
-    ;;
-esac
-
-# tmuxでpbcopy
-alias tmux-copy='tmux save-buffer - | pbcopy'
-
-# zmvを使う
-autoload -Uz zmv
-alias rename='noglob zmv -W'
-
-
-# rbenv
-which rbenv > /dev/null 2>&1 
-if [ $? -eq 0 ]; then
-
-	export PATH="$HOME/.rbenv/bin:$PATH"
-	eval "$(rbenv init -)"
-
-fi
-
-# anyenv
-which anyenv > /dev/null 2>&1 
-if [ $? -eq 0 ]; then
-  export PATH="$HOME/.anyenv/bin:$PATH"
-  eval "$(anyenv init -)"
-fi
-
-# OS Xのクイックルックでテキストのコピペを有効にする
-if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
-  QLEnableTextSelectionValue=$(defaults read com.apple.finder QLEnableTextSelection) >/dev/null 2>&1
-  if [[ $QLEnableTextSelectionValue -ne 1 ]]; then
-    echo "restart finder"
-    defaults write com.apple.finder QLEnableTextSelection -bool TRUE
-    killall Finder
-  else
-    echo "already enabled text selection"
-  fi
-fi
+alias -g C='| pbcopy'
 
