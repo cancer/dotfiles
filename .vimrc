@@ -387,6 +387,7 @@ NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'mattn/emmet-vim'
+NeoBundle 'Lokaltog/vim-easymotion'
 
 " vim-scripts repos
 " rconfig/editorconfig-vim
