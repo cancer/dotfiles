@@ -1,0 +1,12 @@
+# Gで最終行に移動する
+bind generic G move-last-line
+
+# main viewの左端にコミットIDを表示する
+set show-id = yes
+
+# コミットのときdiffを表示する
+bind generic C !git commit -v
+
+# `l`（line）で一行addを行う
+bind stage l stage-update-line
+

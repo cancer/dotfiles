@@ -16,12 +16,18 @@
   ca = commit -a
   co = checkout
   d = diff
-  l = log
+  #l = log
   lg = log --graph --decorate --pretty=oneline --abbrev-commit --all
   ln = log --name-status
-  ls = log --stat
-  lo = log --oneline
-  s = status
+  #ls = log --stat
+  #lo = log --oneline
+  #s = status
+  l = !tig
+  #lg = !tig
+  #ln = !tig
+  ls = !tig
+  lo = !tig
+  s = !tig status
   st = stash
   ignore = !"f( { local s=$1; shift; \
       while [ $# -gt 0 ]; do s="$s,$1"; shift; done;\
