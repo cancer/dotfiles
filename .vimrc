@@ -25,10 +25,15 @@ endif
 " _vimrcを良い感じに開く
 " -----------------------
 
+let os=substitute(system('uname'), '\n', '', '')
+let isMac=os=='Darwin' || os=='Mac'
 if has('win64')
   let s:vimrcbody = '$VIM/_vimrc'
   let s:gvimrcbody = '$VIM/_gvimrc'
-else
+elseif isMac
+  let s:vimrcbody = '$HOME/.vimrc'
+  let s:gvimrcbody = '$HOME/.gvimrc'
+elseif os=='Unix'
   let s:vimrcbody = '$HOME/vimrc'
   let s:gvimrcbody = '$HOME/gvimrc'
 endif
@@ -47,7 +52,7 @@ command! OpenMyVimrc call OpenFile(s:vimrcbody)
 command! OpenMyGVimrc call OpenFile(s:gvimrcbody)
 
 if has('unix')
-  nnoremap ,, :OpenMyVimrc
+  nnoremap ,, :OpenMyVimrc<CR>
 else
   nnoremap ,, :<C-u>OpenMyVimrc<CR>
   nnoremap ,<Tab> :<C-u>OpenMyGVimrc<CR>
@@ -63,9 +68,15 @@ function! SourceIfExists(file)
     execute 'source ' . a:file
   endif
   echo 'Reloaded vimrc and gvimrc and ' . a:file . '.'
-  FullScreen
+  if has('win32') || has('win64')
+    FullScreen
+  endif
 endfunction
-nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :source $MYGVIMRC<CR> :call SourceIfExists($FTPLUGIN .'¥'. &filetype . '.vim')<CR>
+if has('win32') || has('win64')
+  nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :source $MYGVIMRC<CR> :call SourceIfExists($FTPLUGIN .'¥'. &filetype . '.vim')<CR>
+else
+  nnoremap <F5> <Esc>:<C-u>source $MYVIMRC<CR> :call SourceIfExists($FTPLUGIN .'¥'. &filetype . '.vim')<CR>
+endif
 
 " Map double-tap Esc to clear search highlights
 nnoremap <silent> <Esc><Esc> <Esc>:nohlsearch<CR><Esc>
@@ -180,10 +191,10 @@ set backspace=indent,eol,start
 "クリップボードをOSと連携
 " -----------------------
 
-if has('win32') || has('unix')
-  set clipboard=unnamed
-else
+if isMac
   set clipboard=unnamed,autoselect
+elseif has('win32') || has('unix')
+  set clipboard=unnamed
 endif
 
 " undoの永続化
@@ -201,6 +212,7 @@ endif
 " -----------------------
 "カーソルを行頭、行末で止まらないようにする
 " -----------------------
+set whichwrap=b,s,h,l
 set whichwrap=b,s,h,l,<,>,[,]
 
 "---------------------------------------------------------------------------
@@ -293,6 +305,8 @@ au BufNewFile,BufRead *.md setfiletype markdown
 au BufNewFile,BufRead *.coffee setfiletype coffeescript
 " handlebars
 au BufNewFile,BufRead *.hbs setfiletype html
+" jade
+au BufNewFile,BufRead *.jade setfiletype jade
 
 " -----------------------
 " vimshellエンコーディングエラー対策
@@ -363,13 +377,19 @@ filetype off
 "let $PATH = $PATH . ';C:¥WorkSpace¥tools¥MinGW¥bin;C:¥WorkSpace¥tools¥MinGW¥msys¥1.0¥bin;C:¥Git¥cmd;C:¥Git¥bin'
 
 if has('vim_starting')
-  set runtimepath+=$VIMRUNTIME/bundle/neobundle.vim/
+  set nocompatible
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
 endif
 
-call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
+" old
+"call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
+"latest
+call neobundle#begin(expand('~/.vim/bundle/'))
+ 
+ " Let NeoBundle manage NeoBundle
+NeoBundleFetch 'Shougo/neobundle.vim'
 
 " originalrepos on github
-NeoBundle 'Shougo/neobundle.vim'
 NeoBundle 'Shougo/vimproc'
 NeoBundle 'Shougo/unite.vim.git'
 NeoBundle 'ujihisa/unite-colorscheme'
@@ -397,7 +417,7 @@ NeoBundle 'FuzzyFinder'
 NeoBundle 'surround.vim'
 NeoBundle 'visSum.vim'
 
-" colorschemes
+" colorschemes & syntaxes
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'croaker/mustang-vim'
 NeoBundle 'jeffreyiacono/vim-colors-wombat'
@@ -408,6 +428,9 @@ NeoBundle 'mrkn/mrkn256.vim'
 NeoBundle 'jpo/vim-railscasts-theme'
 NeoBundle 'therubymug/vim-pyte'
 NeoBundle 'tomasr/molokai'
+NeoBundle 'digitaltoad/vim-jade'
+
+call neobundle#end()
 
 filetype plugin indent on     " required!
 
@@ -550,7 +573,7 @@ let g:neocomplcache_enable_auto_select = 1
 " Enable omni completion.
 autocmd FileType css,scss setlocal omnifunc=csscomplete#CompleteCSS
 autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript,coffeescript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType javascript,coffeescript,coffee setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
@@ -645,11 +668,39 @@ let g:gitgutter_sign_removed = '✘'
 
 
 " -----------------------
+" coffeescript settings
+" -----------------------
+" vimにcoffeeファイルタイプを認識させる
+au BufRead,BufNewFile,BufReadPre *.coffee   set filetype=coffee
+" インデントを設定
+autocmd FileType coffee     setlocal sw=2 sts=2 ts=2 et
+
+
+
+" -----------------------
+" indent_guides
+"------------------------
+"" インデントの深さに色を付ける
+let g:indent_guides_start_level=2
+let g:indent_guides_auto_colors=1
+let g:indent_guides_enable_on_vim_startup=0
+let g:indent_guides_color_change_percent=20
+let g:indent_guides_guide_size=2
+let g:indent_guides_space_guides=1
+
+hi IndentGuidesOdd  ctermbg=235
+hi IndentGuidesEven ctermbg=237
+au FileType coffee,coffeescript,ruby,javascript,python IndentGuidesEnable
+nmap <silent><Leader>ig <Plug>IndentGuidesToggle
+
+
+
+" -----------------------
 " lightline
 " -----------------------
 let g:lightline = {
       \ 'colorscheme': 'wombat',
-      \ 'mode_map': {'c': 'NORMAL'},
+      \ 'mode_map': { 'c': 'NORMAL' },
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
       \ },
@@ -661,36 +712,34 @@ let g:lightline = {
       \   'fileformat': 'MyFileformat',
       \   'filetype': 'MyFiletype',
       \   'fileencoding': 'MyFileencoding',
-      \   'mode': 'MyMode'
+      \   'mode': 'MyMode',
       \ },
-      \ 'separator': { 'left': "\ue0b0", 'right': "\ue0b2" },
-      \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" }
-      \}
+      \ 'separator': { 'left': '⮀', 'right': '⮂' },
+      \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
+      \ }
 
 function! MyModified()
   return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
 endfunction
 
 function! MyReadonly()
-  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? 'x' : ''
+  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '⭤' : ''
 endfunction
 
 function! MyFilename()
   return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
-        \  &ft == 'unite' ? unite#get_status_string() :
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() : 
+        \  &ft == 'unite' ? unite#get_status_string() : 
         \  &ft == 'vimshell' ? vimshell#get_status_string() :
         \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
         \ ('' != MyModified() ? ' ' . MyModified() : '')
 endfunction
 
 function! MyFugitive()
-  try
-    if &ft !~? 'vimfiler\|gundo' && exists('*fugitive#head')
-      return fugitive#head()
-    endif
-  catch
-  endtry
+  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
+    let _ = fugitive#head()
+    return strlen(_) ? '⭠ '._ : ''
+  endif
   return ''
 endfunction
 
@@ -711,11 +760,45 @@ function! MyMode()
 endfunction
 
 
-set laststatus=2
-if !has('gui_running')
-  set t_Co=256
-endif
-set ambiwidth=double
+
+" -----------------------
+" vim-easymotion
+" -----------------------
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
+
+" Bi-directional find motion
+" Jump to anywhere you want with minimal keystrokes, with just one key binding.
+" `s{char}{label}`
+nmap s <Plug>(easymotion-s)
+" or
+" `s{char}{char}{label}`
+" Need one more keystroke, but on average, it may be more comfortable.
+nmap s <Plug>(easymotion-s2)
+
+" Turn on case sensitive feature
+let g:EasyMotion_smartcase = 1
+
+" JK motions: Line motions
+map <Leader>j <Plug>(easymotion-j)
+
+map f <Plug>(easymotion-bd-fl)
+map t <Plug>(easymotion-bd-tl)
+
+" Gif config
+nmap s <Plug>(easymotion-s2)
+nmap t <Plug>(easymotion-t2)
+" surround.vimと被らないように
+omap z <Plug>(easymotion-s2)
+
+" Gif config
+map  / <Plug>(easymotion-sn)
+omap / <Plug>(easymotion-tn)
+
+" These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
+" Without these mappings, `n` & `N` works fine. (These mappings just provide
+" different highlight method and have some other features )
+map  n <Plug>(easymotion-next)
+
 
 
 " -----------------------
@@ -724,4 +807,13 @@ set ambiwidth=double
 au QuickFixCmdPost vimgrep cw
 
 
+
+" -----------------------
+" end setup
+" -----------------------
+set laststatus=2
+if !has('gui_running')
+  set t_Co=256
+endif
+set ambiwidth=double
 
