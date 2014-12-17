@@ -377,14 +377,16 @@ filetype off
 "let $PATH = $PATH . ';C:¥WorkSpace¥tools¥MinGW¥bin;C:¥WorkSpace¥tools¥MinGW¥msys¥1.0¥bin;C:¥Git¥cmd;C:¥Git¥bin'
 
 if has('vim_starting')
-  set nocompatible
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
+  if &compatible
+    set nocompatible
+  endif
+  set runtimepath+=~/.vimbundle/neobundle.vim/
 endif
 
 " old
 "call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
 "latest
-call neobundle#begin(expand('~/.vim/bundle/'))
+call neobundle#begin(expand('~/.vimbundle/'))
  
  " Let NeoBundle manage NeoBundle
 NeoBundleFetch 'Shougo/neobundle.vim'
@@ -434,6 +436,10 @@ call neobundle#end()
 
 filetype plugin indent on     " required!
 
+
+" If there are uninstalled bundles found on startup,
+" this will conveniently prompt you to install them.
+NeoBundleCheck
 
 
 " -----------------------
