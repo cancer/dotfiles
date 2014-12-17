@@ -6,7 +6,7 @@
   diff = diff-highlight | less
 [core]
   excludesfile = ~/dotfiles/.gitignore
-	editor = vim
+	editor = /usr/bin/vim
   pager = less -r
 [alias]
   a = !git add . && git status
@@ -19,16 +19,22 @@
   #l = log
   lg = log --graph --decorate --pretty=oneline --abbrev-commit --all
   ln = log --name-status
-  #ls = log --stat
-  #lo = log --oneline
-  #s = status
+  ls = log --stat
+  lo = log --oneline
+  s = status
   l = !tig
   #lg = !tig
   #ln = !tig
-  ls = !tig
-  lo = !tig
-  s = !tig status
+  #ls = !tig
+  #lo = !tig
+  #s = !tig status
   st = stash
   ignore = !"f( { local s=$1; shift; \
       while [ $# -gt 0 ]; do s="$s,$1"; shift; done;\
       curl "http://gitignore.io/api/$s"; }; f"
+[push]
+	default = simple
+[merge]
+	ff = false
+[pull]
+	rebase = true

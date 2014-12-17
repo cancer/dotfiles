@@ -17,7 +17,9 @@ export LANG=ja_JP.UTF-8
 # -------------------------------------------------------------------------
 
 NPM_PATH=/usr/local/share/npm/bin
-PATH="$NPM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
+ADT_PATH="$HOME/Development/adt-bundle-mac-x86_64/sdk/platform-tools/"
+IMAGE_MAGICK_PATH="/opt/ImageMagick/bin"
+PATH="$IMAGE_MAGICK_PATH:$NPM_PATH:$ADT_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
 export PATH
 export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
@@ -227,4 +229,7 @@ alias -g GI='| grep -i'
 alias -g T='| tail'
 alias -g TF='| tail -f'
 alias -g C='| pbcopy'
+
+# grep
+alias grep-cmarker="grep \"<<< HEAD\""
 
