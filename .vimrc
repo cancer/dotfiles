@@ -372,23 +372,18 @@ noremap! <BS> 
 " NeoBundleの読み込み/設定
 " -----------------------
 
-filetype off
-
-"let $PATH = $PATH . ';C:¥WorkSpace¥tools¥MinGW¥bin;C:¥WorkSpace¥tools¥MinGW¥msys¥1.0¥bin;C:¥Git¥cmd;C:¥Git¥bin'
+filetype plugin indent off
 
 if has('vim_starting')
   if &compatible
     set nocompatible
   endif
-  set runtimepath+=~/.vimbundle/neobundle.vim/
+  set runtimepath+=~/dotfiles/.vimbundle/neobundle.vim/
 endif
 
-" old
-"call neobundle#rc(expand('$VIMRUNTIME/bundle/'))
-"latest
-call neobundle#begin(expand('~/.vimbundle/'))
+call neobundle#begin(expand('~/dotfiles/.vimbundle/'))
  
- " Let NeoBundle manage NeoBundle
+" Let NeoBundle manage NeoBundle
 NeoBundleFetch 'Shougo/neobundle.vim'
 
 " originalrepos on github
@@ -399,7 +394,6 @@ NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vimfiler.vim'
-"NeoBundle 'mattn/zencoding-vim'
 NeoBundle 'ujihisa/vimshell-ssh'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'tpope/vim-fugitive'
@@ -410,9 +404,9 @@ NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'mattn/emmet-vim'
 NeoBundle 'Lokaltog/vim-easymotion'
+NeoBundle 'editorconfig/editorconfig-vim'
 
 " vim-scripts repos
-" rconfig/editorconfig-vim
 NeoBundle 'sudo.vim'
 NeoBundle 'L9'
 NeoBundle 'FuzzyFinder'
@@ -440,7 +434,6 @@ filetype plugin indent on     " required!
 " If there are uninstalled bundles found on startup,
 " this will conveniently prompt you to install them.
 NeoBundleCheck
-
 
 " -----------------------
 " Fuf setting
@@ -844,17 +837,16 @@ map t <Plug>(easymotion-bd-tl)
 " =======================================
 " Extend search motions with vital-over command line interface
 " Incremental highlight of all the matches
-" Now, you don't need to repetitively press `n` or `N` with EasyMotion
-feature
+" Now, you don't need to repetitively press `n` or `N` with EasyMotion feature
 " `<Tab>` & `<S-Tab>` to scroll up/down a page of next match
 " :h easymotion-command-line
 nmap g/ <Plug>(easymotion-sn)
 xmap g/ <Plug>(easymotion-sn)
 omap g/ <Plug>(easymotion-tn)
 " Support mappings feature
-EMCommandLineNoreMap <Space> <CR>
-EMCommandLineNoreMap ; <CR>
-EMCommandLineNoreMap <C-j> <Space>
+"EMCommandLineNoreMap <Space> <CR>
+"EMCommandLineNoreMap ; <CR>
+"EMCommandLineNoreMap <C-j> <Space>
 
 
 " -----------------------
