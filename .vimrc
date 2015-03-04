@@ -323,7 +323,7 @@ syntax on
 
 
 "---------------------------------------------------------------------------
-" キーマップ設定 
+" キーマップ設定
 " keymap
 nnoremap ZZ <Nop>
 
@@ -384,12 +384,16 @@ if has('vim_starting')
 endif
 
 call neobundle#begin(expand('~/dotfiles/.vimbundle/'))
- 
+
 " Let NeoBundle manage NeoBundle
 NeoBundleFetch 'Shougo/neobundle.vim'
 
 " originalrepos on github
-NeoBundle 'Shougo/vimproc'
+NeoBundle 'Shougo/vimproc', {
+\ 'build' : {
+\     'mac' : 'make -f make_mac.mak',
+\    },
+\ }
 NeoBundle 'Shougo/unite.vim.git'
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'Shougo/neocomplcache'
@@ -459,7 +463,7 @@ let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 
 
 " -----------------------
-" zencoding setting 
+" zencoding setting
 " -----------------------
 
 "let g:user_zen_expandabbr_key = '<C-d>'
@@ -467,7 +471,7 @@ let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 
 
 " -----------------------
-" emmet setting 
+" emmet setting
 " -----------------------
 
 let g:user_emmet_mode = 'i'
@@ -478,7 +482,7 @@ autocmd FileType html,css,scss EmmetInstall
 
 
 " -----------------------
-" unite setting 
+" unite setting
 " -----------------------
 
 " Enable unite in insert mode
@@ -501,7 +505,7 @@ nnoremap <silent> <space>uu :<C-u>Unite file_mru buffer<CR>
 
 
 " -----------------------
-" neocomplcache setting 
+" neocomplcache setting
 " -----------------------
 
 " Disable AutoComplPop.
@@ -516,7 +520,7 @@ let g:neocomplcache_enable_smart_case = 1
 " Set minimum syntax keyword length.
 let g:neocomplcache_min_syntax_length = 3
 
-" Buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder 
+" Buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder
 let g:neocomplcache_lock_buffer_name_pattern = '¥*fuf¥*'
 
 " Heavy features.
@@ -592,7 +596,7 @@ let g:neocomplcache_omni_patterns.cpp = '¥h¥w*¥%(¥.¥|->¥)¥h¥w*¥|¥h¥w*
 
 
 " -----------------------
-" neosnippet setting 
+" neosnippet setting
 " -----------------------
 
 " Plugin key-mappings.
@@ -731,8 +735,8 @@ endfunction
 
 function! MyFilename()
   return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() : 
-        \  &ft == 'unite' ? unite#get_status_string() : 
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
         \  &ft == 'vimshell' ? vimshell#get_status_string() :
         \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
         \ ('' != MyModified() ? ' ' . MyModified() : '')
@@ -868,4 +872,3 @@ if !has('gui_running')
   set t_Co=256
 endif
 set ambiwidth=double
-
