@@ -171,8 +171,15 @@ autoload -Uz zmv
 alias rename='noglob zmv -W'
 
 # anyenv
-export PATH="$HOME/.anyenv/bin:$PATH"
-eval "$(anyenv init -)"
+if [ -d ${HOME}/.anyenv ] ; then
+  export PATH="$HOME/.anyenv/bin:$PATH"
+  eval "$(anyenv init -)"
+  for D in `ls $HOME/.anyenv/envs`
+  do
+      export PATH="$HOME/.anyenv/envs/$D/shims:$PATH"
+  done
+fi
+
 
 # OS Xのクイックルックでテキストのコピペを有効にする
 if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
@@ -232,4 +239,6 @@ alias -g C='| pbcopy'
 
 # grep
 alias grep-cmarker="grep \"<<< HEAD\""
+# gulp
+#alias gulp="gulp --require coffee-script"
 

@@ -1,7 +1,7 @@
 "---------------------------------------------------------------------------
 " 環境設定
 
-set nocompatible
+909090 nocompatible
 set sw=2 st=2 ts=2
 scriptencoding utf-8
 set encoding=utf-8
@@ -307,6 +307,8 @@ au BufNewFile,BufRead *.coffee setfiletype coffeescript
 au BufNewFile,BufRead *.hbs setfiletype html
 " jade
 au BufNewFile,BufRead *.jade setfiletype jade
+" jsx
+au BufNewFile,BufRead *.cjsx setfiletype coffee
 
 " -----------------------
 " vimshellエンコーディングエラー対策
@@ -405,6 +407,8 @@ NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'mattn/emmet-vim'
 NeoBundle 'Lokaltog/vim-easymotion'
 NeoBundle 'editorconfig/editorconfig-vim'
+NeoBundle 'lilydjwg/colorizeR'
+NeoBundle 'mxw/vim-jsx'
 
 " vim-scripts repos
 NeoBundle 'sudo.vim'

@@ -3,11 +3,12 @@
 [pager]
   #log = diff-highlight | less
   show = diff-highlight | less
-  diff = diff-highlight | less
+  #diff = diff-highlight | less
 [core]
   excludesfile = ~/dotfiles/.gitignore
 	editor = /usr/bin/vim
   pager = less -r
+	excludesfile = /Users/cancer/dotfiles/.globalignore
 [alias]
   a = !git add . && git status
   aa = !git add -A && git status
@@ -21,7 +22,7 @@
   ln = log --name-status
   ls = log --stat
   lo = log --oneline
-  s = status
+  s = !tig status
   l = !tig
   #lg = !tig
   #ln = !tig
@@ -32,9 +33,13 @@
   ignore = !"f( { local s=$1; shift; \
       while [ $# -gt 0 ]; do s="$s,$1"; shift; done;\
       curl "http://gitignore.io/api/$s"; }; f"
+  delete-merged-branches = !git branch --merged | grep -v '*' | xargs -I % git branch -d %
 [push]
-	default = simple
+  default = simple
+[user]
+  name = cancer
+  email = zodiac.cancer.j6@gmail.com
 [merge]
-	ff = false
+  ff = false
 [pull]
-	rebase = true
+  rebase = true
