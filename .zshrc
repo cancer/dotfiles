@@ -193,6 +193,11 @@ if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
   fi
 fi
 
+# z
+#   brew info z
+#
+. `brew --prefix`/etc/profile.d/z.sh
+
 # -------------------------------------------------------------------------
 # alias
 #
@@ -219,6 +224,7 @@ export LS_COLORS='di=01;36:ln=01;35:ex=01;32'
 DOTFILES_BASE="~/dotfiles/"
 
 # edit
+alias vi="vim"
 alias edit="vi" 
 alias ezshrc="edit $DOTFILES_BASE.zshrc"
 alias evim="edit $DOTFILES_BASE.vimrc"
@@ -241,4 +247,14 @@ alias -g C='| pbcopy'
 alias grep-cmarker="grep \"<<< HEAD\""
 # gulp
 #alias gulp="gulp --require coffee-script"
+
+# server
+
+function server() {
+  local port="${1:-8000}"
+  sleep 1 && open "http://localhost:${port}/" &
+  # Set the default Content-Type to `text/plain` instead of `application/octet-stream`
+  # And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
+  python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port"
+}
 

@@ -335,6 +335,10 @@ nnoremap gk k
 noremap <Space>h <Home>
 noremap <Space>l <End>
 
+" Moving selection
+xmap <C-k> :mo'<-- <CR> gv
+xmap <C-j> :mo'>+ <CR> gv
+
 " edit
 "noremap <CR> i<CR><ESC> " cwでファイルがEnterで開けなくなるのでやめる
 inoremap <C-z> <Esc>
@@ -398,28 +402,33 @@ NeoBundle 'Shougo/unite.vim.git'
 NeoBundle 'ujihisa/unite-colorscheme'
 NeoBundle 'Shougo/neocomplcache'
 NeoBundle 'Shougo/neosnippet'
+NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'Shougo/vimshell'
 NeoBundle 'Shougo/vimfiler.vim'
 NeoBundle 'ujihisa/vimshell-ssh'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'editorconfig/editorconfig-vim'
 NeoBundle 'itchyny/lightline.vim'
 NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
 NeoBundle 'mattn/emmet-vim'
 NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'editorconfig/editorconfig-vim'
 NeoBundle 'lilydjwg/colorizeR'
-NeoBundle 'mxw/vim-jsx'
+NeoBundle "thinca/vim-quickrun"
+NeoBundle "jceb/vim-hier"
+NeoBundle "dannyob/quickfixstatus"
+NeoBundle 'leafgarland/typescript-vim'
+NeoBundle 'jason0x43/vim-js-indent'
+NeoBundle 'clausreinke/typescript-tools.vim'
+NeoBundle 'Quramy/tsuquyomi'
+
+let g:js_indent_typescript = 1
 
 " vim-scripts repos
-NeoBundle 'sudo.vim'
 NeoBundle 'L9'
 NeoBundle 'FuzzyFinder'
 NeoBundle 'surround.vim'
-NeoBundle 'visSum.vim'
 
 " colorschemes & syntaxes
 NeoBundle 'altercation/vim-colors-solarized'
@@ -432,7 +441,9 @@ NeoBundle 'mrkn/mrkn256.vim'
 NeoBundle 'jpo/vim-railscasts-theme'
 NeoBundle 'therubymug/vim-pyte'
 NeoBundle 'tomasr/molokai'
+NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'digitaltoad/vim-jade'
+NeoBundle 'mxw/vim-jsx'
 
 call neobundle#end()
 
