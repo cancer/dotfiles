@@ -16,7 +16,7 @@ export LANG=ja_JP.UTF-8
 #
 # -------------------------------------------------------------------------
 
-NPM_PATH=/usr/local/share/npm/bin
+NPM_PATH=/usr/local/share/npm/bin:/Users/cancer/.anyenv/envs/ndenv/shims/npm/bin
 ADT_PATH="$HOME/Development/adt-bundle-mac-x86_64/sdk/platform-tools/"
 IMAGE_MAGICK_PATH="/opt/ImageMagick/bin"
 PATH="$IMAGE_MAGICK_PATH:$NPM_PATH:$ADT_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin"
