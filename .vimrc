@@ -488,7 +488,7 @@ let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 let g:user_emmet_mode = 'i'
 let g:user_emmet_leader_key='<C-D>'
 let g:user_emmet_install_global = 0
-autocmd FileType html,css,scss EmmetInstall
+autocmd FileType html,css,scss,javascript,jascript.jsx EmmetInstall
 
 
 
