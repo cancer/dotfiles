@@ -1,7 +1,6 @@
 "---------------------------------------------------------------------------
 " 環境設定
 
-909090 nocompatible
 set sw=2 st=2 ts=2
 scriptencoding utf-8
 set encoding=utf-8
@@ -146,10 +145,6 @@ if has("syntax")
         " 下の行の"　"は全角スペース
         syntax match InvisibleJISX0208Space "　" display containedin=ALL
         highlight InvisibleJISX0208Space term=underline ctermbg=Blue guibg=darkgray gui=underline
-        "syntax match InvisibleTrailedSpace "[ ¥t]¥+$" display containedin=ALL
-        "highlight InvisibleTrailedSpace term=underline ctermbg=Red guibg=NONE gui=undercurl guisp=darkorange
-        "syntax match InvisibleTab "¥t" display containedin=ALL
-        "highlight InvisibleTab term=underline ctermbg=white gui=undercurl guisp=darkslategray
     endf
     augroup invisible
         autocmd! invisible
@@ -158,11 +153,6 @@ if has("syntax")
 endif
 
 colorscheme desert
-"colorscheme wombat
-" wombatのVisualモードをdesert風(緑っぽいやつ)にする
-if g:colors_name ==? 'wombat'
-  hi Visual gui=none guifg=khaki guibg=olivedrab
-endif
 
 "---------------------------------------------------------------------------
 " ファイル操作に関する設定:
@@ -176,8 +166,6 @@ set nobackup
 " スワップファイルの作成
 " -----------------------
 set noswapfile
-"set swapfile
-"set directory=~/.vim/vim_swap/
 
 " ---------------------------------------------------------------------------
 " 編集関連
@@ -277,18 +265,7 @@ endfunction
 " ステータスラインに文字コードと改行文字を表示する
 " -----------------------
 
-"set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
-
-" set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
-
-"set statusline=%<%f¥ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)¥ %P
 set laststatus=2
-
-"set statusline=%<%f¥ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
-
-"set statusline=%{expand('%:p:t')}¥ %<¥(%{SnipMid(expand('%:p:h'),80-len(expand('%:p:t')),'...')}¥)%=¥ %m%r%y%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}[%3l,%3c]%8P
-
-"set statusline=%<%f\ %m%r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=%l,%c%V%8P
 
 "---------------------------------------------------------------------------
 " ファイル設定関連
@@ -340,7 +317,6 @@ xmap <C-k> :mo'<-- <CR> gv
 xmap <C-j> :mo'>+ <CR> gv
 
 " edit
-"noremap <CR> i<CR><ESC> " cwでファイルがEnterで開けなくなるのでやめる
 inoremap <C-z> <Esc>
 
 " brackets"
@@ -470,14 +446,6 @@ let g:fuf_mrufile_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
 let g:fuf_mrufile_maxItem = 100
 let g:fuf_enumeratingLimit = 20
 let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
-
-
-
-" -----------------------
-" zencoding setting
-" -----------------------
-
-"let g:user_zen_expandabbr_key = '<C-d>'
 
 
 
@@ -776,47 +744,6 @@ endfunction
 function! MyMode()
   return winwidth(0) > 60 ? lightline#mode() : ''
 endfunction
-
-
-
-" -----------------------
-" vim-easymotion
-" -----------------------
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-
-" Bi-directional find motion
-" Jump to anywhere you want with minimal keystrokes, with just one key binding.
-" `s{char}{label}`
-nmap s <Plug>(easymotion-s)
-" or
-" `s{char}{char}{label}`
-" Need one more keystroke, but on average, it may be more comfortable.
-nmap s <Plug>(easymotion-s2)
-
-" Turn on case sensitive feature
-let g:EasyMotion_smartcase = 1
-
-" JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
-
-map f <Plug>(easymotion-bd-fl)
-map t <Plug>(easymotion-bd-tl)
-
-" Gif config
-nmap s <Plug>(easymotion-s2)
-nmap t <Plug>(easymotion-t2)
-" surround.vimと被らないように
-omap z <Plug>(easymotion-s2)
-
-" Gif config
-map  / <Plug>(easymotion-sn)
-omap / <Plug>(easymotion-tn)
-
-" These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
-" Without these mappings, `n` & `N` works fine. (These mappings just provide
-" different highlight method and have some other features )
-map  n <Plug>(easymotion-next)
-
 
 
 
