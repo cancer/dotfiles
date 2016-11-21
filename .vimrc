@@ -11,13 +11,45 @@ if 1 && filereadable($VIM . '/vimrc_local.vim')
 endif
 
 " -----------------------
+" dein settings
+" -----------------------
+
+let s:dein_plugin_dir = expand('~/dotfiles/.vimbundle')
+let s:dein_install_dir = s:dein_plugin_dir . '/repos/github.com/Shougo/dein.vim'
+execute 'set runtimepath^=' . s:dein_install_dir
+
+if dein#load_state(s:dein_install_dir)
+  call dein#begin(expand('~/dotfiles/.vimbundle/'))
+
+  call dein#load_toml('~/dotfiles/.dein.toml', {'lazy': 0})
+  call dein#load_toml('~/dotfiles/.dein_lazy.toml', {'lazy': 1})
+
+  call dein#end()
+  call dein#save_state()
+endif
+
+if !has('vim_starting')
+  if  dein#check_install()
+    " Installation check.
+    call dein#install()
+  endif
+
+  call dein#call_hook('source')
+  call dein#call_hook('post_source')
+
+  filetype plugin indent on
+  syntax enable
+endif
+
+
+
+" -----------------------
 " vimproc にpathを通す
 " -----------------------
 
 if has('win64')
   let g:vimproc_dll_path = $VIM . '/runtime/bundle/vimproc/autoload/vimproc_win64.dll'
 endif
-
 
 
 " -----------------------
@@ -354,453 +386,79 @@ noremap! <BS> 
 " NeoBundleの読み込み/設定
 " -----------------------
 
-filetype plugin indent off
-
-if has('vim_starting')
-  if &compatible
-    set nocompatible
-  endif
-  set runtimepath+=~/dotfiles/.vimbundle/neobundle.vim/
-endif
-
-call neobundle#begin(expand('~/dotfiles/.vimbundle/'))
-
-" Let NeoBundle manage NeoBundle
-NeoBundleFetch 'Shougo/neobundle.vim'
-
-" originalrepos on github
-NeoBundle 'Shougo/vimproc', {
-\ 'build' : {
-\     'mac' : 'make -f make_mac.mak',
-\    },
-\ }
-NeoBundle 'Shougo/unite.vim.git'
-NeoBundle 'ujihisa/unite-colorscheme'
-NeoBundle 'Shougo/neocomplcache'
-NeoBundle 'Shougo/neosnippet'
-NeoBundle 'Shougo/neosnippet-snippets'
-NeoBundle 'Shougo/vimshell'
-NeoBundle 'Shougo/vimfiler.vim'
-NeoBundle 'ujihisa/vimshell-ssh'
-NeoBundle 'nathanaelkane/vim-indent-guides'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'editorconfig/editorconfig-vim'
-NeoBundle 'itchyny/lightline.vim'
-NeoBundle 'airblade/vim-gitgutter'
-NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
-NeoBundle 'mattn/emmet-vim'
-NeoBundle 'Lokaltog/vim-easymotion'
-NeoBundle 'lilydjwg/colorizeR'
-NeoBundle "thinca/vim-quickrun"
-NeoBundle "jceb/vim-hier"
-NeoBundle "dannyob/quickfixstatus"
-NeoBundle 'leafgarland/typescript-vim'
-NeoBundle 'jason0x43/vim-js-indent'
-NeoBundle 'clausreinke/typescript-tools.vim'
-NeoBundle 'Quramy/tsuquyomi'
-
-let g:js_indent_typescript = 1
-
-" vim-scripts repos
-NeoBundle 'L9'
-NeoBundle 'FuzzyFinder'
-NeoBundle 'surround.vim'
-
-" colorschemes & syntaxes
-NeoBundle 'altercation/vim-colors-solarized'
-NeoBundle 'croaker/mustang-vim'
-NeoBundle 'jeffreyiacono/vim-colors-wombat'
-NeoBundle 'nanotech/jellybeans.vim'
-NeoBundle 'vim-scripts/Lucius'
-NeoBundle 'vim-scripts/Zenburn'
-NeoBundle 'mrkn/mrkn256.vim'
-NeoBundle 'jpo/vim-railscasts-theme'
-NeoBundle 'therubymug/vim-pyte'
-NeoBundle 'tomasr/molokai'
-NeoBundle 'kchmck/vim-coffee-script'
-NeoBundle 'digitaltoad/vim-jade'
-NeoBundle 'mxw/vim-jsx'
-
-call neobundle#end()
-
-filetype plugin indent on     " required!
-
-
-" If there are uninstalled bundles found on startup,
-" this will conveniently prompt you to install them.
-NeoBundleCheck
-
-" -----------------------
-" Fuf setting
-" -----------------------
-
-nnoremap <silent> <space>fb :FufBuffer!<CR>
-nnoremap <silent> <space>ff :FufFile! <C-r>=expand('%:‾:.')[:-1-len(expand('%:‾:.:t'))]<CR><CR>
-nnoremap <silent> <space>fd :FufDir! <C-r>=expand('%:p:‾')[:-1-len(expand('%:p:‾:t'))]<CR><CR>
-nnoremap <silent> <space>fm :FufMruFile<CR>
-nnoremap <silent> <Space>fc :FufRenewCache<CR>
-autocmd FileType fuf nmap <C-c> <ESC>
-let g:fuf_patternSeparator = ' '
-let g:fuf_modesDisable = ['mrucmd']
-let g:fuf_mrufile_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
-let g:fuf_mrufile_maxItem = 100
-let g:fuf_enumeratingLimit = 20
-let g:fuf_file_exclude = '¥v¥.DS_Store|¥.git|¥.swp|¥.svn'
-
-
-
-" -----------------------
-" emmet setting
-" -----------------------
-
-let g:user_emmet_mode = 'i'
-let g:user_emmet_leader_key='<C-D>'
-let g:user_emmet_install_global = 0
-autocmd FileType html,css,scss,javascript,jascript.jsx EmmetInstall
-
-
-
-" -----------------------
-" unite setting
-" -----------------------
-
-" Enable unite in insert mode
-let g:unite_enable_start_insert=1
-" Enable yank history
-let g:unite_source_history_yank_enable=1
-" Define limit of mru files
-let g:unite_source_file_mru_limit=200
-" Open yunk history
-nnoremap <silent> <space>uy :<C-u>Unite history/yank<CR>
-" Open buffer
-nnoremap <silent> <space>ub :<C-u>Unite buffer<CR>
-" Open same directory files
-nnoremap <silent> <space>uf :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
-" Open register
-nnoremap <silent> <space>ur :<C-u>Unite -buffer-name=register register<CR>
-" Open most recent used file
-nnoremap <silent> <space>uu :<C-u>Unite file_mru buffer<CR>
-
-
-
-" -----------------------
-" neocomplcache setting
-" -----------------------
-
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-
-" Enable neocomplcache
-let g:neocomplcache_enable_at_startup = 1
-
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-
-" Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-
-" Buffer file name pattern that locks neocomplcache. e.g. ku.vim or fuzzyfinder
-let g:neocomplcache_lock_buffer_name_pattern = '¥*fuf¥*'
-
-" Heavy features.
-" Use camel case completion.
-"let g:neocomplcache_enable_camel_case_completion = 1
+"filetype plugin indent off
 "
-" Use underscore completion.
-"let g:neocomplcache_enable_underbar_completion = 1
-
-" Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
-  \ 'default' : '',
-  \ 'vimshell' : $HOME.'/.vimshell_hist',
-  \ 'scheme' : $HOME.'/.gosh_completions'
-\ }
-
-" Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-    let g:neocomplcache_keyword_patterns = {}
-endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
-
-" SuperTab like snippets behavior.
-imap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-"smap <expr><TAB> neocomplcache#sources#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return neocomplcache#smart_close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-endfunction
-" <TAB>: completion.
-" use SuperTab
-" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
-
-" For cursor moving in insert mode(Not recommended)
-"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
-
-" AutoComplPop like behavior.
-let g:neocomplcache_enable_auto_select = 1
-
-" Enable omni completion.
-autocmd FileType css,scss setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript,coffeescript,coffee setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
-endif
-let g:neocomplcache_omni_patterns.ruby = '[^. *¥t]¥.¥h¥w*¥|¥h¥w*::'
-let g:neocomplcache_omni_patterns.php = '[^. ¥t]->¥h¥w*¥|¥h¥w*::'
-let g:neocomplcache_omni_patterns.c = '¥%(¥.¥|->¥)¥h¥w*'
-let g:neocomplcache_omni_patterns.cpp = '¥h¥w*¥%(¥.¥|->¥)¥h¥w*¥|¥h¥w*::'
-
-
-
-" -----------------------
-" neosnippet setting
-" -----------------------
-
-" Plugin key-mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-
-" SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-
-" For snippet_complete marker.
-if has('conceal')
-  set conceallevel=2 concealcursor=i
-endif
-
-" Tell Neosnippet about the other snippets
-"let g:neosnippet#snippets_directory=$VIMRUNTIME.'/snippets'
-
-
-
-
-" -----------------------
-" Enable jscomplete-vim
-" -----------------------
-
-autocmd FileType javascript setlocal omnifunc=jscomplete#CompleteJS
-let g:jscomplete_use = ['dom']
-
-" For snippet_complete marker.
-if has('conceal')
-  set conceallevel=2 concealcursor=i
-endif
-
-
-
-
-" -----------------------
-" surround.vim setting
-" -----------------------
-
-" [key map]
-autocmd FileType html let b:surround_49  = "<h1>\r</h1>"
-autocmd FileType html let b:surround_50  = "<h2>\r</h2>"
-autocmd FileType html let b:surround_51  = "<h3>\r</h3>"
-autocmd FileType html let b:surround_52  = "<h4>\r</h4>"
-autocmd FileType html let b:surround_53  = "<h5>\r</h5>"
-autocmd FileType html let b:surround_54  = "<h6>\r</h6>"
-
-autocmd FileType html let b:surround_112 = "<p>¥r</p>"
-autocmd FileType html let b:surround_117 = "<ul>¥r</ul>"
-autocmd FileType html let b:surround_111 = "<ol>¥r</ol>"
-autocmd FileType html let b:surround_108 = "<li>¥r</li>"
-autocmd FileType html let b:surround_97  = "<a href=\"\">\r</a>"
-autocmd FileType html let b:surround_65  = "<a href=\"\r\"></a>"
-autocmd FileType html let b:surround_105 = "<img src=\"\r\" alt=\"\">"
-autocmd FileType html let b:surround_73  = "<img src=\"\" alt=\"\r\">"
-autocmd FileType html let b:surround_100 = "<div>\r</div>"
-autocmd FileType html let b:surround_68  = "<div class=\"section\">\r</div>"
-
-
-
-" -----------------------
-" vimsum
-" -----------------------
-nmap <Leader>sp "sp
-
-
-
-" -----------------------
-" vim-gitgutter
-" -----------------------
-let g:gitgutter_sign_added = '✚'
-let g:gitgutter_sign_modified = '➜'
-let g:gitgutter_sign_removed = '✘'
-
-
-
-" -----------------------
-" coffeescript settings
-" -----------------------
-" vimにcoffeeファイルタイプを認識させる
-au BufRead,BufNewFile,BufReadPre *.coffee   set filetype=coffee
-" インデントを設定
-autocmd FileType coffee     setlocal sw=2 sts=2 ts=2 et
-
-
-
-" -----------------------
-" indent_guides
-"------------------------
-"" インデントの深さに色を付ける
-let g:indent_guides_start_level=2
-let g:indent_guides_auto_colors=1
-let g:indent_guides_enable_on_vim_startup=0
-let g:indent_guides_color_change_percent=20
-let g:indent_guides_guide_size=2
-let g:indent_guides_space_guides=1
-
-hi IndentGuidesOdd  ctermbg=235
-hi IndentGuidesEven ctermbg=237
-au FileType coffee,coffeescript,ruby,javascript,python IndentGuidesEnable
-nmap <silent><Leader>ig <Plug>IndentGuidesToggle
-
-
-
-" -----------------------
-" lightline
-" -----------------------
-let g:lightline = {
-      \ 'colorscheme': 'wombat',
-      \ 'mode_map': { 'c': 'NORMAL' },
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
-      \ },
-      \ 'component_function': {
-      \   'modified': 'MyModified',
-      \   'readonly': 'MyReadonly',
-      \   'fugitive': 'MyFugitive',
-      \   'filename': 'MyFilename',
-      \   'fileformat': 'MyFileformat',
-      \   'filetype': 'MyFiletype',
-      \   'fileencoding': 'MyFileencoding',
-      \   'mode': 'MyMode',
-      \ },
-      \ 'separator': { 'left': '⮀', 'right': '⮂' },
-      \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
-      \ }
-
-function! MyModified()
-  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
-endfunction
-
-function! MyReadonly()
-  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '⭤' : ''
-endfunction
-
-function! MyFilename()
-  return ('' != MyReadonly() ? MyReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
-        \  &ft == 'unite' ? unite#get_status_string() :
-        \  &ft == 'vimshell' ? vimshell#get_status_string() :
-        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
-        \ ('' != MyModified() ? ' ' . MyModified() : '')
-endfunction
-
-function! MyFugitive()
-  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
-    let _ = fugitive#head()
-    return strlen(_) ? '⭠ '._ : ''
-  endif
-  return ''
-endfunction
-
-function! MyFileformat()
-  return winwidth(0) > 70 ? &fileformat : ''
-endfunction
-
-function! MyFiletype()
-  return winwidth(0) > 70 ? (strlen(&filetype) ? &filetype : 'no ft') : ''
-endfunction
-
-function! MyFileencoding()
-  return winwidth(0) > 70 ? (strlen(&fenc) ? &fenc : &enc) : ''
-endfunction
-
-function! MyMode()
-  return winwidth(0) > 60 ? lightline#mode() : ''
-endfunction
-
-
-
-" -----------------------
-" vim-easymotion
-" -----------------------
-let g:EasyMotion_do_mapping = 0 " Disable default mappings
-
-" Jump to first match with enter & space
-let g:EasyMotion_enter_jump_first = 1
-let g:EasyMotion_space_jump_first = 1
-
-" Bi-directional find motion
-" Jump to anywhere you want with minimal keystrokes, with just one key binding.
-" `s{char}{label}`
-nmap s <Plug>(easymotion-s)
-" or
-" `s{char}{char}{label}`
-" Need one more keystroke, but on average, it may be more comfortable.
-nmap s <Plug>(easymotion-s2)
-xmap s <Plug>(easymotion-s2)
-" surround.vimと被らないように
-omap z <Plug>(easymotion-s2)
-
-" Turn on case sensitive feature
-let g:EasyMotion_smartcase = 1
-
-" JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
-
-map f <Plug>(easymotion-bd-fl)
-map t <Plug>(easymotion-bd-tl)
-
-" =======================================
-" Search Motions
-" =======================================
-" Extend search motions with vital-over command line interface
-" Incremental highlight of all the matches
-" Now, you don't need to repetitively press `n` or `N` with EasyMotion feature
-" `<Tab>` & `<S-Tab>` to scroll up/down a page of next match
-" :h easymotion-command-line
-nmap g/ <Plug>(easymotion-sn)
-xmap g/ <Plug>(easymotion-sn)
-omap g/ <Plug>(easymotion-tn)
-" Support mappings feature
-"EMCommandLineNoreMap <Space> <CR>
-"EMCommandLineNoreMap ; <CR>
-"EMCommandLineNoreMap <C-j> <Space>
-
-
-" -----------------------
-" vimgrepで自動的にQuickFixを開く
-" -----------------------
-au QuickFixCmdPost vimgrep cw
-
-
+"if has('vim_starting')
+"  if &compatible
+"    set nocompatible
+"  endif
+"  set runtimepath+=~/dotfiles/.vimbundle/neobundle.vim/
+"endif
+"
+"call neobundle#begin(expand('~/dotfiles/.vimbundle/'))
+"
+"" Let NeoBundle manage NeoBundle
+"NeoBundleFetch 'Shougo/neobundle.vim'
+"
+"" originalrepos on github
+"NeoBundle 'Shougo/vimproc', {
+"\ 'build' : {
+"\     'mac' : 'make -f make_mac.mak',
+"\    },
+"\ }
+"NeoBundle 'Shougo/unite.vim.git'
+"NeoBundle 'ujihisa/unite-colorscheme'
+"NeoBundle 'Shougo/neocomplcache'
+"NeoBundle 'Shougo/neosnippet'
+"NeoBundle 'Shougo/neosnippet-snippets'
+"NeoBundle 'Shougo/vimshell'
+"NeoBundle 'Shougo/vimfiler.vim'
+"NeoBundle 'ujihisa/vimshell-ssh'
+"NeoBundle 'nathanaelkane/vim-indent-guides'
+"NeoBundle 'tpope/vim-fugitive'
+"NeoBundle 'editorconfig/editorconfig-vim'
+"NeoBundle 'itchyny/lightline.vim'
+"NeoBundle 'airblade/vim-gitgutter'
+"NeoBundle 'Lokaltog/powerline', { 'rtp' : 'powerline/bindings/vim'}
+"NeoBundle 'mattn/emmet-vim'
+"NeoBundle 'Lokaltog/vim-easymotion'
+"NeoBundle 'lilydjwg/colorizeR'
+"NeoBundle "thinca/vim-quickrun"
+"NeoBundle "jceb/vim-hier"
+"NeoBundle "dannyob/quickfixstatus"
+"NeoBundle 'leafgarland/typescript-vim'
+"NeoBundle 'jason0x43/vim-js-indent'
+"NeoBundle 'clausreinke/typescript-tools.vim'
+"NeoBundle 'Quramy/tsuquyomi'
+"
+"" vim-scripts repos
+"NeoBundle 'L9'
+"NeoBundle 'FuzzyFinder'
+"NeoBundle 'surround.vim'
+"
+"" colorschemes & syntaxes
+"NeoBundle 'altercation/vim-colors-solarized'
+"NeoBundle 'croaker/mustang-vim'
+"NeoBundle 'jeffreyiacono/vim-colors-wombat'
+"NeoBundle 'nanotech/jellybeans.vim'
+"NeoBundle 'vim-scripts/Lucius'
+"NeoBundle 'vim-scripts/Zenburn'
+"NeoBundle 'mrkn/mrkn256.vim'
+"NeoBundle 'jpo/vim-railscasts-theme'
+"NeoBundle 'therubymug/vim-pyte'
+"NeoBundle 'tomasr/molokai'
+"NeoBundle 'kchmck/vim-coffee-script'
+"NeoBundle 'digitaltoad/vim-jade'
+"NeoBundle 'mxw/vim-jsx'
+"
+"call neobundle#end()
+"
+"filetype plugin indent on     " required!
+"
+"
+"" If there are uninstalled bundles found on startup,
+"" this will conveniently prompt you to install them.
+"NeoBundleCheck
 
 " -----------------------
 " end setup

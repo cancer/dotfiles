@@ -1,0 +1,290 @@
+[[plugins]]
+repo = 'Shougo/neomru.vim'
+on_path = '.*'
+
+[[plugins]]
+repo = 'Shougo/neocomplete.vim'
+depends = 'context_filetype.vim'
+on_event = 'InsertEnter'
+if = "has('lua')"
+hook_source = '''
+  let g:neocomplete#enable_at_startup = 1
+
+
+  "---------------------------------------------------------------------------
+  " neocomplete.vim
+  "
+
+  let g:neocomplete#disable_auto_complete = 0
+
+  let g:neocomplete#enable_smart_case = 1
+  let g:neocomplete#enable_camel_case = 1
+  let g:neocomplete#auto_complete_delay = 30
+
+  let g:neocomplete#enable_fuzzy_completion = 1
+
+  let g:neocomplete#auto_completion_start_length = 2
+  let g:neocomplete#manual_completion_start_length = 0
+  let g:neocomplete#min_keyword_length = 3
+
+  let g:neocomplete#enable_auto_select = 1
+
+  let g:neocomplete#enable_auto_delimiter = 1
+  let g:neocomplete#max_list = 100
+  if !exists('g:neocomplete#sources#omni#input_patterns')
+    let g:neocomplete#sources#omni#input_patterns = {}
+  endif
+
+  let g:marching_enable_neocomplete = 1
+
+  let g:neocomplete#sources#omni#input_patterns.python =
+        \ '[^. *\t]\.\w*\|\h\w*'
+
+  " Define keyword pattern.
+  if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
+  endif
+  let g:neocomplete#keyword_patterns._ = '\h\k*(\?'
+  let g:neocomplete#keyword_patterns.rst =
+        \ '\$\$\?\w*\|[[:alpha:]_.\\/~-][[:alnum:]_.\\/~-]*\|\d\+\%(\.\d\+\)\+'
+
+  call neocomplete#custom#source('look', 'min_pattern_length', 4)
+  call neocomplete#custom#source('_', 'converters',
+        \ ['converter_add_paren', 'converter_remove_overlap',
+        \  'converter_delimiter', 'converter_abbr'])
+
+  " mappings."{{{
+  " <C-f>, <C-b>: page move.
+  inoremap <expr><C-f>  pumvisible() ? "\<PageDown>" : "\<Right>"
+  inoremap <expr><C-b>  pumvisible() ? "\<PageUp>"   : "\<Left>"
+  " <C-h>, <BS>: close popup and delete backword char.
+  " inoremap <expr> <C-h> neocomplete#smart_close_popup()."\<C-h>"
+  inoremap <expr> <BS> neocomplete#smart_close_popup()."\<C-h>"
+  " <C-n>: neocomplete.
+  inoremap <expr> <C-n>  pumvisible() ? "\<C-n>" : "\<C-x>\<C-u>\<C-p>\<Down>"
+  " <C-p>: keyword completion.
+  inoremap <expr> <C-p>  pumvisible() ? "\<C-p>" : "\<C-p>\<C-n>"
+  inoremap <expr> '  pumvisible() ? "\<C-y>" : "'"
+
+  " <CR>: close popup and save indent.
+  inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+  function! s:my_cr_function() abort
+    return neocomplete#smart_close_popup() . "\<CR>"
+  endfunction
+
+  " <TAB>: completion.
+  inoremap <silent><expr> <TAB>
+        \ pumvisible() ? "\<C-n>" :
+        \ <SID>check_back_space() ? "\<TAB>" :
+        \ neocomplete#start_manual_complete()
+  function! s:check_back_space() abort "{{{
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~ '\s'
+  endfunction"}}}
+  " <S-TAB>: completion back.
+  inoremap <expr><S-TAB>  pumvisible() ? "\<C-p>" : "\<C-h>"
+  "}}}
+'''
+
+[[plugins]]
+repo = 'Shougo/neosnippet.vim'
+depends = ['neosnippet-snippets', 'context_filetype.vim']
+on_event = 'InsertCharPre'
+on_ft = 'snippet'
+hook_source = '''
+  " Plugin key-mappings.
+  imap <C-k>     <Plug>(neosnippet_jump_or_expand)
+  smap <C-k>     <Plug>(neosnippet_jump_or_expand)
+
+  " SuperTab like snippets behavior.
+  imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_jump_or_expand)" : pumvisible() ? "\<C-n>" : "\<TAB>"
+  smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_jump_or_expand)" : "\<TAB>"
+
+  let g:neosnippet#enable_snipmate_compatibility = 1
+  let g:neosnippet#enable_complete_done = 1
+  let g:neosnippet#expand_word_boundary = 1
+
+  " For snippet_complete marker.
+  if has('conceal')
+    set conceallevel=2 concealcursor=i
+  endif
+
+  " Tell Neosnippet about the other snippets
+  let g:neosnippet#snippets_directory = $VIMRUNTIME.'/snippets'
+'''
+
+[[plugins]]
+repo = 'Shougo/context_filetype.vim'
+
+[[plugins]]
+repo = 'Shougo/unite.vim'
+depends = 'neomru.vim'
+hook_source='''
+  " Enable unite in insert mode
+  let g:unite_enable_start_insert=1
+  " Enable yank history
+  let g:unite_source_history_yank_enable=1
+  " Define limit of mru files
+  let g:unite_source_file_mru_limit=200
+
+  " unite grep に ag(The Silver Searcher) を使う
+  if executable('ag')
+    let g:unite_source_grep_command = 'ag'
+    let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+    let g:unite_source_grep_recursive_opt = ''
+  endif
+'''
+hook_add = '''
+  " Open yunk history
+  nnoremap <silent> <space>uy :<C-u>Unite history/yank<CR>
+  " Open buffer
+  nnoremap <silent> <space>ub :<C-u>Unite buffer<CR>
+  " Open same directory files
+  nnoremap <silent> <space>uf :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
+  " Open register
+  nnoremap <silent> <space>ur :<C-u>Unite -buffer-name=register register<CR>
+  " Open most recent used file
+  nnoremap <silent> <space>uu :<C-u>Unite file_mru buffer<CR>
+  " Unite grep
+  nnoremap <silent> ,g  :<C-u>Unite grep:. -buffer-name=search-buffer<CR><C-R><C-W><CR>
+  nnoremap <silent> ,ag  :<C-u>Unite grep:. -buffer-name=search-buffer<CR>
+
+  " Like Fuf mapping
+  nnoremap <silent> <space>ff :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
+  nnoremap <silent> <space>fb :<C-u>Unite buffer<CR>
+  nnoremap <silent> <space>fr :<C-u>Unite file_mru buffer<CR>
+  au FileType unite nnoremap <silent> <buffer> <ESC><ESC> :q<CR>
+  au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>:q<CR>
+  au FileType unite noremap <silent> <TAB><TAB> <TAB>
+'''
+
+[[plugins]]
+repo = 'ujihisa/unite-colorscheme'
+depends = 'unite.vim'
+
+[[plugins]]
+repo = 'Shougo/vimfiler.vim'
+depends = 'unite.vim'
+on_map = {n = '<Plug>'}
+on_if = "isdirectory(bufname('%'))"
+
+[[plugins]]
+repo = 'Shougo/vimshell.vim'
+on_map = {n = '<Plug>'}
+
+[[plugins]]
+repo = 'easymotion/vim-easymotion'
+on_map = {n = '<Plug>'}
+hook_add = '''
+  let g:EasyMotion_do_mapping = 0 " Disable default mappings
+
+  " Bi-directional find motion
+  " Jump to anywhere you want with minimal keystrokes, with just one key binding.
+  " `s{char}{label}`
+  nmap s <Plug>(easymotion-s)
+  " or
+  " `s{char}{char}{label}`
+  " Need one more keystroke, but on average, it may be more comfortable.
+  nmap s <Plug>(easymotion-s2)
+
+  " Turn on case sensitive feature
+  let g:EasyMotion_smartcase = 1
+
+  " JK motions: Line motions
+  map <Leader>j <Plug>(easymotion-j)
+
+  map f <Plug>(easymotion-bd-fl)
+  map t <Plug>(easymotion-bd-tl)
+
+  " Gif config
+  nmap s <Plug>(easymotion-s2)
+  nmap t <Plug>(easymotion-t2)
+  " surround.vimと被らないように
+  omap z <Plug>(easymotion-s2)
+
+  " Gif config
+  map  / <Plug>(easymotion-sn)
+  omap / <Plug>(easymotion-tn)
+  map // /<C-R><C-W>
+
+  " These `n` & `N` mappings are options. You do not have to map `n` & `N` to EasyMotion.
+  " Without these mappings, `n` & `N` works fine. (These mappings just provide
+  " different highlight method and have some other features )
+  map  n <Plug>(easymotion-next)
+'''
+
+[[plugins]]
+repo = 'tpope/vim-surround'
+on_map = {n = '<Plug>'}
+hook_source = '''
+  " [key map]
+  autocmd FileType html let b:surround_49  = "<h1>\r</h1>"
+  autocmd FileType html let b:surround_50  = "<h2>\r</h2>"
+  autocmd FileType html let b:surround_51  = "<h3>\r</h3>"
+  autocmd FileType html let b:surround_52  = "<h4>\r</h4>"
+  autocmd FileType html let b:surround_53  = "<h5>\r</h5>"
+  autocmd FileType html let b:surround_54  = "<h6>\r</h6>"
+
+  autocmd FileType html let b:surround_112 = "<p>¥r</p>"
+  autocmd FileType html let b:surround_117 = "<ul>¥r</ul>"
+  autocmd FileType html let b:surround_111 = "<ol>¥r</ol>"
+  autocmd FileType html let b:surround_108 = "<li>¥r</li>"
+  autocmd FileType html let b:surround_97  = "<a href=\"\">\r</a>"
+  autocmd FileType html let b:surround_65  = "<a href=\"\r\"></a>"
+  autocmd FileType html let b:surround_105 = "<img src=\"\r\" alt=\"\">"
+  autocmd FileType html let b:surround_73  = "<img src=\"\" alt=\"\r\">"
+  autocmd FileType html let b:surround_100 = "<div>\r</div>"
+  autocmd FileType html let b:surround_68  = "<div class=\"section\">\r</div>"
+'''
+
+[[plugins]]
+repo = 'thinca/vim-quickrun'
+on_map = {n = '<Plug>'}
+hook_add = 'nmap <silent> <Leader>r <Plug>(quickrun)'
+
+[[plugins]]
+repo = 'jceb/vim-hier'
+depends = 'vim-quickrun'
+
+[[plugins]]
+repo = 'Shougo/vimshell.vim'
+on_map = {n = '<Plug>'}
+
+[[plugins]]
+repo = 'mattn/emmet-vim'
+on_map = {n = '<Plug>'}
+hook_source = '''
+  let g:user_emmet_mode = 'i'
+  let g:user_emmet_leader_key='<C-D>'
+  let g:user_emmet_install_global = 0
+  autocmd FileType html,css,scss,javascript,jascript.jsx EmmetInstall
+'''
+
+[[plugins]]
+repo = 'nathanaelkane/vim-indent-guides'
+on_path = '.*'
+hook_source = '''
+  "" インデントの深さに色を付ける
+  let g:indent_guides_start_level=2
+  let g:indent_guides_auto_colors=1
+  let g:indent_guides_enable_on_vim_startup=0
+  let g:indent_guides_color_change_percent=20
+  let g:indent_guides_guide_size=2
+  let g:indent_guides_space_guides=1
+
+  hi IndentGuidesOdd  ctermbg=235
+  hi IndentGuidesEven ctermbg=237
+  au FileType coffee,coffeescript,ruby,javascript,javascript.jsx,python IndentGuidesEnable
+'''
+hook_add = '''
+  nmap <silent><Leader>ig <Plug>IndentGuidesToggle
+'''
+
+[[plugins]]
+repo = 'airblade/vim-gitgutter'
+on_path = '.*'
+hook_source = '''
+  let g:gitgutter_sign_added = '✚'
+  let g:gitgutter_sign_modified = '➜'
+  let g:gitgutter_sign_removed = '✘'
+'''
