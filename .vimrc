@@ -306,18 +306,20 @@ set laststatus=2
 " fileencode を設定
 " -----------------------
 
-set fileencodings=utf-8,euc-jp,sjis,cp932
+" dein氏がよしなにしてるのでいらなそう
+
+"set fileencodings=utf-8,euc-jp,sjis,cp932
 
 " markdown
 au BufNewFile,BufRead *.md setfiletype markdown
 " coffeescript
-au BufNewFile,BufRead *.coffee setfiletype coffeescript
+"au BufNewFile,BufRead *.coffee setfiletype coffeescript
 " handlebars
-au BufNewFile,BufRead *.hbs setfiletype html
+"au BufNewFile,BufRead *.hbs setfiletype html
 " jade
-au BufNewFile,BufRead *.jade setfiletype jade
+"au BufNewFile,BufRead *.jade setfiletype jade
 " jsx
-au BufNewFile,BufRead *.cjsx setfiletype coffee
+"au BufNewFile,BufRead *.cjsx setfiletype coffee
 
 " -----------------------
 " vimshellエンコーディングエラー対策
@@ -378,6 +380,9 @@ noremap  
 noremap!  
 noremap <BS> 
 noremap! <BS> 
+
+vnoremap > >gv
+vnoremap < <gv
 
 "---------------------------------------------------------------------------
 " プラグイン管理
@@ -463,7 +468,11 @@ noremap! <BS> 
 " -----------------------
 " end setup
 " -----------------------
-set laststatus=2
+" ftが自動認識されなかったときのために
+if !&filetype
+  filetype detect
+endif
+
 if !has('gui_running')
   set t_Co=256
 endif
