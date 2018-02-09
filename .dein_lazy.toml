@@ -215,7 +215,7 @@ hook_add = '''
 
 [[plugins]]
 repo = 'tpope/vim-surround'
-on_map = {n = '<Plug>'}
+on_path = '.*'
 hook_source = '''
   " [key map]
   autocmd FileType html let b:surround_49  = "<h1>\r</h1>"
@@ -280,6 +280,88 @@ hook_source = '''
 '''
 
 [[plugins]]
+repo = 'vim-syntastic/syntastic'
+hook_add = '''
+"  set statusline+=%#warningmsg#
+"  set statusline+=%{SyntasticStatuslineFlag()}
+"  set statusline+=%*
+"
+"  let g:syntastic_enable_signs = 1
+"  let g:syntastic_always_populate_loc_list = 1
+"  let g:syntastic_auto_loc_list = 1
+"  let g:syntastic_check_on_open = 1
+"  let g:syntastic_check_on_wq = 0
+"  let g:syntastic_javascript_checkers = ['eslint']
+"  let g:syntastic_javascript_eslint_exec = 'eslint_d'
+"  let g:syntastic_mode_map = {
+"    \ 'mode': 'active',
+"    \ 'active_filetypes': ['javascript', 'javascript.jsx'],
+"    \ }
+"
+"  " ローカルのeslint探してくるやつ
+"  function! FindConfig(prefix, what, where)
+"    let cfg = findfile(a:what, escape(a:where, ' ') . ';')
+"    return cfg !=# '' ? ' ' . a:prefix . ' ' . shellescape(cfg) : ''
+"  endfunction
+"
+"  autocmd FileType javascript,javascript.jsx let b:syntastic_javascript_eslint_args = 
+"    \ get(g:, 'syntastic_javascript_eslint_args', '') .
+"    \ FindConfig('-c', '.eslintrc', expand('<afile>:p:h', 1))
+'''
+on_ft = ['javascript', 'javascript.jsx']
+
+[[plugins]]
 repo = 'mtscout6/syntastic-local-eslint.vim'
 depends = 'syntastic'
 on_source = 'syntastic'
+
+[[plugins]]
+repo = 'cespare/vim-toml'
+on_ft = 'toml'
+
+[[plugins]]
+repo = 'rcmdnk/vim-markdown'
+on_ft = ['markdown', 'mkd']
+
+[[plugins]]
+repo = 'kchmck/vim-coffee-script'
+on_ft = 'coffeescript'
+hook_add = '''
+  " vimにcoffeeファイルタイプを認識させる
+  au BufRead,BufNewFile,BufReadPre *.coffee   set filetype=coffee
+  " インデントを設定
+  autocmd FileType coffee     setlocal sw=2 sts=2 ts=2 et
+'''
+
+[[plugins]]
+repo = 'othree/yajs.vim'
+on_path = '.js'
+on_ft = 'javascript'
+
+[[plugins]]
+repo = 'Quramy/tsuquyomi'
+on_ft = 'typescript'
+
+[[plugins]]
+repo = 'pangloss/vim-javascript'
+on_path = '.jsx'
+on_ft = 'javascript.jsx'
+
+[[plugins]]
+repo = 'mxw/vim-jsx'
+on_path = '.jsx'
+on_ft = 'javascript.jsx'
+
+[[plugins]]
+repo = 'posva/vim-vue'
+on_path = '.vue'
+on_ft = ['vue.html.javascript.css']
+
+[[plugins]]
+repo = 'mattn/emmet-vim'
+on_ft = ['html', 'css', 'scss', 'javascript', 'javascript.jsx']
+hook_add = '''
+  let g:user_emmet_mode = 'i'
+  let g:user_emmet_leader_key='<C-D>'
+'''
+

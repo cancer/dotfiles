@@ -18,40 +18,6 @@ repo = 'jeffreyiacono/vim-colors-wombat'
 repo = 'lilydjwg/colorizeR'
 
 [[plugins]]
-repo = 'vim-syntastic/syntastic'
-hook_add = '''
-  set statusline+=%#warningmsg#
-  set statusline+=%{SyntasticStatuslineFlag()}
-  set statusline+=%*
-
-  let g:syntastic_enable_signs = 1
-  let g:syntastic_always_populate_loc_list = 1
-  let g:syntastic_auto_loc_list = 1
-  let g:syntastic_check_on_open = 1
-  let g:syntastic_check_on_wq = 0
-  let g:syntastic_javascript_checkers = ['eslint']
-  let g:syntastic_javascript_eslint_exec = 'eslint_d'
-
-  " ローカルのeslint探してくるやつ
-  function! FindConfig(prefix, what, where)
-    let cfg = findfile(a:what, escape(a:where, ' ') . ';')
-    return cfg !=# '' ? ' ' . a:prefix . ' ' . shellescape(cfg) : ''
-  endfunction
-
-  autocmd FileType javascript,javascript.jsx let b:syntastic_javascript_eslint_args = 
-    \ get(g:, 'syntastic_javascript_eslint_args', '') .
-    \ FindConfig('-c', '.eslintrc', expand('<afile>:p:h', 1))
-'''
-
-[[plugins]]
-repo = 'mattn/emmet-vim'
-on_ft = ['html', 'css', 'scss', 'javascript', 'javascript.jsx']
-hook_add = '''
-  let g:user_emmet_mode = 'i'
-  let g:user_emmet_leader_key='<C-D>'
-'''
-
-[[plugins]]
 repo = 'itchyny/lightline.vim'
 hook_add = '''
   let g:lightline = {
@@ -117,46 +83,13 @@ hook_add = '''
 '''
 
 [[plugins]]
-repo = 'leafgarland/typescript-vim'
-on_ft = 'typescript'
-hook_add = '''
-  let g:js_indent_typescript = 1
-'''
-
-[[plugins]]
-repo = 'Quramy/tsuquyomi'
-on_ft = 'typescript'
-
-[[plugins]]
-repo = 'kchmck/vim-coffee-script'
-on_ft = 'coffeescript'
-hook_add = '''
-  " vimにcoffeeファイルタイプを認識させる
-  au BufRead,BufNewFile,BufReadPre *.coffee   set filetype=coffee
-  " インデントを設定
-  autocmd FileType coffee     setlocal sw=2 sts=2 ts=2 et
-'''
-
-[[plugins]]
 repo = 'digitaltoad/vim-jade'
-on_ft = 'jade'
-
-[[plugins]]
-repo = 'mxw/vim-jsx'
-on_ft = 'javascript.jsx'
-
-[[plugins]]
-repo = 'jason0x43/vim-js-indent'
-on_ft = ['javascript', 'javascript.jsx', 'json']
-
-[[plugins]]
-repo = 'cespare/vim-toml'
-on_ft = 'toml'
 
 [[plugins]]
 repo = 'elzr/vim-json'
-on_ft = 'json'
 
 [[plugins]]
-repo = 'rcmdnk/vim-markdown'
-on_ft = ['markdown', 'mkd']
+repo = 'leafgarland/typescript-vim'
+hook_add = '''
+  let g:js_indent_typescript = 1
+'''

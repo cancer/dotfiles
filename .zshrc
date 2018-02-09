@@ -16,11 +16,12 @@ export LANG=ja_JP.UTF-8
 #
 # -------------------------------------------------------------------------
 
-NPM_PATH=/usr/local/share/npm/bin:/Users/cancer/.anyenv/envs/ndenv/shims/npm/bin
-RUBY_PATH=/usr/local/share/npm/bin:/Users/cancer/.anyenv/envs/ndenv/shims/ruby/bin
+NPM_PATH=/Users/cancer/.anyenv/envs/nodenv/shims/npm/bin
+RUBY_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/ruby/bin
+GEM_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/gem
 ADT_PATH="$HOME/Development/adt-bundle-mac-x86_64/sdk/platform-tools/"
 IMAGE_MAGICK_PATH="/opt/ImageMagick/bin"
-PATH="$IMAGE_MAGICK_PATH:$NPM_PATH:$ADT_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin"
+PATH="$IMAGE_MAGICK_PATH:$NPM_PATH:$GEM_PATH:$ADT_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin"
 export PATH
 export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
@@ -200,6 +201,25 @@ fi
 . `brew --prefix`/etc/profile.d/z.sh
 
 # -------------------------------------------------------------------------
+# zplug
+#
+# -------------------------------------------------------------------------
+
+source ~/.zplug/init.zsh
+
+zplug "b4b4r07/enhancd", use:init.sh
+
+# Install plugins if there are plugins that have not been installed
+if ! zplug check --verbose; then
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
+fi
+
+zplug load --verbose
+
+# -------------------------------------------------------------------------
 # alias
 #
 # -------------------------------------------------------------------------
@@ -238,8 +258,8 @@ alias stmux="source $DOTFILES_BASE.tmux.conf"
 
 # global
 alias -g L='|  less'
-alias -g G='| grep'
-alias -g GI='| grep -i'
+alias -g G='| ag'
+alias -g GI='| ag -i'
 alias -g T='| tail'
 alias -g TF='| tail -f'
 alias -g C='| pbcopy'
@@ -259,3 +279,11 @@ function server() {
   python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port"
 }
 
+export PATH="$PATH:`yarn global bin`"
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/cancer/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then source '/Users/cancer/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
