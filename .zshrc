@@ -19,18 +19,9 @@ export LANG=ja_JP.UTF-8
 NPM_PATH=/Users/cancer/.anyenv/envs/nodenv/shims/npm/bin
 RUBY_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/ruby/bin
 GEM_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/gem
-ADT_PATH="$HOME/Development/adt-bundle-mac-x86_64/sdk/platform-tools/"
-IMAGE_MAGICK_PATH="/opt/ImageMagick/bin"
-PATH="$IMAGE_MAGICK_PATH:$NPM_PATH:$GEM_PATH:$ADT_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin"
+PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin"
 export PATH
-export PATH="/Users/y-uno/bin:/usr/local/gnu/bin:/usr/local/app/tmux/bin:$PATH"
 export BIN_PATH="/usr/local/bin"
-
-mf_zshrc="$HOME/project/Dev/share/etc/mf-dev.zshrc"
-if [ -f $mf_zshrc ]; then
-  source $mf_zshrc
-fi
-
 
 # -------------------------------------------------------------------------
 # プロンプト
@@ -66,8 +57,6 @@ RPROMPT='$p_cdir ${vcs_info_msg_0_}'
 
 PROMPT='$p_info%(#.#.$) '
 PROMPT2='[%n]> ' 
-
-#PROMPT="[zsh %n@%m]% "
 
 bindkey -e
 
@@ -125,15 +114,6 @@ setopt list_types
 zstyle ':completion:*' list-colors 'di=36' 'ln=35' 'ex=32'
 
 # -------------------------------------------------------------------------
-# function
-#
-# -------------------------------------------------------------------------
-
-# scpのショートカット
-function scpf { scp $1 y-uno@y-uno.dev.mf.local:~/tmp }
-function scpd { scp -r $1 y-uno@y-uno.dev.mf.local:~/tmp }
-
-# -------------------------------------------------------------------------
 # その他
 #
 # -------------------------------------------------------------------------
@@ -155,18 +135,6 @@ setopt interactive_comments
 
 # シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
 setopt NO_hup
-
-# Linuxでもpbcopyを使いたい
-if which xsel >/dev/null 2>&1 ; then
-  # Linux
-  alias -g C='| xsel --input --clipboard'
-elif which pbcopy >/dev/null 2>&1 ; then
-  # Mac
-  alias -g C='| pbcopy'
-fi
-
-# tmuxでpbcopy
-alias tmux-copy='tmux save-buffer - C'
 
 # zmvを使う
 autoload -Uz zmv
@@ -240,23 +208,3 @@ alias -g T='| tail'
 alias -g TF='| tail -f'
 alias -g C='| pbcopy'
 
-# grep
-alias grep-cmarker="grep \"<<< HEAD\""
-# gulp
-#alias gulp="gulp --require coffee-script"
-
-# server
-
-function server() {
-  local port="${1:-8000}"
-  sleep 1 && open "http://localhost:${port}/" &
-  # Set the default Content-Type to `text/plain` instead of `application/octet-stream`
-  # And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
-  python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port"
-}
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/cancer/Downloads/google-cloud-sdk/completion.zsh.inc' ]; then source '/Users/cancer/Downloads/google-cloud-sdk/completion.zsh.inc'; fi
