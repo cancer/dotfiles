@@ -195,30 +195,6 @@ if [ $(echo $OSTYPE |grep darwin |wc -l ) != 0 ]; then
   fi
 fi
 
-# z
-#   brew info z
-#
-. `brew --prefix`/etc/profile.d/z.sh
-
-# -------------------------------------------------------------------------
-# zplug
-#
-# -------------------------------------------------------------------------
-
-source ~/.zplug/init.zsh
-
-zplug "b4b4r07/enhancd", use:init.sh
-
-# Install plugins if there are plugins that have not been installed
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
-fi
-
-zplug load --verbose
-
 # -------------------------------------------------------------------------
 # alias
 #
@@ -278,9 +254,6 @@ function server() {
   # And serve everything as UTF-8 (although not technically correct, this doesn’t break anything for binary files)
   python -c $'import SimpleHTTPServer;\nmap = SimpleHTTPServer.SimpleHTTPRequestHandler.extensions_map;\nmap[""] = "text/plain";\nfor key, value in map.items():\n\tmap[key] = value + ";charset=UTF-8";\nSimpleHTTPServer.test();' "$port"
 }
-
-export PATH="$PATH:`yarn global bin`"
-
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc' ]; then source '/Users/cancer/Downloads/google-cloud-sdk/path.zsh.inc'; fi
