@@ -36,6 +36,7 @@
   delete-merged-branches = !git branch --merged | grep -v '*' | xargs -I % git branch -d %
 [push]
   default = simple
+	autoSetupRemote = true
 [user]
   name = cancer
   email = zodiac.cancer.j6@gmail.com
