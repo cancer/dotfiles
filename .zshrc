@@ -23,6 +23,9 @@ PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/s
 export PATH
 export BIN_PATH="/usr/local/bin"
 
+# direnv
+eval "$(direnv hook zsh)"
+
 # -------------------------------------------------------------------------
 # プロンプト
 #
