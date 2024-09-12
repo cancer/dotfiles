@@ -218,3 +218,9 @@ alias -g C='| pbcopy'
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/cancer/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/completion.zsh.inc'; fi
