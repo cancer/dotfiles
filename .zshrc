@@ -211,3 +211,10 @@ alias -g T='| tail'
 alias -g TF='| tail -f'
 alias -g C='| pbcopy'
 
+
+# bun completions
+[ -s "/Users/cancer/.bun/_bun" ] && source "/Users/cancer/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
