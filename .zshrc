@@ -192,7 +192,7 @@ export LS_COLORS='di=01;36:ln=01;35:ex=01;32'
 DOTFILES_BASE="~/dotfiles/"
 
 # edit
-alias vi="vim"
+alias vi="nvim"
 alias edit="vi" 
 alias ezshrc="edit $DOTFILES_BASE.zshrc"
 alias evim="edit $DOTFILES_BASE.vimrc"
