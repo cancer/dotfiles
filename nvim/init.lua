@@ -10,9 +10,10 @@ vim.lsp.set_log_level("debug")
 -- Key mappings
 vim.keymap.set('n', '<C-1>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-k>', vim.lsp.buf.hover, { noremap = true, silent = true })
-vim.keymap.set('n', '<C-p>', ':Telescope<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-[>', ':tabnext<CR>', { noremap = true, silent = true })
 vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true })
+vim.keymap.set('n', '<C-p>', ':Telescope find_files<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<F12>', ':Telescope lsp_document_symbols<CR>', { noremap = true, silent = true })
 
 -- Install plugin manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -138,7 +139,24 @@ require("lazy").setup({
     "nvim-tree/nvim-tree.lua",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      require("nvim-tree").setup()
+      require("nvim-tree").setup({
+        update_focused_file = {
+          enable = true
+        },
+        on_attach = function(bufnr)
+          local api = require('nvim-tree.api')
+          local function opts(desc)
+            return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+          end
+          api.config.mappings.default_on_attach(bufnr)
+
+          -- Remap
+          vim.keymap.set('n', '<CR>', function()
+            api.node.open.tab()
+            api.tree.open()
+          end, opts('Open: New Tab'))
+        end,
+      })
 
       -- Launch
       local nvim_tree = require("nvim-tree.api")
