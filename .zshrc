@@ -19,7 +19,7 @@ export LANG=ja_JP.UTF-8
 NPM_PATH=/Users/cancer/.anyenv/envs/nodenv/shims/npm/bin
 RUBY_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/ruby/bin
 GEM_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/gem
-PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin"
+PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin:/Users/cancer/dotfiles/node_modules/.bin"
 export PATH
 export BIN_PATH="/usr/local/bin"
 

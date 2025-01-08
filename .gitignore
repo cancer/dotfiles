@@ -3,3 +3,4 @@
 vimplugin/
 .vimbundle/*
 !.vimbundle/neobundle.vim/
+node_modules/
