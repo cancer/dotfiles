@@ -52,24 +52,7 @@ require("lazy").setup({
       })
     end,
   },
-  {
-    "jinzhongjia/LspUI.nvim",
-    branch = "main",
-    config = function()
-      require("LspUI").setup({
-        hover = { enable = true }
-      })
-    end
-  },
-  -- Formatter
-  {
-    "prettier/vim-prettier",
-    build = "npm install",
-    ft = { "javascript", "typescript", "css", "json", "markdown", "astro", "svelte" },
-    cmd = { "Prettier", "PrettierAsync" },
-    config = function()
-    end,
-  },
+
   -- Auto complete
   {
     "hrsh7th/nvim-cmp",
@@ -100,19 +83,7 @@ require("lazy").setup({
       })
     end,
   },
-  -- Syntax highlighter
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "javascript", "typescript", "html", "css", "json", "astro", "svelte", "markdown" },
-        highlight = { enable = true },
-        indent = { enable = true },
-        auto_install = true,
-      })
-    end,
-  },
+
   -- Search
   {
     "nvim-telescope/telescope.nvim",
@@ -121,19 +92,13 @@ require("lazy").setup({
       require("telescope").setup({})
     end,
   },
+
   -- Git
   {
     "lewis6991/gitsigns.nvim",
     config = true,
   },
-  -- Status line
-  {
-    "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    config = function()
-      require("lualine").setup()
-    end,
-  },
+
   -- Filetree
   {
     "nvim-tree/nvim-tree.lua",
@@ -179,6 +144,20 @@ require("lazy").setup({
       })
     end,
   },
+
+  -- Presentation
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        ensure_installed = { "javascript", "typescript", "html", "css", "json", "astro", "svelte", "markdown" },
+        highlight = { enable = true },
+        indent = { enable = true },
+        auto_install = true,
+      })
+    end,
+  },
   {
     'projekt0n/github-nvim-theme',
     name = 'github-theme',
@@ -188,6 +167,34 @@ require("lazy").setup({
       require('github-theme').setup()
 
       vim.cmd('colorscheme github_dark_colorblind')
+    end,
+  },
+
+  -- UI
+  {
+    "nvim-lualine/lualine.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("lualine").setup()
+    end,
+  },
+  {
+    "jinzhongjia/LspUI.nvim",
+    branch = "main",
+    config = function()
+      require("LspUI").setup({
+        hover = { enable = true }
+      })
+    end
+  },
+
+  -- Formatter
+  {
+    "prettier/vim-prettier",
+    build = "npm install",
+    ft = { "javascript", "typescript", "css", "json", "markdown", "astro", "svelte" },
+    cmd = { "Prettier", "PrettierAsync" },
+    config = function()
     end,
   }
 })
