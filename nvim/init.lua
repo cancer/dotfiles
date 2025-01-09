@@ -188,6 +188,42 @@ require("lazy").setup({
     end
   },
 
+  -- Linter
+    {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      local lint = require("lint")
+      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+      vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+
+      lint.linters.eslint.cmd = function()
+        local cwd = vim.fn.getcwd()
+        local local_eslint = cwd .. '/node_modules/.bin/eslint'
+        if vim.fn.executable(local_eslint) == 1 then
+          return local_eslint
+        else
+          return 'eslint' -- fallback
+        end
+      end
+
+      lint.linters_by_ft = {
+        javascript = { 'eslint' },
+        typescript = { 'eslint' },
+        astro = { 'eslint' },
+        svelte = { 'eslint' },
+      }
+    end,
+  },
+
   -- Formatter
   {
     "prettier/vim-prettier",
