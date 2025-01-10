@@ -35,20 +35,27 @@ require("lazy").setup({
     config = function()
       local lspconfig = require("lspconfig")
       local on_attach = function(client, bufnr)
-          vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
-          vim.keymap.set("n", "<F7>", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<F7>", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<C-CR>", vim.lsp.buf.code_action, { noremap = true, silent = true, buffer = bufnr })
       end
 
-      -- Astro LSP 設定
       lspconfig.astro.setup({
         root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
         on_attach = on_attach,
       })
 
-      -- TypeScript LSP 設定
       lspconfig.ts_ls.setup({
         root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", ".git"),
         on_attach = on_attach,
+        init_options = {
+          hostInfo = "neovim",
+          preferences = {
+            includeCompletionForModuleExports = true,
+            includeCompletionForImportStatements = true,
+            importModuleSpecifierPreference = "project-relative"
+          }
+        }
       })
     end,
   },
