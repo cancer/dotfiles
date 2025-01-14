@@ -5,8 +5,6 @@ vim.opt.expandtab = true
 vim.opt.smartcase = true
 vim.opt.clipboard:append {'unnamedplus'}
 
-vim.lsp.set_log_level("debug")
-
 -- Key mappings
 vim.keymap.set('n', '<C-1>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-k>', vim.lsp.buf.hover, { noremap = true, silent = true })
@@ -115,28 +113,7 @@ require("lazy").setup({
         update_focused_file = {
           enable = true
         },
-        on_attach = function(bufnr)
-          local api = require('nvim-tree.api')
-          local function opts(desc)
-            return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-          end
-          api.config.mappings.default_on_attach(bufnr)
-
-          -- Remap
-          vim.keymap.set('n', '<CR>', function()
-            api.node.open.tab()
-            api.tree.open()
-          end, opts('Open: New Tab'))
-        end,
       })
-
-      -- Launch
-      local nvim_tree = require("nvim-tree.api")
-      vim.api.nvim_create_autocmd("VimEnter", {
-        callback = function()
-          nvim_tree.tree.open()
-        end
-      });
     end,
   },
   {
