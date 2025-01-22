@@ -9,6 +9,7 @@ vim.opt.clipboard:append {'unnamedplus'}
 vim.keymap.set('n', '<C-1>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-k>', vim.lsp.buf.hover, { noremap = true, silent = true })
 vim.keymap.set('n', '<C-[>', ':tabnext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-S-[>', ':tabprev<CR>', { noremap = true, silent = true })
 vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true })
 vim.keymap.set('n', '<C-p>', ':Telescope find_files<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<F12>', ':Telescope lsp_document_symbols<CR>', { noremap = true, silent = true })
@@ -49,8 +50,10 @@ require("lazy").setup({
         init_options = {
           hostInfo = "neovim",
           preferences = {
-            includeCompletionForModuleExports = true,
-            includeCompletionForImportStatements = true,
+            enableSuggestions = true,
+            includeCompletionsForModuleExports = true,
+            includeCompletionsForImportStatements = true,
+            includePackageJsonAutoImports = "on",
             importModuleSpecifierPreference = "project-relative"
           }
         }
@@ -89,7 +92,7 @@ require("lazy").setup({
     end,
   },
 
-  -- Search
+  -- Finder
   {
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
