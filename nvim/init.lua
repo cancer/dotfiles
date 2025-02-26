@@ -5,14 +5,18 @@ vim.opt.expandtab = true
 vim.opt.smartcase = true
 vim.opt.clipboard:append {'unnamedplus'}
 
+vim.g.mapleader = " "
+
 -- Key mappings
 vim.keymap.set('n', '<C-1>', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-k>', vim.lsp.buf.hover, { noremap = true, silent = true })
 vim.keymap.set('n', '<C-[>', ':tabnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-S-[>', ':tabprev<CR>', { noremap = true, silent = true })
 vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true })
-vim.keymap.set('n', '<C-p>', ':Telescope find_files<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<F12>', ':Telescope lsp_document_symbols<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-p>', ':Telescope<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>pf', ':Telescope find_files<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>ps', ':Telescope lsp_document_symbols<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>P', ':Prettier<CR>', { noremap = true, silent = true })
 
 -- Install plugin manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
