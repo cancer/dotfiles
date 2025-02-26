@@ -223,6 +223,22 @@ require("lazy").setup({
     cmd = { "Prettier", "PrettierAsync" },
     config = function()
     end,
+  },
+
+  -- AI Helper
+  {
+    -- Pure lua replacement for github/copilot
+    "zbirenbaum/copilot.lua",
+    config = function() 
+      require("copilot").setup({
+        suggestion = {
+          auto_trigger = true,
+          keymap = {
+            accept = "<D-l>",
+          },
+        },
+      })
+    end,
   }
 })
 
