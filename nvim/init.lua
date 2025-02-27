@@ -239,6 +239,21 @@ require("lazy").setup({
         },
       })
     end,
-  }
+  },
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    dependencies = {
+      { "zbirenbaum/copilot.lua" },
+      { "nvim-lua/plenary.nvim", branch = "master" },
+    },
+    build = "make tiktoken",
+    opts = {
+    },
+    prompts = {
+      MyCustomPrompt  = {
+        system_prompt = "言語を指示したとき以外は常に日本語で答えること",
+      },
+    },
+  },
 })
 

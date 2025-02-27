@@ -1,4 +1,5 @@
 {
+  "CopilotChat.nvim": { "branch": "main", "commit": "3a562fd17e2fcd14d790a7c0c701b47d6724da60" },
   "LspUI.nvim": { "branch": "main", "commit": "a783d904921f657e003288ad3cab14e3c86d16e7" },
   "LuaSnip": { "branch": "master", "commit": "c9b9a22904c97d0eb69ccb9bab76037838326817" },
   "cmp-buffer": { "branch": "main", "commit": "3022dbc9166796b644a841a02de8dd1cc1d311fa" },
