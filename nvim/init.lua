@@ -235,8 +235,12 @@ require("lazy").setup({
           auto_trigger = true,
           keymap = {
             accept = "<D-l>",
+            accept_word = "<D-S-l>",
           },
         },
+        filetypes = {
+          markdown = true,
+        }
       })
     end,
   },
