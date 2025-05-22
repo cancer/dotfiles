@@ -217,11 +217,25 @@ require("lazy").setup({
 
   -- Formatter
   {
-    "prettier/vim-prettier",
-    build = "npm install",
-    ft = { "javascript", "typescript", "css", "json", "markdown", "astro", "svelte" },
-    cmd = { "Prettier", "PrettierAsync" },
+    "MunifTanjim/prettier.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
     config = function()
+      require("prettier").setup({
+        bin = "prettier",
+        filetypes = {
+          "javascript",
+          "typescript",
+          "css",
+          "json",
+          "yaml",
+          "markdown",
+          "svelte",
+          "astro",
+          "jsx",
+        },
+      })
     end,
   },
 
