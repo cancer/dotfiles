@@ -261,5 +261,14 @@ require("lazy").setup({
       },
     },
   },
+  {
+    "coder/claudecode.nvim",
+    config = true,
+    keys = {
+      { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Claude: Chat" },
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Claude: Send selection" },
+      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
+    }
+  }
 })
 
