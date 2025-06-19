@@ -16,7 +16,7 @@ vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true 
 vim.keymap.set('n', '<C-p>', ':Telescope<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>pf', ':Telescope find_files<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>ps', ':Telescope lsp_document_symbols<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<leader>P', ':Prettier<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>P', ':Neoformat<CR>', { noremap = true, silent = true })
 
 -- Install plugin manager
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -120,6 +120,10 @@ require("lazy").setup({
         update_focused_file = {
           enable = true
         },
+        filters = {
+          git_ignored = false,
+          custom = { "^\\.git$", "^\\.idea$", "^\\.vscode$", "^\\.DS_Store$" },
+        },
       })
     end,
   },
@@ -217,25 +221,9 @@ require("lazy").setup({
 
   -- Formatter
   {
-    "MunifTanjim/prettier.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
+    "sbdchd/neoformat",
     config = function()
-      require("prettier").setup({
-        bin = "prettier",
-        filetypes = {
-          "javascript",
-          "typescript",
-          "css",
-          "json",
-          "yaml",
-          "markdown",
-          "svelte",
-          "astro",
-          "jsx",
-        },
-      })
+      vim.env.PATH = vim.fn.expand("~/dotfiles/node_modules/.bin") .. ":" .. vim.env.PATH
     end,
   },
 
