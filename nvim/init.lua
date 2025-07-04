@@ -39,12 +39,22 @@ require("lazy").setup({
       local lspconfig = require("lspconfig")
       local on_attach = function(client, bufnr)
         vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<F7>", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
         vim.keymap.set("n", "<C-CR>", vim.lsp.buf.code_action, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<leader>gD", vim.lsp.buf.declaration, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "<leader>tD", vim.lsp.buf.type_definition, { noremap = true, silent = true, buffer = bufnr })
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, { noremap = true, silent = true, buffer = bufnr })
       end
 
       lspconfig.astro.setup({
-        root_dir = require("lspconfig.util").root_pattern("package.json", ".git"),
+        root_dir = require("lspconfig.util").root_pattern("package.json", "svelte.config.js", ".git"),
+        on_attach = on_attach,
+      })
+
+      lspconfig.svelte.setup({
+        root_dir = require("lspconfig.util").root_pattern("package.json", "svelte.config.js", ".git"),
         on_attach = on_attach,
       })
 
@@ -266,6 +276,7 @@ require("lazy").setup({
     config = true,
     keys = {
       { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Claude: Chat" },
+      { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
       { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Claude: Send selection" },
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
     }
