@@ -6,3 +6,6 @@ vimplugin/
 node_modules/
 codex/
 agent/
+.claude/*
+!.claude/agents/
+!.claude/agents/**
