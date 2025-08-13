@@ -143,15 +143,17 @@ setopt NO_hup
 autoload -Uz zmv
 alias rename='noglob zmv -W'
 
-# anyenv
-if [ -d ${HOME}/.anyenv ] ; then
-  export PATH="$HOME/.anyenv/bin:$PATH"
-  eval "$(anyenv init -)"
-  for D in `ls $HOME/.anyenv/envs`
-  do
-      export PATH="$HOME/.anyenv/envs/$D/shims:$PATH"
-  done
-fi
+# any env
+
+## Node.js
+eval "$(fnm env --use-on-cd)"
+
+## bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+## bun completions
+[ -s "/Users/cancer/.bun/_bun" ] && source "/Users/cancer/.bun/_bun"
 
 
 # OS Xのクイックルックでテキストのコピペを有効にする
@@ -212,15 +214,10 @@ alias -g TF='| tail -f'
 alias -g C='| pbcopy'
 
 
-# bun completions
-[ -s "/Users/cancer/.bun/_bun" ] && source "/Users/cancer/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/cancer/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/completion.zsh.inc'; fi
+
+. "$HOME/.local/bin/env"
