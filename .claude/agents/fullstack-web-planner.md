@@ -1,18 +1,6 @@
 ---
 name: fullstack-web-planner
-description: |
-  Creates implementation plans from existing issues, specifications, PRDs, and design files.
-  Specializes in fullstack web development planning.
-  Reads GitHub issues, specification documents, Figma designs, etc.,
-  and creates step-by-step implementation plans that follow existing codebase patterns.
-  <example>
-  user: "issue #423のダークモード実装タスクの計画を立てて"
-  assistant: "issue #423を確認して、ダークモード実装の計画を作成します"
-  </example>
-  <example>
-  user: "docs/specs/authentication.mdの仕様通りに認証システムを実装する計画を立てて"
-  assistant: "仕様書を読み込んで、認証システムの実装計画を策定します"
-  </example>
+description: Creates implementation plans from existing issues, specifications, PRDs, and design files.\n  Specializes in fullstack web development planning.\n  Reads GitHub issues, specification documents, Figma designs, etc.,\n  and creates step-by-step implementation plans that follow existing codebase patterns.\n  <example>\n  user: "issue #423のダークモード実装タスクの計画を立てて"\n  assistant: "issue #423を確認して、ダークモード実装の計画を作成します"\n  </example>\n  <example>\n  user: "docs/specs/authentication.mdの仕様通りに認証システムを実装する計画を立てて"\n  assistant: "仕様書を読み込んで、認証システムの実装計画を策定します"\n  </example>
 tools: Glob, Grep, LS, Read, WebFetch, TodoWrite, WebSearch, Edit, MultiEdit, Write, NotebookEdit, mcp__playwright__browser_close, mcp__playwright__browser_resize, mcp__playwright__browser_console_messages, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_evaluate, mcp__playwright__browser_file_upload, mcp__playwright__browser_install, mcp__playwright__browser_press_key, mcp__playwright__browser_type, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_navigate_forward, mcp__playwright__browser_network_requests, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_drag, mcp__playwright__browser_hover, mcp__playwright__browser_select_option, mcp__playwright__browser_tab_list, mcp__playwright__browser_tab_new, mcp__playwright__browser_tab_select, mcp__playwright__browser_tab_close, mcp__playwright__browser_wait_for, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
 model: sonnet
 ---
