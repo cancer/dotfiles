@@ -231,3 +231,23 @@ source ~/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization scrip
 alias xclaude="claude --dangerously-skip-permissions"
 alias xcopilot="copilot --allow-all"
 
+# zoxide
+eval "$(zoxide init zsh)"
+
+# fzf
+source <(fzf --zsh)
+
+# tmux: 引数なしで呼んだ時、ディレクトリ名をセッション名にして開始
+tmux() {
+  if [ $# -eq 0 ]; then
+    local dir=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+    local session_name=$(basename "$dir" | tr '.' '_')
+    if command tmux has-session -t "$session_name" 2>/dev/null; then
+      command tmux attach-session -t "$session_name"
+    else
+      command tmux new-session -s "$session_name"
+    fi
+  else
+    command tmux "$@"
+  fi
+}
