@@ -213,7 +213,6 @@ alias -g T='| tail'
 alias -g TF='| tail -f'
 alias -g C='| pbcopy'
 
-
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/path.zsh.inc'; fi
 
@@ -221,3 +220,14 @@ if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/g
 if [ -f '/Users/cancer/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/completion.zsh.inc'; fi
 
 . "$HOME/.local/bin/env"
+
+# for Claude Code
+export LANG="ja_JP.UTF-8"
+
+[[ "$TERM_PROGRAM" == "kiro" ]] && . "$(kiro --locate-shell-integration-path zsh)"
+
+source ~/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script
+
+alias xclaude="claude --dangerously-skip-permissions"
+alias xcopilot="copilot --allow-all"
+
