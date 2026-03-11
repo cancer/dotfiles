@@ -38,6 +38,8 @@ require("lazy").setup({
     config = function()
       local lspconfig = require("lspconfig")
       local on_attach = function(client, bufnr)
+        client.server_capabilities.positionEncoding = "utf-16"
+
         vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
         vim.keymap.set("n", "<C-CR>", vim.lsp.buf.code_action, { noremap = true, silent = true, buffer = bufnr })
         vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { noremap = true, silent = true, buffer = bufnr })
@@ -199,17 +201,6 @@ require("lazy").setup({
     event = { "BufReadPre", "BufNewFile" },
     config = function()
       local lint = require("lint")
-      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-        callback = function()
-          lint.try_lint()
-        end,
-      })
-      vim.api.nvim_create_autocmd({ "BufReadPost" }, {
-        callback = function()
-          lint.try_lint()
-        end,
-      })
-
       lint.linters.eslint.cmd = function()
         local cwd = vim.fn.getcwd()
         local local_eslint = cwd .. '/node_modules/.bin/eslint'
@@ -219,6 +210,17 @@ require("lazy").setup({
           return 'eslint' -- fallback
         end
       end
+
+      -- vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+      --   callback = function()
+      --     lint.try_lint()
+      --   end,
+      -- })
+      -- vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+      --   callback = function()
+      --     lint.try_lint()
+      --   end,
+      -- })
 
       lint.linters_by_ft = {
         javascript = { 'eslint' },
@@ -272,6 +274,13 @@ require("lazy").setup({
     },
   },
   {
+    "cajames/copy-reference.nvim",
+    keys = {
+      { "yr", "<cmd>CopyReference<cr>", mode = { "n", "v" }, desc = "Copy file reference with line number" },
+    },
+    config = true,
+  },
+  {
     "coder/claudecode.nvim",
     config = true,
     keys = {
@@ -282,4 +291,26 @@ require("lazy").setup({
     }
   }
 })
+
+-- Dim inactive windows in tmux
+local augroup = vim.api.nvim_create_augroup("TmuxFocus", { clear = true })
+
+if os.getenv("TMUX") then
+  vim.api.nvim_create_autocmd("FocusGained", {
+    group = augroup,
+    pattern = "*",
+    callback = function()
+      vim.cmd("hi Normal ctermbg=NONE guibg=NONE")
+      vim.cmd("hi NormalNC ctermbg=NONE guibg=NONE")
+    end,
+  })
+  vim.api.nvim_create_autocmd("FocusLost", {
+    group = augroup,
+    pattern = "*",
+    callback = function()
+      vim.cmd("hi Normal ctermbg=236 guibg=#202020")
+      vim.cmd("hi NormalNC ctermbg=236 guibg=#202020")
+    end,
+  })
+end
 
