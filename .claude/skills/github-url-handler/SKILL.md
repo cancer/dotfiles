@@ -1,6 +1,7 @@
 ---
 name: github-url-handler
 description: When a GitHub URL is provided in the user's message, use the gh CLI command instead of WebFetch to retrieve the information. This applies to issues, pull requests, repositories, files, and directories.
+model: haiku
 ---
 
 # GitHub URL Handler Skill
