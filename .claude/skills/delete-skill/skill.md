@@ -1,7 +1,8 @@
 ---
 name: delete-skill
-description: 既存スキルを削除する。影響調査付き
+description: 既存スキルを削除する。他スキルからの参照を影響調査してから削除する。「スキルを消して/削除して」と頼まれた場面で使う。編集は edit-skill、新規作成は create-skill の領分
 argument-hint: <skill-name>
+model: haiku
 allowed-tools: Bash, Read, Glob, Grep
 user-invocable: true
 ---
@@ -21,7 +22,7 @@ $ARGUMENTS
 
 ## スキルファイルの配置
 
-- ユーザースコープ: `~/.claude/skills/<skill-name>/skill.md`
+- ユーザースコープ: `~/.claude/skills/<skill-name>/SKILL.md`
 - プロジェクトスコープ: `.claude/commands/<skill-name>.md`
 
 ## 実行手順

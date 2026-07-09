@@ -1,7 +1,8 @@
 ---
 name: find-session
-description: キーワードで過去のセッションを検索し、内容を要約する
+description: キーワードで過去のセッションを検索し内容を要約する。「前にやった○○のセッションを探して」「あの作業どこだっけ?」と頼まれた場面で使う
 argument-hint: <検索キーワード(issue番号, PR番号, ブランチ名, 機能名等)>
+model: sonnet
 allowed-tools: Bash, Read, Glob, Grep
 user-invocable: true
 ---

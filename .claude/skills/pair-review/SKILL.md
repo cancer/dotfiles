@@ -1,6 +1,7 @@
 ---
 name: pair-review
-description: ユーザーと共にレビューを行うペアレビュースキル。対話的にコードを深掘りし、合意した指摘をPRコメントとして投稿する
+model: opus
+description: ユーザーと対話しながらコードを深掘りし、合意した指摘だけをPRコメントとして投稿する。「一緒にレビューしよう」「ペアレビューして」と頼まれた場面で使う。単独の自己レビューは code-review、受けたレビューへの対応は review-respond の領分
 argument-hint: <file-path, directory, or pr-url/number>
 allowed-tools: Bash, Read, Glob, Grep, Skill, AskUserQuestion
 user-invocable: true
@@ -159,6 +160,15 @@ EOF
 ```
 
 `<github-username>` は `gh api user --jq .login` で取得したユーザー名を使用する。
+
+## 完了前チェックリスト
+
+投稿前に確認する。
+
+- [ ] ユーザーの承認を得てから投稿する
+- [ ] 「指摘する」に合意した項目のみ投稿し、保留・見送りは投稿しない
+- [ ] インラインコメントはボット署名なし・ユーザー本人の言葉・柔らかい口語にした
+- [ ] サマリーに「@username の監修のもと Claude Code が投稿しています」の注釈を付けた
 
 ## 注意事項
 

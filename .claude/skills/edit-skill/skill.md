@@ -1,7 +1,8 @@
 ---
 name: edit-skill
-description: 既存スキルを編集する。影響調査付き
+description: 既存スキルを編集する。他スキルからの参照を影響調査してから編集する。「スキルを直して/修正して」「○○スキルに△△を追加して」と頼まれた場面で使う。新規作成は create-skill、削除は delete-skill の領分
 argument-hint: <skill-name> <変更内容>
+model: haiku
 allowed-tools: Read, Edit, Write, Glob, Grep
 user-invocable: true
 ---
@@ -22,7 +23,7 @@ $ARGUMENTS
 
 ## スキルファイルの配置
 
-- ユーザースコープ: `~/.claude/skills/<skill-name>/skill.md`
+- ユーザースコープ: `~/.claude/skills/<skill-name>/SKILL.md`
 - プロジェクトスコープ: `.claude/commands/<skill-name>.md`
 
 ## 実行手順

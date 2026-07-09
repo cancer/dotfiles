@@ -1,6 +1,7 @@
 ---
 name: research
-description: 調べ物をする際に使用。Web検索と技術ドキュメント検索を適切に使い分ける
+description: Web検索と技術ドキュメント検索を使い分けて調べ物をする。ライブラリのAPI・エラー原因・ベストプラクティス等を「調べて」と頼まれた場面で使う。プロジェクト内文書の検索は search-proj-docs、依存更新の調査は package-research の領分
+model: sonnet
 allowed-tools: mcp__context7__resolve-library-id, mcp__context7__query-docs, Bash
 user-invocable: false
 ---
