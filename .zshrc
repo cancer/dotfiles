@@ -19,6 +19,7 @@ export LANG=ja_JP.UTF-8
 NPM_PATH=/Users/cancer/.anyenv/envs/nodenv/shims/npm/bin
 RUBY_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/ruby/bin
 GEM_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/gem
+PYTHON_PATH=/home/cancer/.local/share/uv
 PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin:/Users/cancer/dotfiles/node_modules/.bin"
 export PATH
 export BIN_PATH="/usr/local/bin"
@@ -219,7 +220,16 @@ if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/g
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/cancer/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/completion.zsh.inc'; fi
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 . "$HOME/.local/bin/env"
+
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - bash)"
+eval "$(pyenv virtualenv-init -)"
 
 # for Claude Code
 export LANG="ja_JP.UTF-8"
