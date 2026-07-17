@@ -1,8 +1,8 @@
 ---
 name: analyze-working
-description: 直近のセッションログから非効率なコミュニケーションや定型化できる反復作業を洗い出す。「働き方を分析して」「無駄を洗い出して」「スキル化できる作業は?」と頼まれた場面で使う。判断傾向の分析は analyze-judgment の領分
+description: 直近のセッションログから非効率なコミュニケーションや定型化できる反復作業を洗い出す。「働き方を分析して」「無駄を洗い出して」「スキル化できる作業は?」と頼まれた場面で使う。
 argument-hint: [期間(例:7d)] [追加の分析観点] [--model <name>]
-model: haiku
+model: sonnet
 allowed-tools: Bash, Read, Glob, Grep, Agent, Skill
 user-invocable: true
 ---
@@ -15,7 +15,7 @@ $ARGUMENTS
 引数のパース:
 - 第1引数: 期間指定（`7d`, `3d`, `2w` 等）。省略時は `7d`
 - 第2引数以降: 追加の分析観点（自由記述）。省略可能
-- `--model <name>`: 分析を実行するモデル。未指定なら `haiku`
+- `--model <name>`: 分析を実行するモデル。未指定なら `sonnet`
 
 例:
 - 引数なし → 直近7日間、デフォルト観点のみ
@@ -28,8 +28,9 @@ $ARGUMENTS
 
 | `--model` 値 | 委譲先 | 備考 |
 |---|---|---|
-| `haiku` （デフォルト） | このskill自身で実行 | フロントマターの `model: haiku` で動作 |
-| `sonnet` / `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: <指定>`） | Claudeの別モデルに委譲 |
+| `sonnet` （デフォルト） | このskill自身で実行 | フロントマターの `model: sonnet` で動作 |
+| `haiku` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: haiku`） | 軽い分析向けの opt-down |
+| `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: opus`） | 深い分析向けのエスカレーション |
 | `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | 素の `gpt` ならモデル指定なし、`gpt-*` なら argsに `--model <name>` を含める |
 | `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
 | `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |

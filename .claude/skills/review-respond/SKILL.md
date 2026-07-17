@@ -107,15 +107,9 @@ gh pr diff <number> --repo <owner/repo> --name-only
 - 既存の設計判断を覆す変更
 - スコープ外の指摘への対応要否
 
-#### 判断傾向プロファイルによる補正
+#### 判断基準 knowledge による補正
 
-以下のパスに判断傾向プロファイルが存在する場合は参照する:
-
-```
-~/.claude/memory/judgment_tendency.md
-```
-
-プロファイルの「review-respond への推奨補正」セクションに基づき、分類テーブルを調整する。例えば、ユーザーが命名に対して強いこだわりを持つ傾向がある場合、命名の変更をAからBに引き上げる。
+分類を確定させる前に、判断の根拠となる既存 knowledge を `mcp__knowledge__search_knowledge` で検索する（例: 「コードレビュー 判断基準」「PR 粒度」）。ヒットしたら `mcp__knowledge__read_knowledge` で本文を読み、その原則に基づいて分類テーブルを調整する。
 
 #### 対応方針の決定
 
