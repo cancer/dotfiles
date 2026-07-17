@@ -146,11 +146,15 @@ gh pr list --head "$TARGET" --state open --json number,title,author,url
 # ステップ8: PR作成
 
 1. `git log --oneline <BASE>..HEAD` と `git diff <BASE>...HEAD` で PR に含まれる変更を把握する
-2. PR本文を一時ファイルに書き出す
+2. **コミット数チェック**: `COMMIT_COUNT=$(git rev-list --count <BASE>..HEAD)` でコミット数を数える。**20以上（`>= 20`）の場合**、PR作成を中止し、PRを分割するよう指示して終了する:
+   - 理由: Cloudflare Workers CI は push に 20+ commits（または 3000+ file changes）が含まれると [build watch paths](https://developers.cloudflare.com/workers/ci-cd/builds/build-watch-paths/) のパスマッチングをバイパスし、常にプロジェクト全体をビルドする。watch-paths による monorepo ビルド最適化を効かせるには、1つのPR（push）を 19 コミット以下に収める必要がある
+   - **確認は取らない**。分割が必要である旨とコミット数 N を報告して終了する
+   - **例外**: ユーザーが事前に「コミット数が20以上でもよい」と明示している場合に限り、このチェックを無視してそのまま続行してよい
+3. PR本文を一時ファイルに書き出す
    - **必ず** `BODY_FILE=$(mktemp /tmp/pr_body.XXXXXX)` で一意な一時ファイルを作る（固定パス禁止）
    - 書き出し後、ファイルが存在し空でないことを確認する。空または存在しない場合は PR 作成を中止して報告する
-3. `gh pr create --title "<title>" --base "<BASE>" --head "<TARGET>" --body-file "$BODY_FILE"` で PR を作成する
-4. 成否にかかわらず一時ファイルを削除する
+4. `gh pr create --title "<title>" --base "<BASE>" --head "<TARGET>" --body-file "$BODY_FILE"` で PR を作成する
+5. 成否にかかわらず一時ファイルを削除する
 
 ## PR本文のテンプレート
 
@@ -191,3 +195,4 @@ gh pr list --head "$TARGET" --state open --json number,title,author,url
 - 検証（lint/typecheck等）が失敗した状態でPRを作らない
 - 一時ファイルは必ず `mktemp` で一意に作る。固定パスは禁止
 - `git push --force` 等の破壊的操作はユーザーの明示的な許可がない限り行わない
+- コミット数が 20 以上のPRは build watch paths がバイパスされるため、分割をユーザーに促す（ステップ8-2）

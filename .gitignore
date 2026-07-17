@@ -9,3 +9,6 @@ agent/
 .claude/*
 !.claude/agents/
 !.claude/agents/**
+!.claude/skills/
+!.claude/skills/**
+

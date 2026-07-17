@@ -84,7 +84,7 @@ jq -r 'select(.type == "user") | .message.content | if type == "string" then . e
 各セッションについて以下を把握する:
 - セッションの目的（何をしようとしていたか）
 - ユーザーメッセージの流れ（やりとりの回数、修正指示の回数）
-- team-managerやサブエージェントが使われていた場合はその構成
+- dev-workflowやサブエージェントが使われていた場合はその構成
 
 ### Step 4: 分析観点ごとの横断分析
 
