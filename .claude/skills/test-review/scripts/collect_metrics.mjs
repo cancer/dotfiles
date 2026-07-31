@@ -20,7 +20,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { dump, loadJson, parseArgs, readText, sortStrings, splitLines } from "./common.mjs";
+import { dump, loadJson, parseArgs, readText, runMain, sortStrings, splitLines } from "./common.mjs";
 
 const RELATIVE_SLOW_FLOOR_MS = 100.0;
 
@@ -615,8 +615,8 @@ function main() {
 // Python 版の `if __name__ == "__main__":` 相当。二点、素朴な書き方では壊れる。
 // - argv[1] を realpath へ通す: 起動パスがシンボリックリンク経由でも、ESM の
 //   import.meta.url は実体パスに解決されるため、揃えないとガードが常に偽になる
-// - process.exit() ではなく exitCode: exit() は stdout のバッファを破棄するので、
-//   --out 省略時のパイプ出力が途中で切り捨てられる
+// - 終了は runMain() 経由: process.exit() は stdout のバッファを破棄するため、
+//   --out 省略時のパイプ出力が途中で切り捨てられる（理由は common.mjs の runMain 参照）
 if (process.argv[1] && pathToFileURL(fs.realpathSync(process.argv[1])).href === import.meta.url) {
-  process.exitCode = main();
+  runMain(main);
 }

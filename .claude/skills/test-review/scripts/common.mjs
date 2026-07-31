@@ -309,29 +309,42 @@ export function declaredLevel(filePath, lang) {
 // 挙動を合わせた形で用意する（下記の各コメントが「なぜ素朴な実装では駄目か」を示す）
 // ---------------------------------------------------------------------------
 
-/**
- * `raise SystemExit("...")` 相当。stderr へ 1 行出して終了コード 1。
- *
- * `process.exit()` は書き込み途中の stdout を捨てる（`console.log` はパイプ・ファイル宛だと
- * 非同期に流れるため、キューに残った分が失われる）。ここで `process.exit()` を使ってよいのは、
- * **3 本のスクリプトいずれも `fail()` / 引数解析エラーが `dump()` より必ず先に起きる**
- * という不変条件が成り立っているからである。`dump()` が唯一の stdout 書き込み口
- * （`--out` 未指定時の `console.log`）なので、この時点で失われるバッファは存在しない。
- *
- * 現状の呼び出し順:
- *   - `changed_targets.mjs:91,124` → `dump()` は `:417`
- *   - `scan_tests.mjs:615` → `dump()` は `:652`
- *   - `collect_metrics.mjs` は `parseArgs`（`:531`）のみ → `dump()` は `:601`
- *
- * 壊れるのは、部分的な出力を stdout へ書いたあとにバリデーションを足したときである。
- * その場合 `process.exit()` が出力を黙って切り詰めるので、`fail()` 側を
- * `process.exitCode` + 戻り値による中断へ変えること（`fail()` が「戻らない」前提の
- * 呼び出し側の制御フローも併せて直す必要がある）。同じ理由で `parseArgs` の
- * `process.exit(2)` も、引数解析が全出力より前に走る限りにおいて安全である。
- */
+/** エラー終了の要求。`runMain()` だけが捕捉し、stderr 出力と終了コードへ翻訳する。 */
+class ExitError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+/** `raise SystemExit("...")` 相当。呼び出し元へは戻らず、`runMain()` が stderr 1 行 + 終了コード 1 にする。 */
 export function fail(message) {
-  process.stderr.write(`${message}\n`);
-  process.exit(1);
+  throw new ExitError(message, 1);
+}
+
+/**
+ * `raise SystemExit(main())` 相当。`main()` の戻り値を終了コードとし、`fail()` /
+ * 引数解析エラーによる中断を stderr 1 行 + 終了コードへ翻訳する。
+ *
+ * `process.exit()` を使ってはいけない。stdout がパイプ・ファイル宛のとき `console.log` の
+ * 書き込みは非同期に流れるため、`exit()` はキューに残った分を捨てる。例外で `main()` を
+ * 抜けてから `process.exitCode` を立てれば、出力済みのバイト列は Node の通常終了時に
+ * 必ず flush される。エラー検出が stdout への出力より前か後かに関係なく成り立つので、
+ * 呼び出し順序についての不変条件を要求しない。
+ *
+ * `ExitError` 以外は握らずに投げ直す。Python 版が想定外の例外でトレースバックを出して
+ * 終了コード 1 になるのに合わせる。
+ */
+export function runMain(main) {
+  try {
+    process.exitCode = main();
+  } catch (err) {
+    if (!(err instanceof ExitError)) {
+      throw err;
+    }
+    process.stderr.write(`${err.message}\n`);
+    process.exitCode = err.code;
+  }
 }
 
 /** `re.escape` 相当。動的に組む正規表現へ埋める識別子・パスを無害化する。 */
@@ -420,8 +433,8 @@ const optionNameOf = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`
  *
  * 戻り値は spec の各キーと `positionals`。未指定の単一値オプションは Python の
  * `None` に合わせて `null`、`append` は空配列になる。
- * 解析失敗は argparse と同じ終了コード 2（usage 文面は再現しない）。
- * ここで `process.exit()` を使ってよい条件は `fail()` の注記を参照。
+ * 解析失敗は argparse と同じ終了コード 2（usage 文面は再現しない）。中断の方法は
+ * `fail()` と同じく例外で、`runMain()` が終了コードへ翻訳する。
  */
 export function parseArgs(argv, spec) {
   const entries = Object.entries(spec).map(([key, opt]) => [key, optionNameOf(key), opt]);
@@ -434,8 +447,7 @@ export function parseArgs(argv, spec) {
   try {
     parsed = nodeParseArgs({ args: argv, options, allowPositionals: true, strict: true });
   } catch (err) {
-    process.stderr.write(`${err.message}\n`);
-    process.exit(2);
+    throw new ExitError(err.message, 2);
   }
 
   const result = { positionals: parsed.positionals };
@@ -451,8 +463,7 @@ export function parseArgs(argv, spec) {
     }
     const value = Number(raw);
     if (!Number.isFinite(value)) {
-      process.stderr.write(`argument --${name}: invalid float value: '${raw}'\n`);
-      process.exit(2);
+      throw new ExitError(`argument --${name}: invalid float value: '${raw}'`, 2);
     }
     result[key] = value;
   }
