@@ -1,7 +1,7 @@
 ---
 name: test-review
 description: テストコードと変更コードを分析し、テスト戦略の妥当性・テスト品質上のリスク・追加確認が必要な箇所を根拠付きのレビュー候補として提示する。機械検出（無効化・focused マーカー・空検証・モック偏重・外部依存・単体テストの分類乖離・重複・未検証の分岐/例外/境界・遅いテスト・不安定なテスト・生き残った変異）はスクリプトで顕出し、テスト戦略とテスト意図の妥当性を LLM がレビューする。「テストをレビューして」「このテストで十分?」「テスト戦略を見て」「テストの品質が不安」「flaky を調べて」「モックばかりのテストを見て」「カバレッジ/ミューテーション結果を読んで」と頼まれた場面では必ず使う。PR 前にテストの妥当性を確かめたい場面、テストが薄い/重い/壊れやすいという懸念が語られた場面でも使う。実装コード起点でテストギャップを探すのは test-analyze、実装コードの設計レビューは code-review、これから書くテストの進め方は test-driven-development の領分
-argument-hint: "[<path>...] [--base <ref>] [--spec <path>]... [--known-issues <path>] [--answers <path>] [--implementer <agent-name>] [--test-json <file>]... [--nextest-json <file>]... [--coverage-lcov <file>] [--coverage-json <file>] [--mutation-json <file>]"
+argument-hint: "[<path>...] [--base <ref>] [--exclude <pattern>]... [--spec <path>]... [--known-issues <path>] [--answers <path>] [--implementer <agent-name>] [--test-json <file>]... [--nextest-json <file>]... [--coverage-lcov <file>] [--coverage-json <file>] [--mutation-json <file>]"
 model: opus
 allowed-tools: Read, Glob, Grep, Bash, Skill, SendMessage, mcp__knowledge__search_knowledge, mcp__knowledge__read_knowledge
 user-invocable: true
@@ -26,6 +26,7 @@ $ARGUMENTS
 |---|---|
 | `<path>...` | レビュー対象。**省略時は git 差分**（`--base` の基点から HEAD まで）を対象にする |
 | `--base <ref>` | 差分の基点。省略時は `origin/HEAD` → `origin/main` → `origin/master` → `main` → `master` の順に merge-base を試す |
+| `--exclude <pattern>...` | スキャン対象から除外するパスのグロブ（手順 1-2 の `scan_tests.mjs` のみ）。`--targets` 経由で解決されたテストにも効く。パス全体との完全一致で判定し、`*` は `/` にもマッチする（`src/generated/*` は `src/generated/a/b.test.ts` も除く）。大文字小文字は区別し、先頭の `./` は除いた形で照合する |
 | `--spec <path>...` | 仕様・設計資料（ファイルまたはディレクトリ）。テストがどの命題を固定しているかの対応付けに使う |
 | `--known-issues <path>` | 既知の不具合情報。過去に壊れた箇所は、テストが無いことの重要度を上げる根拠になる |
 | `--answers <path>` | 前回の「未解決の質問」への回答（`Q1: ...` の形式）。**再評価モードに入る** |
@@ -48,7 +49,7 @@ $ARGUMENTS
 2. `--previous` の前回結果を読み、回答が影響する指摘を特定する。影響しない指摘は**判断も文面もそのまま引き継ぐ**
 3. 影響する指摘だけを、回答を根拠に加えて再判断する。回答で確信度が上がる／区分が「人による最終判断」から外れる／指摘が消える、のいずれかが起きる
 4. 回答から新しく導かれた指摘は追加してよい（例: 回答が述べた無効化の原因が、コードの実行経路と一致しない）。**新規と明記し、回答を根拠として引用する。** 回答と無関係な新規指摘は追加しない（それは再評価ではなく再レビューであり、引き継ぎの意味が消える）
-4. 出力の冒頭に**変更点**を置く（どの質問に答えが付き、どの指摘がどう変わったか）。答えが付かなかった質問は質問節に残す
+5. 出力の冒頭に**変更点**を置く（どの質問に答えが付き、どの指摘がどう変わったか）。答えが付かなかった質問は質問節に残す
 
 回答によって指摘が消えることもある（例: `#[ignore]` の理由と復帰条件が判明した → 復帰条件が不明という部分は解消され、無効化そのものの指摘は残る）。消えた指摘も変更点に記載する。前回あった指摘が黙って消えると、読み手は見落としと区別できない。
 
@@ -72,19 +73,19 @@ reject の際、記録（コミット本文・PR）を照会して当時の判�
 
 ### 1. 機械検出（スクリプト実行）
 
-`SKILL_DIR` はこのスキルのディレクトリ（既定 `~/.claude/skills/test-review`）、`OUT` は対象リポジトリ直下の `.claude/test-review/`。3本ともレビュー対象のコード・テストを変更せず、テストも実行しない（書き込みは `$OUT` 配下の JSON のみ）。Python 3.10 以降の標準ライブラリのみで動く。
+`SKILL_DIR` はこのスキルのディレクトリ（既定 `~/.claude/skills/test-review`）、`OUT` は対象リポジトリ直下の `.claude/test-review/`。3本ともレビュー対象のコード・テストを変更せず、テストも実行しない（書き込みは `$OUT` 配下の JSON のみ）。Node.js 20 以降の標準モジュールのみで動く（`node:util` の `parseArgs` が安定版になったのが 20.0.0）。
 
 ```bash
 # 1-1. 変更コード側の検証対象候補（分岐・例外経路・境界値候補・対応テストの有無）
-python3 "$SKILL_DIR/scripts/changed_targets.py" [<path>...] [--base <ref>] --out "$OUT/targets.json"
+node "$SKILL_DIR/scripts/changed_targets.mjs" [<path>...] [--base <ref>] --out "$OUT/targets.json"
 
 # 1-2. テストコードの静的スキャン
 #      （無効化・focused マーカー・空/弱い検証・モック偏重・外部依存・分類乖離・重複）
 #      外部依存はテスト本文だけでなく beforeEach 等の準備フックとファイル先頭の初期化も見る
-python3 "$SKILL_DIR/scripts/scan_tests.py" --targets "$OUT/targets.json" [<追加パス>...] --out "$OUT/scan.json"
+node "$SKILL_DIR/scripts/scan_tests.mjs" --targets "$OUT/targets.json" [<追加パス>...] [--exclude <PATTERN>]... --out "$OUT/scan.json"
 
 # 1-3. 既存レポートの正規化・集計（実行時間・ばらつき・カバレッジ・ミューテーション）
-python3 "$SKILL_DIR/scripts/collect_metrics.py" [レポート引数...] --targets "$OUT/targets.json" --out "$OUT/metrics.json"
+node "$SKILL_DIR/scripts/collect_metrics.mjs" [レポート引数...] --targets "$OUT/targets.json" --out "$OUT/metrics.json"
 ```
 
 1-2 は `--targets` から対象テストを解決する（`changed_test_files` と `targets[].candidate_tests[].file`）。差分に含まれないがレビュー対象の実装を検証しているテストを取り逃さないための経路なので、`--targets` は省略しない。ユーザーがテストディレクトリを明示した場合だけ、追加パスとして併せて渡す。
