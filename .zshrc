@@ -16,16 +16,25 @@ export LANG=ja_JP.UTF-8
 #
 # -------------------------------------------------------------------------
 
-NPM_PATH=/Users/cancer/.anyenv/envs/nodenv/shims/npm/bin
-RUBY_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/ruby/bin
-GEM_PATH=/Users/cancer/.anyenv/envs/rbenv/shims/gem
-PYTHON_PATH=/home/cancer/.local/share/uv
-PATH="$NPM_PATH:$GEM_PATH:/sbin:/usr/local/bin:/bin:/usr/local/sbin:$PATH:/usr/sbin:/Users/cancer/bin:/Users/cancer/dotfiles/node_modules/.bin"
-export PATH
-export BIN_PATH="/usr/local/bin"
+typeset -U path   # 重複を自動排除
+
+path=(
+  $HOME/.local/share/uv
+  /opt/homebrew/bin
+  /sbin
+  /usr/local/bin
+  /bin
+  /usr/local/sbin
+  $path             # 既存の継承分
+  /usr/sbin
+  $HOME/bin
+  $HOME/dotfiles/node_modules/.bin
+)
 
 # direnv
 eval "$(direnv hook zsh)"
+
+export EDITOR="nvim"
 
 # -------------------------------------------------------------------------
 # プロンプト
@@ -227,9 +236,11 @@ export NVM_DIR="$HOME/.nvm"
 . "$HOME/.local/bin/env"
 
 export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init - bash)"
-eval "$(pyenv virtualenv-init -)"
+[ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv >/dev/null; then
+  eval "$(pyenv init - zsh)"
+  eval "$(pyenv virtualenv-init -)"
+fi
 
 # for Claude Code
 export LANG="ja_JP.UTF-8"
@@ -238,8 +249,10 @@ export LANG="ja_JP.UTF-8"
 
 source ~/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script
 
-alias xclaude="claude --dangerously-skip-permissions"
+alias xclaude="claude --permission-mode auto"
 alias xcopilot="copilot --allow-all"
+alias xcodex="codex --dangerously-bypass-approvals-and-sandbox"
+alias xagy="agy --dangerously-skip-permissions"
 
 # zoxide
 eval "$(zoxide init zsh)"
@@ -261,3 +274,10 @@ tmux() {
     command tmux "$@"
   fi
 }
+
+
+# Added by Antigravity CLI installer
+export PATH="/Users/cancer/.local/bin:$PATH"
+
+# opencode
+export PATH=/Users/cancer/.opencode/bin:$PATH

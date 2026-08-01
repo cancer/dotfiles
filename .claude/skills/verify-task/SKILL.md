@@ -2,7 +2,7 @@
 name: verify-task
 description: ワーカーの成果物が指示どおり完了しているかを検証する。完了チェックに特化し、品質レビューはしない。サブエージェントの作業を受け取った場面で使う。原則ベースの品質レビューは code-review の領分
 argument-hint: <指示内容> <worktreeパスまたはブランチ名> [issue参照] [--model <name>]
-model: haiku
+model: sonnet
 allowed-tools: Bash, Read, Glob, Grep, Agent, Skill
 user-invocable: false
 ---
@@ -16,7 +16,7 @@ $ARGUMENTS
 - **指示内容**: ワーカーに何を依頼したか
 - **worktreeパスまたはブランチ名**: ワーカーの作業場所
 - **issue参照**（任意）: GitHub issueのURL、`owner/repo#番号`、または `#番号`
-- **`--model <name>`**（任意）: 検証を実行するモデル。未指定なら `haiku`
+- **`--model <name>`**（任意）: 検証を実行するモデル。未指定なら `sonnet`
 
 ## モデルルーティング
 
@@ -24,8 +24,9 @@ $ARGUMENTS
 
 | `--model` 値 | 委譲先 | 備考 |
 |---|---|---|
-| `haiku` （デフォルト） | このskill自身で実行 | フロントマターの `model: haiku` で動作 |
-| `sonnet` / `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: <指定>`） | Claudeの別モデルに委譲 |
+| `sonnet` （デフォルト） | このskill自身で実行 | フロントマターの `model: sonnet` で動作 |
+| `haiku` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: haiku`） | 単純なチェックリスト照合で足りる軽案件向けの opt-down |
+| `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: opus`） | 意図判定が難しい案件向けのエスカレーション |
 | `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | argsに「下記のプロンプト＋（明示モデルなら）`--model <name>`」を含める。素の `gpt` ならモデル指定なし |
 | `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
 | `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
