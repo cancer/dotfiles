@@ -2,7 +2,7 @@
 name: dev-workflow
 description: コードを書く依頼（新規実装・修正・バグ修正・リファクタリング・PoC/MVP/プロトタイプ・スクリプト作成、issue対応を含む）を最初に受ける入口。「実装して」「作って」「対応して」「このissueをやって」等コード変更を伴う依頼で使う。規模を問わず、分解→ワーカーへ委任→検証のワークフローで遂行する。自分では実装しない。計画だけなら plan、「使い捨て」「テスト不要」と明示された単発コードは対象外（inlineで直接対応）。write-code はワーカーが実装時に従う方針であり、依頼の入口は本スキル
 argument-hint: <要求内容（issueのURL/番号、仕様の説明、自由記述など）>
-allowed-tools: Agent, Skill, AskUserQuestion, SendMessage, TaskCreate, TaskUpdate, TaskGet, TaskList
+allowed-tools: Agent, Skill, AskUserQuestion, SendMessage, TaskCreate, TaskUpdate, TaskGet, TaskList, TaskOutput, Monitor, TaskStop
 user-invocable: true
 ---
 
@@ -71,6 +71,8 @@ $ARGUMENTS
 
 - 加えてタスク固有情報を渡す: ゴール、期待成果物、使うスキル、plan で判明した関連ファイル・設計意図・制約、**CLAUDE.md のプロジェクト固有ルールは内容そのものを引用**（worktree のワーカーは CLAUDE.md を読めない場合があるため）
 - **issue 起点の場合**: 実装ワーカーに「commit と PR 本文に `Closes #<番号>` を含め、完了後 `comment-issue` で issue に PR 報告コメントを投稿せよ」と指示する
+- **spawn 結果の agent id / task_id とエージェント名の対応を保持する**。後述の「無応答ワーカーの自動確認」で watchdog の検知結果をワーカー名に対応づけるために使う
+- 全ワーカーの起動後、後述の watchdog を張る
 
 ### Phase 4: 個別完了検証
 
@@ -96,8 +98,68 @@ $ARGUMENTS
 ### Phase 6: PR作成と完了
 
 1. 統合後レビュー PASS 後、PR を（ワーカーに委任して）作成する（`create-pr` 相当）。1〜N PR、各PR ≤ コミット上限。issue 起点なら `Closes #<番号>`
-2. 各ワーカーに `shutdown_request` を送る
+2. 各ワーカーに `shutdown_request` を送り、watchdog の Monitor を `TaskStop` で止める
 3. ユーザーに完了報告する（下記「成果物」）
+
+## 無応答ワーカーの自動確認
+
+ワーカーからの完了報告・エスカレーションは通知として届くため、受信のためのポーリングは不要である。しかし**通知が来ないことは「作業中」と「停止・沈黙」を区別しない**。この区別を watchdog で埋める。
+
+### watchdog（沈黙の検知）
+
+サブエージェントは 1 ターンごとに自分のトランスクリプト `~/.claude/projects/**/subagents/agent-<agentId>.jsonl` へ追記する。**その mtime の停滞が「そのエージェントが何も出していない時間」**を表す。これをシェルから見張れば、指揮者のコンテキストを消費せずに沈黙を検知できる。
+
+Phase 3 で全ワーカーを起動した直後に、`Monitor` を `persistent: true` で 1 つだけ張る。閾値を越えたワーカーごとに 1 行だけ発火する（再発火させない。ノイズの多い Monitor は自動停止される）。
+
+```bash
+PROJ="$HOME/.claude/projects"
+THRESHOLD=600          # 秒。長時間のテスト/ビルド中は追記が止まるため短くしない
+reported=" "
+while true; do
+  sleep 60             # 起動直後はトランスクリプト未作成なので必ず先に待つ
+  now=$(date +%s)
+  for id in <spawn 結果の agent id を空白区切りでここに直接展開する>; do
+    case "$reported" in *" $id "*) continue ;; esac
+    f=$(find "$PROJ" -name "agent-$id.jsonl" -print -quit 2>/dev/null)
+    if [ -z "$f" ]; then echo "NOTRANSCRIPT $id"; reported="$reported$id "; continue; fi
+    age=$(( now - $(stat -f %m "$f") ))
+    if [ "$age" -ge "$THRESHOLD" ]; then echo "STALE $id ${age}s"; reported="$reported$id "; fi
+  done
+done
+```
+
+- **agent id はスクリプト本文に直接列挙する**。シェルは zsh であり未クォート変数は単語分割されないため、`IDS` 変数に入れて `for id in $IDS` と書くとループが 1 回しか回らない
+- **`/private/tmp/.../tasks/a<agentId>.output` に依存してはならない**。この symlink は全エージェントには作られず（実測: サブエージェント記録を持つセッションの多くで 0 件）、tmp は揮発する。エージェント id からトランスクリプトを引くこと
+- `STALE` を受け取ったら、agent id を spawn 時に保持したワーカー名に対応づけ、**そのワーカーに対してスイープ手順を実行する**
+- `STALE` は「死亡」ではなく「確認せよ」の信号である。長時間のテスト・ビルド実行中も追記は止まるため、生死はスイープで確定させる
+- `NOTRANSCRIPT` はそのワーカーを watchdog で見張れないことを意味する。**沈黙を成功と解釈せず**、そのワーカーはスイープのみで確認する旨をユーザーに報告する
+- watchdog を張れない場合（`Monitor` が使えない等）は、スイープのみに縮退し、縮退したことをユーザーに報告する
+- Phase 6 完了時に `TaskStop` で Monitor を止める
+- **この Monitor に渡すのは上記の生存確認スクリプトのみ**。実装・調査・git 操作・issue 操作にシェルを使ってはならない（「自分では実装しない」規律は維持する）
+
+### スイープ（状況確認）
+
+watchdog の `STALE` を受けたときに加えて、待ちに入る時点でも必ず実行する。watchdog は一度報告したワーカーを再報告しないため、待ちの入口が取りこぼしの受け皿になる。
+
+- 全タスクを委任し終え、報告を待つ状態に入るとき
+- あるワーカーの報告を処理し終えた後、未報告のワーカーが残っているとき
+- Phase 4 で修正を差し戻し、修正報告を待つとき
+
+### スイープ手順
+
+1. `TaskList` / `TaskGet` で各ワーカーの担当タスクの status と owner を確認する。これはワーカーの自己申告であり、停止したワーカーは更新しないため、これ単独では生存の証明にならない
+2. spawn 時に得た agent id に `TaskOutput`（`block: false`）を実行し、プロセスが実行中か終了済みかを確認する。**`.output` ファイルは読まない**（サブエージェントの全トランスクリプトであり、コンテキストを溢れさせる）。背景タスクとして登録されていないワーカーでは取得できないので、その場合は次の照会で判断する
+3. 実行中かつ未報告なら、`SendMessage` で進捗を照会する（現在の作業・ブロッカー・残作業）
+4. 照会に応答がない、またはプロセスが終了しているのに完了報告が無い場合は、**元の指示を再送して待つ**。再送は 1 ワーカーにつき 1 回まで
+5. 再送後も応答が無いワーカーは無応答として記録し、他タスクの進行は止めない
+
+### ユーザーへの状態報告
+
+スイープごとに、確認できた事実だけを報告する。
+
+- ワーカー名 / 担当タスク / タスクの status / プロセス状態（実行中・終了済み）
+- 取った処置（進捗照会・指示の再送）とその結果
+- 未確定のものは未確定と書く。ワーカーの進捗や成果を推測で埋めてはならない
 
 ## 成果物（完了報告）
 
@@ -118,6 +180,8 @@ $ARGUMENTS
 - [ ] Phase1 で plan による分解計画を得た（自分で issue を読んでいない）
 - [ ] コミット上限を確認し、PR粒度をそれに合わせた（squash で誤魔化していない）
 - [ ] すべての実装・調査・統合・git 操作をワーカーに委任した（自分で実装していない）
+- [ ] ワーカー起動後に watchdog を張り、完了時に停止した
+- [ ] `STALE` 検知時と待ちに入る各時点でスイープを行い、無応答ワーカーの状態をユーザーに報告した
 - [ ] 各ワーカーの成果に `verify-task` を実行し PASS を確認した
 - [ ] 統合後、実装者以外による独立 `code-review` を実行し指摘対応した
 - [ ] 完了報告に verify 結果・レビュー結果・PR・ブランチを含めた
