@@ -5,58 +5,29 @@
       "id": 0,
       "name": "level-mismatch-self-declared",
       "prompt": "<repo> の container 配下のテストをレビューして",
-      "expected_output": "機械検出の level_mismatch 11 件が (a) レビュー候補に上がる、または (b) 実装 container/src/control-server.ts のシグネチャ・処理を開いた確認を根拠として棄却される。ファイル名の .integrate やテスト内コメントの主張だけを根拠に棄却しない。件数表のセルで棄却しない。未計測を根拠に「正当」と結論しない。",
-      "files": ["fixtures/f1-repo"],
-      "assertions": [
-        {
-          "name": "level_mismatch を放置しない（候補に上げるか、根拠付きで棄却する）",
-          "text": "出力に level_mismatch 11 件への言及があり、レビュー候補として上がっているか、棄却として明示的に扱われている"
-        },
-        {
-          "name": "棄却するなら実装ファイルを開いた確認が根拠に出ている",
-          "text": "level_mismatch を棄却している場合、根拠に container/src/control-server.ts の file:line 参照（シグネチャ・依存の注入形・処理内容のいずれか）が含まれる"
-        },
-        {
-          "name": "自己申告のみを棄却根拠にしていない",
-          "text": "棄却根拠がファイル名の .integrate、テスト内コメント、テスト名のみで構成されていない"
-        },
-        {
-          "name": "件数表に判定を書いていない",
-          "text": "「参考: 機械検出の全件」の表のセルに「正当」「問題なし」「意図した設計」等の判定語が無い"
-        },
-        {
-          "name": "未計測を肯定的結論の根拠にしていない",
-          "text": "実行結果が未計測である旨を書いた上で、そのテスト群が回帰防止として機能している・正当であるという結論を出していない"
-        },
-        {
-          "name": "未解決 issue の照会を試みている",
-          "text": "記録探索に課題管理の未解決項目の照会（gh issue list 等）を行った、または照会できなかった事実の記載がある"
-        }
+      "expected_output": "実装のシグネチャと処理を開いた確認を経ずに level_mismatch が棄却されない。棄却するなら何を開いて何を確認したかが出力から読める。",
+      "files": ["evals/fixtures/f1-repo"],
+      "expectations": [
+        "出力に level_mismatch 11 件への言及があり、レビュー候補として上がっているか、棄却として明示的に扱われている",
+        "level_mismatch を棄却している場合、根拠に container/src/control-server.ts の file:line 参照（シグネチャ・依存の注入形・処理内容のいずれか）が含まれる",
+        "棄却根拠がファイル名の .integrate、テスト内コメント、テスト名のみで構成されていない",
+        "「参考: 機械検出の全件」の表のセルに「正当」「問題なし」「意図した設計」等の判定語が無い",
+        "実行結果が未計測である旨を書いた上で、そのテスト群が回帰防止として機能している・正当であるという結論を出していない",
+        "記録探索に課題管理の未解決項目の照会（gh issue list 等）を行った、または照会できなかった事実の記載がある"
       ]
     },
     {
       "id": 1,
       "name": "false-positive-regression",
       "prompt": "<repo> の src 配下のテストをレビューして",
-      "expected_output": "仕様上の拒否結果が null であるための weak_assertion_only 4 件と、文字列リテラル正規化による duplicate_test_body 1 件が、実物を開いた確認とともに棄却される。過剰な指摘に転じない。",
-      "files": ["fixtures/regress-repo"],
-      "assertions": [
-        {
-          "name": "weak_assertion_only を実装確認のうえ棄却している",
-          "text": "weak_assertion_only 4 件が棄却され、根拠に src/quota.ts の拒否結果が null である旨の file:line 参照がある"
-        },
-        {
-          "name": "duplicate_test_body を誤検出として棄却している",
-          "text": "duplicate_test_body 1 件が、label の 2 テストが異なる命題を検証していることの確認とともに棄却されている"
-        },
-        {
-          "name": "棄却に 3 項目が揃っている",
-          "text": "棄却の記述に「開いて確認したもの」「確認した内容」「判定」に相当する 3 項目が揃っている"
-        },
-        {
-          "name": "誤検出を断定的な指摘に転じさせていない",
-          "text": "weak_assertion_only / duplicate_test_body がレビュー候補として断定形で指摘されていない"
-        }
+      "expected_output": "検出器の限界による誤検出が、実物を開いた確認とともに棄却される。過剰な指摘に転じない。",
+      "files": ["evals/fixtures/regress-repo"],
+      "expectations": [
+        "weak_assertion_only 4 件が棄却され、根拠に src/quota.ts の拒否結果が null である旨の file:line 参照がある",
+        "duplicate_test_body 1 件が、label の 2 テストが異なる命題を検証していることの確認とともに棄却されている",
+        "棄却の記述に「開いて確認したもの」「確認した内容」「判定」に相当する 3 項目が揃っている",
+        "weak_assertion_only / duplicate_test_body がレビュー候補として断定形で指摘されていない",
+        "棄却根拠に src/quota.ts のコメント（仕様の記述）を使っていない"
       ]
     }
   ]
