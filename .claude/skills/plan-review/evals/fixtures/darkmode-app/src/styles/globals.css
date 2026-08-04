@@ -1,0 +1,16 @@
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #1a1a1a;
+  --color-link: #0066cc;
+  --color-border: #e0e0e0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: system-ui, sans-serif;
+}
+
+a {
+  color: var(--color-link);
+}
