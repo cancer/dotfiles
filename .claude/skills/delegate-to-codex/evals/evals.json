@@ -1,0 +1,62 @@
+{
+  "skill_name": "delegate-to-codex",
+  "evals": [
+    {
+      "id": 0,
+      "name": "basic-delegation-mechanics",
+      "prompt": "この関数のテストを書くのを Codex に任せて。対象は src/parse-duration.ts。",
+      "expected_output": "herdr ペインで Codex が起動し、依頼文はファイル経由で渡され、報告を回収して返す。検収は行わず、未検証であることを明示して返す。",
+      "files": ["evals/fixtures/parse-duration"],
+      "expectations": [
+        "依頼文を Write でファイルへ書き、agent prompt にはそのファイルを cat して渡している（ヒアドキュメントや直接埋め込みを使っていない）",
+        "herdr agent start の引数に --no-alt-screen が含まれている",
+        "発注前の画面確認に --source visible または detection を使っている（recent-unwrapped を起動直後の確認に使っていない）",
+        "報告の回収に --source recent-unwrapped を使っている",
+        "agent get のポーリングではなく agent prompt --wait で完了を待っている",
+        "発注前に、選んだモデルと推論量とその理由をユーザーへ伝えている",
+        "最終出力に、報告を差分で照合していない旨（未確認事項）が含まれている",
+        "git diff によるコードレビューや PR 作成を自分で行っていない"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "no-herdr-pane-refusal",
+      "prompt": "この移行スクリプトの実装を Codex に投げて。migrate.ts。",
+      "expected_output": "HERDR_ENV が無いので委任経路が無いと判断し、委任せずに止まる。別経路へ退避せず、自分で実装もしない。",
+      "files": ["evals/fixtures/migrate-script"],
+      "setup": "HERDR_ENV を unset した環境で実行する",
+      "expectations": [
+        "HERDR_ENV を確認している",
+        "herdr のペイン内で実行するようユーザーへ伝えて止まっている",
+        "codex exec など herdr を経由しない代替経路へ退避していない",
+        "対象ファイルを自分で編集していない"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "parallel-write-guard",
+      "prompt": "この2件、両方 Codex に同時にやらせて。1件目は src/api/user.ts のエラーハンドリング修正、2件目は src/api/order.ts のバリデーション追加。",
+      "expected_output": "書き込みを伴う委任を同一作業ツリーで並列に走らせない。worktree を分けるか、直列化するか、ユーザーに判断を求める。",
+      "files": ["evals/fixtures/two-write-tasks"],
+      "expectations": [
+        "同一作業ツリーで書き込み委任を並列に走らせていない",
+        "worktree の分離・直列実行・ユーザーへの確認のいずれかを選び、その理由を述べている",
+        "ペインを分けたことを並列化の根拠として扱っていない"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "tier-selection-without-args",
+      "prompt": "リネームだけなんだけど、UserProfile っていう型名を全部 AccountProfile に変えるのを Codex にやらせて。対象は src 配下。",
+      "expected_output": "--model / --effort が渡されていないので references/model-routing.md を読んで段を決める。変更対象が明示され実装方法が一意なので既定より下げられる。",
+      "files": ["evals/fixtures/rename-type"],
+      "expectations": [
+        "references/model-routing.md を読んでいる",
+        "gpt-5.6-luna を選んでいる（sol を選んでいない）",
+        "推論量に high より低い段（none または low）を選び、依頼文に裁量が残っていないことを理由に挙げている",
+        "service_tier=priority を明示して起動している",
+        "発注前にモデル・推論量・理由の3点をユーザーへ伝えている"
+      ]
+    }
+  ]
+}
