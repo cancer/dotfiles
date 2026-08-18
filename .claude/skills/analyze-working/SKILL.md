@@ -1,9 +1,9 @@
 ---
 name: analyze-working
 description: 直近のセッションログから非効率なコミュニケーションや定型化できる反復作業を洗い出す。「働き方を分析して」「無駄を洗い出して」「スキル化できる作業は?」と頼まれた場面で使う。
-argument-hint: [期間(例:7d)] [追加の分析観点] [--model <name>]
+argument-hint: [期間(例:7d)] [追加の分析観点]
 model: sonnet
-allowed-tools: Bash, Read, Glob, Grep, Agent, Skill
+allowed-tools: Bash, Read, Glob, Grep
 user-invocable: true
 ---
 
@@ -15,27 +15,13 @@ $ARGUMENTS
 引数のパース:
 - 第1引数: 期間指定（`7d`, `3d`, `2w` 等）。省略時は `7d`
 - 第2引数以降: 追加の分析観点（自由記述）。省略可能
-- `--model <name>`: 分析を実行するモデル。未指定なら `sonnet`
 
 例:
 - 引数なし → 直近7日間、デフォルト観点のみ
 - `3d` → 直近3日間
 - `7d チームエージェントの指示品質` → 7日間 + 追加観点「チームエージェントの指示品質」
 
-## モデルルーティング
-
-`--model` の値に応じて、分析処理を以下の委譲先に振り分ける。
-
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `sonnet` （デフォルト） | このskill自身で実行 | フロントマターの `model: sonnet` で動作 |
-| `haiku` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: haiku`） | 軽い分析向けの opt-down |
-| `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: opus`） | 深い分析向けのエスカレーション |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | 素の `gpt` ならモデル指定なし、`gpt-*` なら argsに `--model <name>` を含める |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは手順だけとする。
 
 ## デフォルトの分析観点（常に実施）
 

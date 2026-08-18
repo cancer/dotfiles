@@ -1,9 +1,9 @@
 ---
 name: verify-task
 description: ワーカーの成果物が指示どおり完了しているかを検証する。完了チェックに特化し、品質レビューはしない。サブエージェントの作業を受け取った場面で使う。原則ベースの品質レビューは code-review の領分
-argument-hint: <指示内容> <worktreeパスまたはブランチ名> [issue参照] [--model <name>]
+argument-hint: <指示内容> <worktreeパスまたはブランチ名> [issue参照]
 model: sonnet
-allowed-tools: Bash, Read, Glob, Grep, Agent, Skill
+allowed-tools: Bash, Read, Glob, Grep
 user-invocable: false
 ---
 
@@ -16,24 +16,10 @@ $ARGUMENTS
 - **指示内容**: ワーカーに何を依頼したか
 - **worktreeパスまたはブランチ名**: ワーカーの作業場所
 - **issue参照**（任意）: GitHub issueのURL、`owner/repo#番号`、または `#番号`
-- **`--model <name>`**（任意）: 検証を実行するモデル。未指定なら `sonnet`
 
-## モデルルーティング
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは検証の手順だけとする。
 
-`--model` の値に応じて、検証実行を以下の委譲先に振り分ける。
-
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `sonnet` （デフォルト） | このskill自身で実行 | フロントマターの `model: sonnet` で動作 |
-| `haiku` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: haiku`） | 単純なチェックリスト照合で足りる軽案件向けの opt-down |
-| `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: opus`） | 意図判定が難しい案件向けのエスカレーション |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | argsに「下記のプロンプト＋（明示モデルなら）`--model <name>`」を含める。素の `gpt` ならモデル指定なし |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
-
-## 検証プロンプト（委譲先 / 自身で実行する場合の共通プロンプト）
+## 検証プロンプト
 
 下記の指示に沿って検証を完了させ、最終レポートを日本語で出力する。
 
@@ -95,14 +81,13 @@ Output format:
 ### 判定
 PASS / FAIL（理由）
 
-At the start of the report, include the normalized values used for instruction content, worktree path or branch name, issue reference, and the selected `--model`.
+At the start of the report, include the normalized values used for instruction content, worktree path or branch name, and issue reference.
 ```
 
 ## 実行方針
 
-- 委譲する場合（外部CLI / Agent）も、自身で実行する場合も、**1回の実行で検証を完了させる**こと
+- **1回の実行で検証を完了させる**こと
 - 検証ループや複数回の呼び出しは禁止
-- 委譲先には上記プロンプトをそのまま渡す（`$ARGUMENTS` は展開済みの値を埋め込む）
 
 ## 注意
 
