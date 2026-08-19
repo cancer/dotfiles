@@ -143,6 +143,9 @@ gh api repos/<owner>/<repo>/issues/<番号> --jq '{type: (if .pull_request then 
 2. `delegate-to-codex` 経由で `verify-task` を実行させる（**実装した Codex とは別のスレッド**で発注する）。依頼文に `/Users/cancer/.claude/skills/verify-task/SKILL.md` のパスと、指示内容・worktreeパス・issue参照を渡す。`-s read-only` で発注する
 3. FAIL なら該当スレッドへ差し戻す。同じ名前へ `agent prompt` を送れば同じスレッドが続く
 4. 差し戻しは2回までを目安にする。上限に達したら、原因と残る不確定事項をユーザーへ報告して判断を仰ぐ
+5. PASS したらそのタスクのペインを閉じ、worktree を片付ける。差し戻す予定が無いなら残さない
+
+**中断時も片付ける。** ワークフローがエラーで止まったとき、ユーザーが別の作業へ移ったとき、判断を仰いで待ちに入るときも、走っていないペインは閉じる。片付けを「完了時にやること」にすると、完了しなかった場合に誰も片付けない。
 
 差し戻しで段を上げるのは既定にしない。範囲が限定された時点で必要な判断量は減っている。原因が依頼文の不備なら、同じ段で条件を書き直して出し直す。
 
@@ -162,7 +165,7 @@ gh api repos/<owner>/<repo>/issues/<番号> --jq '{type: (if .pull_request then 
 ### Phase 6: PR作成と完了
 
 1. 統合後レビュー PASS 後、PR 作成を Codex へ委任する（`create-pr` 相当）。1〜N PR、各PR ≤ コミット上限。issue 起点なら `Closes #<番号>`
-2. 使い終わった Codex ペインを閉じ、worktree を片付ける。差し戻しが想定される間は閉じない。閉じる前にセッション UUID を控えておくと、後から同じスレッドへ戻れる
+2. Codex ペインと worktree を片付ける。**個別検収が PASS したタスクのペインは、Phase 6 を待たずその時点で閉じる。** 最後にまとめて片付ける運用にすると、ワークフローが途中で終わったときに全部残る
 3. watchdog の Monitor を `TaskStop` で止める
 4. ユーザーに完了報告する（下記「成果物」）
 
