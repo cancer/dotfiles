@@ -15,7 +15,8 @@ herdr のペインで Codex を動かし、1 件のタスクを委任して報�
 $ARGUMENTS
 
 - **依頼内容**: Codex に何をさせるか（必須）
-- **`--model <ID>` / `--effort <推論量>`**: 呼び出し側が段を指定する場合。未指定なら `references/model-routing.md` に従って自分で選ぶ
+- **`--effort <推論量>`**: 呼び出し側が推論量を指定する場合。未指定なら `references/model-routing.md` に従って自分で選ぶ
+- **`--model <ID>`**: モデルの上書き。**ユーザーが明示的に指定したときだけ渡る。** 呼び出し側が自分の判断でこれを付けない（付けられるようにすると、根拠の薄いまま上位モデルが選ばれる）
 - **`--read-only`**: 調査・レビューだけで書き込みが不要な場合
 - **`--cwd <パス>`**: 作業ディレクトリ。未指定なら現在のディレクトリ
 
@@ -39,9 +40,9 @@ test "${HERDR_ENV:-}" = 1
 
 ### 1. 段を決める
 
-`--model` / `--effort` が渡されていればそれを使う。渡されていなければ `references/model-routing.md` を読んで決める。**既定は `gpt-5.6-luna` + `high` であり、`sol` は既定にならない。**
+`--effort` が渡されていればそれを使う。`--model` はユーザーが明示指定したときだけ渡るので、あればそれに従う。渡されていなければ `references/model-routing.md` を読んで決める。**モデルは `gpt-5.6-luna` の 1 つだけで、選ぶのは推論量である。** 既定は `high`。
 
-段は、この依頼文を書き終えた時点で Codex に残っている裁量の量で決める。作業の種類（調査か実装か）で決めない。`sol` を選ぶなら、探索範囲のどこを指定できなかったかを言える必要がある。言えないなら `luna` の段で足りる。
+推論量は、この依頼文を書き終えた時点で Codex に残っている裁量の量で決める。作業の種類（調査か実装か）で決めない。上限は `max` で、そこで抜けないなら上位モデルを探さず、依頼文の作り直しかタスクの分割へ戻る。
 
 選んだモデル・推論量・その理由の 3 点を、発注前にユーザーへ 1〜2 行で伝える。委任先の選択はユーザーが是正できる唯一のタイミングなので、事後報告にしない。
 
@@ -71,8 +72,8 @@ herdr pane split --current --direction right --cwd "$PWD" --no-focus
 
 ```bash
 herdr agent start <名前> --kind codex --pane <pane_id> --timeout 60000 \
-  -- --model <モデルID> -c model_reasoning_effort=<推論量> \
-     -c service_tier=<luna なら priority / sol なら default> --no-alt-screen
+  -- --model gpt-5.6-luna -c model_reasoning_effort=<推論量> \
+     -c service_tier=priority --no-alt-screen
 ```
 
 `--` 以降は Codex のネイティブ引数としてそのまま渡る。
@@ -174,4 +175,4 @@ herdr pane close <pane_id>
 
 ## 参照ファイル
 
-- `references/model-routing.md` — モデルと推論量の選択基準。`--model` / `--effort` が渡されていないときに読む
+- `references/model-routing.md` — 推論量の選択基準と、モデルを 1 つに固定している理由。`--effort` が渡されていないときに読む
