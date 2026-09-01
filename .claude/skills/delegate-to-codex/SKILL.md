@@ -73,15 +73,17 @@ herdr pane split --current --direction right --cwd "$PWD" --no-focus
 ```bash
 herdr agent start <名前> --kind codex --pane <pane_id> --timeout 60000 \
   -- --model gpt-5.6-luna -c model_reasoning_effort=<推論量> \
-     -c service_tier=priority --no-alt-screen
+     -c service_tier=priority --approve-for-me --no-alt-screen
 ```
 
 `--` 以降は Codex のネイティブ引数としてそのまま渡る。
 
 - **`--no-alt-screen` を必ず付ける。** Codex の TUI をインラインで描くので出力がスクロールバックに残り、報告を回収できる。付けないと `agent read --source recent` が終了コード 0 で 0 行を返し、報告の先頭は `--lines` を増やしても戻らない（2026-08-12 実測）。
+- **`--approve-for-me` を必ず付ける。** workspace-write サンドボックス内の操作について、確認の要求を自動レビューへ回す。付けないとサンドボックス内の通常操作のたびに `blocked` で止まり、委任が進まない。起動後に `/status` を見ると `Permissions: Workspace (Approve for me)` と表示される（2026-09-01 実測、Codex 0.148.0）。**サンドボックスの境界は動かないので、外へ出る操作は依然として要求として上がり、下記のとおり却下する。**
 - ファイル変更に追加フラグは要らない（`workspace-write` が既定）。調査だけなら `-s read-only` を付ける。
 - ループバックへの listen を伴う検証（開発サーバーの起動など）を頼むなら `-c sandbox_workspace_write.network_access=true` を足す。要らない発注には付けない。
-- 承認方針は既定（`on-request`）のまま起動する。`-a untrusted` は `ls` や `find` まで承認へ上げるので、そのペインで作業が進まなくなる。
+- `-a untrusted` は使わない。`ls` や `find` まで要求として上げるので、`--approve-for-me` と組み合わせても余計な往復が増える。
+- `--dangerously-bypass-approvals-and-sandbox` は使わない。サンドボックスごと外れるため、外へ出る操作を却下して代行する運用が成立しなくなる。
 
 **起動後、発注前に画面を確認する。**
 
@@ -152,11 +154,13 @@ herdr pane close <pane_id>
 **画面を見ずにキーを送らない。** 何を聞かれているかで対応が分かれる。
 
 - **通常の確認ダイアログ**（ディレクトリの信頼、更新の可否、上書きの確認など）は、選択肢を読んだうえで意図する番号を明示して送る。`herdr pane send-text <pane_id> '<番号>'` のあとに `send-keys <pane_id> enter`。**素の `enter` を単独で送らない**（既定の選択が意図と違うことがある。手順 4 の実測を参照）
-- **サンドボックス外への権限昇格の承認**は代行しない。Claude Code の classifier が代理入力を止めるうえ、昇格の是非はユーザーの判断である。何を求められているかを伝えて待つ
+- **サンドボックス外へ出る操作の要求は却下する。** `herdr agent send-keys <名前> esc` を送る。実測では、却下した時点でその操作は実行されない
 
-却下は通る（`herdr agent send-keys <名前> esc`）。却下した直後は Codex が指示待ちで `blocked` のままなので、通常の `agent prompt` を送れば `idle` に戻る。
+却下した直後は Codex が指示待ちで `blocked` のままなので、通常の `agent prompt` を送れば `idle` に戻る。
 
-この経路を選んだ理由がここにもある。ペインはユーザーの画面に見えているので、判断が要る場面をユーザーが直接処理できる。
+**却下した操作は呼び出し側が代行する。** Codex に権限を渡して通すのではなく、サンドボックスの外に出る作業だけを呼び出し側が自分の手で実行し、その結果を依頼文で Codex へ返す。呼び出し側へ返す情報に、却下した操作の内容を必ず含める（下記「呼び出し側へ返すもの」）。
+
+サンドボックスの境界を動かさないので、Codex が触れる範囲は作業ツリーの中に留まる。境界の外で起きることは、呼び出し側が何をしたかとして残る。
 
 ## 呼び出し側へ返すもの
 
@@ -165,6 +169,7 @@ herdr pane close <pane_id>
 - エージェント名 / pane_id / セッション UUID（ペインを残したか閉じたかも）
 - 使ったモデルと推論量、`-s read-only` などのフラグ
 - Codex の報告（要約せずに渡すか、要約するなら要約であると明示する）
+- **却下した操作**: サンドボックス外へ出ようとして却下したものがあれば、何を実行しようとしたかをそのまま伝える。呼び出し側が代行するかどうかを判断する材料になる
 - 未確認事項: 報告の内容を差分で照合していないこと
 
 ## 適用範囲外
