@@ -28,7 +28,11 @@ $ARGUMENTS
 2. **挙動の保存**: 命題が触れていない既存の挙動が変わっていないか
 3. **検証の保存**: 変更前に保証されていた命題が、いまも同等以上の強さで検証されているか。削除・置換された実装が保証していた命題（移送された命題）も対象に含む
 
-2 と 3 は判断ではなく**列挙して突合する**。列挙できなかった項目がある状態を PASS と呼ばない。
+2 と 3 は判断ではなく**列挙して突合する**。列挙の出所は `git diff` と grep であり、対象は差分から確定する。
+
+**列挙の完全性は、列挙した本人には確かめられない。** 見落としが無いことを示す手段が無いため、網羅を主張しない。導出できなかった箇所は、その箇所を名指しして書く。
+
+**base が一度もカバーしていなかった範囲は、このスキルでは扱えない。** 列挙しても網羅を保証できないので、判定の材料にしない（テストの不足は `test-review` と `test-analyze` の領分）。
 
 **機械的チェック（lint / 型検査 / テスト実行）はこのスキルの範囲外である。** 判定が機械的に決まる検査は呼び出し側が自分で実行し、生の出力を依頼文で渡す（`dev-workflow` の Phase 4「機械的チェック」）。ここで再実行しない。渡された結果を読んでレポートに反映する。
 
@@ -69,7 +73,7 @@ Axis 2 - Behavior preservation:
 - For each domain, classify it as covered by an instruction/issue proposition, or not covered. State the evidence for the classification.
 - Any domain that is not covered by a proposition is a FAIL candidate. Report it with the concrete inputs and the before/after outputs, not as a general remark.
 - The worker's own claim that behavior is unchanged (a "what I did not change" section in the PR body or report) is not evidence. Confirm each such claim against the diff. A refactor described as behavior-preserving is exactly where this axis pays off.
-- If you cannot enumerate the affected domains for some part of the diff, say so explicitly. That is a FAIL, not a pass.
+- Completeness of this enumeration cannot be verified from the inside, so do not claim it. Name the parts of the diff whose affected domains you could not derive, and report them as such. A FAIL on this axis requires a named domain, its concrete inputs, and its before/after outputs.
 
 Axis 3 - Verification preservation:
 - Enumerate ALL test changes against the base: `git diff <base>..HEAD -- <test paths>`. Classify each one as added / deleted / test file removed / moved to another test level (unit to integration, or the reverse) / expected value rewritten / input or setup changed / assertion replaced or removed / skipped or ignored.
@@ -82,6 +86,7 @@ Axis 3 - Verification preservation:
 - Rewriting an expected value redefines the proposition being asserted. Require the reason to be traceable to the instruction or the issue. If it is not traceable, it is a FAIL candidate.
 - A maintained coverage threshold, a green suite, or the worker's statement that every removed proposition "has been confirmed to have a counterpart" is not evidence. Name the counterpart yourself for each item.
 - No counterpart, or a weaker counterpart, is a FAIL candidate. Do not PASS unless every enumerated item is accounted for.
+- Report the counts alongside the list: the number of changed test files from `git diff <base>..HEAD --stat -- <test paths>`, the number of test cases you classified, and the number of deleted or replaced units you examined. The caller reconciles these against the same commands, so a list shorter than its count is visible rather than silent.
 - Enumerate a second source as well: every function, branch, or module deleted or replaced between base and HEAD. Test diffs alone miss these, because the deletion itself was requested and its tests may not appear as deletions at all.
 - For each deleted or replaced unit, list the propositions it guaranteed at base - taken from its own tests, its doc comments, and the assertions or expectations at its call sites.
 - For each such proposition, state where it is guaranteed now, which test verifies it, and the strength comparison on the same dimensions above.
@@ -113,6 +118,11 @@ Output format:
 - [ ] issueの要件がすべて満たされている
 - [ ] 指示内容とissueの間に齟齬がない
 
+### 機械的チェックの結果（呼び出し側が実行）
+- <check or lint command>: pass / fail / 未提供
+- <typecheck command>: pass / fail / 未提供
+- <test command>: pass / fail / 未提供
+
 ### 指示突合
 - 命題一覧: <指示・issueから抽出した命題>
 - [ ] 指示された変更がすべて実施されている
@@ -142,7 +152,14 @@ Output format:
 ### 判定
 PASS / FAIL（理由）
 
-PASS は、上記で列挙した全項目が説明できている場合に限る。列挙できなかった項目、対応の付かない項目、根拠を示せない項目がひとつでもあれば FAIL とし、何が説明できなかったのかを書く。
+PASS は、次の2つを満たす場合とする。
+
+- 列挙した入力域に、命題外の挙動変化が無い
+- 失われた検証に、同等以上の強さの対応が付いている
+
+**列挙を導出できなかった箇所は FAIL の理由にしない。** 成果物の欠陥ではなく、検証の届かない範囲である。判定とは別に、その箇所を名指しして書く。
+
+対応の付かない項目、根拠を示せない項目があれば FAIL とし、何が説明できなかったのかを書く。
 
 At the start of the report, include the normalized values used for instruction content, worktree path or branch name, issue reference, and base.
 ```
