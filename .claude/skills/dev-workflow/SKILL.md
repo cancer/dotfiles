@@ -178,7 +178,7 @@ gh api repos/<owner>/<repo>/issues/<番号> --jq '{type: (if .pull_request then 
 
 **依頼文には、同定した種別と、頭脳が読み取った要求の骨子を書く。** 「#30 を見て」だけでは、Codex 側でも同じ取り違えが起きる。issue なら `gh issue view <番号> --comments`、PR なら `gh pr view <番号> --comments` と `gh pr diff <番号>` のように、対象に合ったコマンドを指定する。
 
-**推論量の既定は `max` である**（`references/model-routing.md`）。`high` へ下げるのは変更内容が機械的な置換で表せる場合に限り、判断が挟まるなら依頼文を細かく書いていても `max` で出す。分解計画も `max` である。
+**推論量は既定を置かず、発注のたびに分類する**（`references/model-routing.md`「推論量の決め方」）。成果物が依頼文と既存コードだけで一意に定まるなら `high`、Codex が何かを決める必要があるなら `max` で出す。**分解計画も `max` である**（Codex が分割方針を決める作業のため）。
 
 **`max` でも抜けないなら上げ先は無い。** 依頼文を作り直すかタスクを分割し、それでも進まないならユーザーへ報告して指示を仰ぐ。
 
