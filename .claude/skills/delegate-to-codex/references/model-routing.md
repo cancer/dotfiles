@@ -20,6 +20,8 @@ Codex が受理する値は `none, low, medium, high, xhigh, max`（**`minimal` 
 
 推論量は `herdr agent start` の `--` 以降に `-c model_reasoning_effort=<値>` として渡り、Codex 本体へ直接届く。値を検証して弾く層が間に無いので、Codex が受理する値はそのまま使える。
 
+**推論量は 5 時間枠にほぼ影響しない。** 推論量が動かすのは出力側であり、実測では出力は入力の 0.2% だったためである。
+
 ## Fast モード
 
 Fast モードは Codex の `service_tier` である（"1.5x speed, increased usage"、速度を使用量で買う設定）。`luna` は単価が低いので速度を買う。**`-c service_tier=priority` を渡す。**
