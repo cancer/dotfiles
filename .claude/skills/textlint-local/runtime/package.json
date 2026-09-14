@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "textlint": "15.7.1",
+    "textlint-rule-preset-ai-words-ja": "1.2.0",
+    "textlint-rule-period-in-list-item": "1.0.1",
+    "textlint-rule-preset-ja-technical-writing": "12.0.2"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "preset-ja-technical-writing": {
+      "ja-no-mixed-period": false,
+      "no-exclamation-question-mark": false,
+      "no-mix-dearu-desumasu": {
+        "preferInBody": "である"
+      }
+    },
+    "period-in-list-item": true,
+    "preset-ai-words-ja": true
+  }
+}
