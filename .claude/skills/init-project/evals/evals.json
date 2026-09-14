@@ -1,0 +1,43 @@
+{
+  "skill_name": "init-project",
+  "evals": [
+    {
+      "id": 0,
+      "name": "workers-new-project",
+      "prompt": "Cloudflare Workers で新しいプロジェクトを作りたい。テストがちゃんと動く状態にしておいて。作成先は <DIR>",
+      "expected_output": "テスト実行・型検査・lint・format・カバレッジ出力・CI 設定が揃い、各コマンドが exit 0 になる Workers プロジェクト",
+      "files": [],
+      "assertions": [
+        "npm run lint が exit 0 で終わる（非破壊の lint スクリプトが存在する）",
+        "npm run format:check が exit 0 で終わる（差分チェック用の format スクリプトが存在する）",
+        "npm run typecheck が exit 0 で終わる（typecheck スクリプトが存在する）",
+        "npm test が watch モードに入らず exit 0 で終わる",
+        "カバレッジのレポートファイル coverage/coverage-final.json が生成される",
+        "カバレッジ閾値 90 がコマンドまたは設定に指定されている",
+        ".github/workflows/ に CI 設定があり、lint・typecheck・カバレッジを実行している",
+        "CLAUDE.md が生成されている",
+        "git リポジトリとして初期化され、コミットが1件以上ある",
+        "hello-world の実装コード（Hello World! を返すハンドラ）が残っていない"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "mcp-server-stack-inference",
+      "prompt": "新しく MCP サーバを作りたい。テストと lint が回る状態にして。<DIR> に作って",
+      "expected_output": "ライブラリ/CLI 系統として構成され、6項目が exit 0 になるプロジェクト（Workers 構成を選ばないこと）",
+      "files": [],
+      "assertions": [
+        "Workers 構成（wrangler.jsonc や @cloudflare/* 依存）を選んでいない",
+        "npm run lint が exit 0 で終わる",
+        "npm run format:check が exit 0 で終わる",
+        "npm run typecheck が exit 0 で終わる",
+        "npm test が watch モードに入らず exit 0 で終わる",
+        "カバレッジのレポートファイル coverage/coverage-final.json が生成される",
+        "カバレッジ閾値 90 がコマンドまたは設定に指定されている",
+        ".github/workflows/ に CI 設定がある",
+        "CLAUDE.md が生成されている",
+        "git リポジトリとして初期化され、コミットが1件以上ある"
+      ]
+    }
+  ]
+}

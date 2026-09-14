@@ -1,0 +1,70 @@
+# <プロジェクト名>
+
+## 検査コマンド
+
+| コマンド | 挙動 |
+|---|---|
+| `npm run lint` | 非破壊。ファイルを書き換えない |
+| `npm run lint:fix` | **破壊的**。ファイルを書き換える |
+| `npm run format:check` | 非破壊 |
+| `npm run format` | **破壊的** |
+| `npm run typecheck` | 非破壊 |
+| `npm run knip` | 非破壊。未使用のファイル・エクスポート・依存を検出する（node 系統のみ） |
+| `npm test` | テスト実行 |
+| `npm run coverage` | テスト実行 + カバレッジ出力（`coverage/coverage-final.json`） |
+
+キー名からは破壊的かどうかが読めないので、ここに明記する。CI は非破壊側だけを実行する。
+
+## カバレッジ閾値
+
+閾値 90 は**保持線**である。要求水準ではなく「これ以上未検証の分岐を増やさない」ための下限として置いている。テストが積まれてきたら、この下限を実績に合わせて上げ直す。下げる場合は理由をここに書く。
+
+閾値は `package.json` の `coverage` スクリプトのコマンドラインにある（設定ファイルではない）。同じスクリプトの `--coverage.include=src/**` を**外してはいけない**。vitest 4 は `coverage.all` が廃止されており、この指定が無いとテストから import されたファイルだけが計測対象になる。外すと、テストの無いファイルを追加しても分母に載らず、閾値が作動しなくなる。
+
+## 未使用検出（knip）
+
+`npm run knip` が落ちるのは、どこからも参照されないファイル・使われないエクスポート・使われない依存が入ったときである。カバレッジ閾値と同じ**保持線**として置いており、初期状態では 0 件なので通る。
+
+依存を「使用済み」と判定する根拠は npm script である。新しいツールを devDependencies に足したのにスクリプトから呼ばないと `Unused devDependencies` で落ちる。落ちたら、まず**本当に不要でないか**を疑う。除外設定（`knip.json` の `ignoreDependencies` 等）で黙らせるのは、参照が静的に辿れないと確認できた場合に限る。
+
+## テストの評価
+
+カバレッジ・実行結果・ミューテーションのレポートを使ったテストのレビューは `~/.claude/skills/test-review/SKILL.md` の手順で行う。`npm run coverage` が出す `coverage/coverage-final.json` をそのまま `--coverage-json` に渡せる。
+
+ミューテーションテストは**導入していない**。理由は Stryker が TypeScript 7 に対応しておらず、現時点で導入できないことである。価値を否定しての除外ではないので、Stryker が TS 7 に対応したら再検討する。
+
+## placeholder テスト
+
+placeholder テスト（`lib` / `web` 系統は `test/placeholder.test.ts` または `src/placeholder.test.ts`、Workers 系統は C3 由来の `test/index.spec.ts`）は、環境が動いていることを示すための足場である。最初の実装を書く時点で削除するか、実際の振る舞いを検証するテストへ差し替える。
+
+## 開発の進め方
+
+以下のスキルを読み、その手順に従う（本文はコピーしない。スキル側の更新に追随させるため）。
+
+- 実装依頼の入口: `~/.claude/skills/dev-workflow/SKILL.md`
+- 実装時の共通方針: `~/.claude/skills/write-code/SKILL.md`
+- テストの書き方: `~/.claude/skills/test-driven-development/SKILL.md`
+- PR 作成: `~/.claude/skills/create-pr/SKILL.md`
+
+## Workers Builds（Workers 系統のみ。不要なら削除する）
+
+品質検査は GitHub Actions（`.github/workflows/quality.yml`）が回し、ビルドとデプロイは Cloudflare 側の Workers Builds に任せる。接続はまだ済んでいない。手順:
+
+1. ダッシュボードで "Cloudflare Workers & Pages" GitHub App をインストールする（一度だけ手動）
+2. リモートリポジトリを作って push する
+3. REST API で接続と trigger を作る（`PUT /builds/repos/connections` → `GET /workers/scripts` → `POST /builds/triggers`）
+   - API トークンは **user-scoped** が必須（account-scoped は不可）
+   - 必要権限: `Workers Builds Configuration: Edit`, `Workers Scripts: Read`
+4. `wrangler.jsonc` の `name` がダッシュボードの Worker 名と一致していることを確認する（不一致だとビルドが失敗する）
+5. Preview URL が必要なら `wrangler.jsonc` に `"preview_urls": true` を設定する（公式ドキュメントの `preview_urls = true` は TOML 記法。このプロジェクトの設定は JSONC なのでキーと値の書き方が違う）
+
+### Workers 系統の注意点
+
+- **ルートの型検査はテストを含まない。** `tsconfig.json` の `exclude` に `test` があるため、`npm run typecheck` が緑でもテストの型は検査されていない。テスト側は `npx tsc --noEmit -p test/tsconfig.json` で検査する
+- **`npm run cf-typegen` の後は `format:check` が落ちる。** `wrangler types` が `worker-configuration.d.ts` をタブで再生成するため。`npm run format` を続けて実行すれば戻る
+- **カバレッジの provider は istanbul 固定である。** `@vitest/coverage-v8` は workerd 上で `Error: The Session method is not implemented` になり、テストごと実行されない
+- C3 の生成物（`tsconfig.json` / `wrangler.jsonc` / `worker-configuration.d.ts`）は初回の `npm run format` でタブからスペースへ整形されている。設定内容は変わっていない
+
+ビルド/デプロイのコマンドはリポジトリ内では宣言できない（ダッシュボードまたは API 側の設定のみ）。Open Beta なので API の形は変わりうる。
+
+参照: https://developers.cloudflare.com/workers/ci-cd/builds/
