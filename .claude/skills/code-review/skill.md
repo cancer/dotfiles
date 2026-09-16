@@ -1,9 +1,9 @@
 ---
 name: code-review
 description: コードをソフトウェアエンジニアリング原則で自己レビューする。実装・修正後やPR作成前に「レビューして」「セルフレビュー」と頼まれた場面で使う。対話しながらの深掘りは pair-review、受けたレビューへの対応は review-respond、仕様書が対象なら spec-review の領分
-argument-hint: <file-path or directory> [--model <name>]
+argument-hint: <file-path or directory>
 model: sonnet
-allowed-tools: Read, Glob, Grep, Skill, Bash, Agent
+allowed-tools: Read, Glob, Grep, Bash
 user-invocable: true
 ---
 
@@ -14,7 +14,6 @@ $ARGUMENTS
 
 引数から以下を特定する：
 - レビュー対象（ファイルパスまたはディレクトリ）
-- **`--model <name>`**（任意）: レビュー実行モデル。未指定なら `sonnet`
 
 ## 判断基準 knowledge の参照
 
@@ -23,19 +22,7 @@ $ARGUMENTS
 - knowledge はレビュー観点の根拠・重み付けにのみ使う。knowledge の内容そのものをレビュー出力に含めない
 - 該当する knowledge が無ければ、デフォルトの観点でレビューする（以下の通り）。
 
-## モデルルーティング
-
-`--model` の値に応じて、レビュー実行を以下の委譲先に振り分ける。
-
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `sonnet` （デフォルト） | `Agent` ツール（`subagent_type: "code-reviewer"`、`model: sonnet`） | デフォルトのClaude Agentでレビュー |
-| `haiku` / `opus` | `Agent` ツール（`subagent_type: "code-reviewer"`、`model: <指定>`） | Claudeの別モデルに委譲 |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | argsに「下記レビュープロンプト＋（明示モデルなら）`--model <name>`」を含める |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<レビュープロンプト>" --yolo` | |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<レビュープロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは手順だけとする。
 
 委譲時は、レビュー対象のdiffと下記レビュー観点を委譲先へのタスクプロンプトに含めること。
 

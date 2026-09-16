@@ -1,9 +1,9 @@
 ---
 name: watch-ci
 description: GitHub PR の CI を監視し、失敗があれば原因を調べて修正する。「CI を見といて」「CI 通して」「PRのチェックが落ちてる」と頼まれた場面で使う
-argument-hint: <pr-url or number> [--interval <seconds>] [--max-retries <count>] [--model <name>]
+argument-hint: <pr-url or number> [--interval <seconds>] [--max-retries <count>]
 model: sonnet
-allowed-tools: Bash, Read, Edit, Write, Glob, Grep, Skill, Agent
+allowed-tools: Bash, Read, Edit, Write, Glob, Grep
 user-invocable: true
 ---
 
@@ -19,21 +19,8 @@ $ARGUMENTS
   2. 番号のみ: `123`（現在のリポジトリのPRとして扱う）
 - `--interval <seconds>`: CIのポーリング間隔（デフォルト: 30秒）
 - `--max-retries <count>`: 修正→再チェックの最大試行回数（デフォルト: 無制限）
-- `--model <name>`: CI監視・修正を実行するモデル。未指定なら `sonnet`
 
-## モデルルーティング
-
-`--model` の値に応じて、CI監視・修正処理を以下の委譲先に振り分ける。
-
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `sonnet` （デフォルト） | このskill自身で実行 | フロントマターの `model: sonnet` で動作 |
-| `haiku` / `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: <指定>`） | Claudeの別モデルに委譲 |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | argsに「下記プロンプト＋（明示モデルなら）`--model <name>`」を含める |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは手順だけとする。
 
 ## 実行プロンプト（委譲先 / 自身で実行する場合の共通プロンプト）
 
@@ -88,7 +75,7 @@ Treat the following as unfixable and stop with a clear report:
 - Fixes that would significantly exceed the PR scope
 - The same error recurring after an attempted fix
 
-At the start of the report, include the normalized values used for PR target, poll interval seconds, max retries, and the selected `--model`.
+At the start of the report, include the normalized values used for PR target, poll interval seconds, and max retries.
 
 If successful, include PR URL, final CI status, summary of fixes made, and number of fix attempts.
 If unfixable, include PR URL, failed checks, short error summary, why it is unfixable, and recommended next action.

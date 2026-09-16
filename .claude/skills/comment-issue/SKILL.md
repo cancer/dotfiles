@@ -1,9 +1,9 @@
 ---
 name: comment-issue
 description: GitHub issueやPRにコメントを投稿・追加・残す。結果やサマリーをissueに書き込む際に使用
-argument-hint: <issue/pr-url or owner/repo#number> [comment-body] [--model <name>]
+argument-hint: <issue/pr-url or owner/repo#number> [comment-body]
 model: haiku
-allowed-tools: Bash, Agent, Skill
+allowed-tools: Bash
 user-invocable: true
 ---
 
@@ -22,21 +22,9 @@ $ARGUMENTS
 2. **owner/repo#番号**: `anthropics/claude-code#456`
 3. **番号のみ**: `123`（現在のリポジトリのissue/PRとして扱う）
 
-残りの引数はコメント本文として使用します。`--model <name>` は委譲先のモデル指定として解釈し、コメント本文には含めません。
+残りの引数はコメント本文として使用します。
 
-## モデルルーティング
-
-`--model` の値に応じて、コメント投稿処理を以下の委譲先に振り分ける。
-
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `haiku` （デフォルト） | このskill自身で実行 | フロントマターの `model: haiku` で動作 |
-| `sonnet` / `opus` | `Agent` ツール（`subagent_type: "general-purpose"`、`model: <指定>`） | Claudeの別モデルに委譲 |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | 素の `gpt` ならモデル指定なし、`gpt-*` ならargsに `--model <name>` を含める |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<プロンプト>" --yolo` | |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは手順だけとする。
 
 ## 実行プロンプト（委譲先 / 自身で実行する場合の共通プロンプト）
 
@@ -48,7 +36,7 @@ You are responsible for posting a comment to a GitHub issue or pull request.
 Input:
 - Raw arguments: $ARGUMENTS
 - Target reference: extract the issue or PR target from the raw arguments
-- Comment body: extract the remaining text (excluding --model flag) as the comment body
+- Comment body: extract the remaining text as the comment body
 
 Complete this task in a single execution. Do not ask the user for confirmation
 unless the target or comment body is genuinely impossible to determine.
@@ -75,7 +63,7 @@ Always append this signature to the comment body:
 ---
 🤖 *This comment was posted via [Claude Code](https://claude.ai/claude-code)*
 
-At the start of the report, include the normalized values used for target reference, comment body presence, and the selected `--model`.
+At the start of the report, include the normalized values used for target reference and comment body presence.
 
 If successful, report posted target, whether it was an issue or PR, the target URL, and success confirmation.
 If unsuccessful, report why posting failed and whether the target or comment body was ambiguous.

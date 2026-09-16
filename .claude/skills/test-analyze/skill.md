@@ -2,14 +2,14 @@
 name: test-analyze
 model: opus
 description: リスクベースのテストギャップ分析を行い、テストが不足している高リスク箇所を特定する。レポート提示後の「low も調べて」等、low リスクの追加分析依頼にも対応する
-argument-hint: <target-path> [--model <name>] [--handler-pattern <pattern,...>] [--analyze-low] [--use-cache]
-allowed-tools: Read, Glob, Grep, Bash, Skill, Agent
+argument-hint: <target-path> [--handler-pattern <pattern,...>] [--analyze-low] [--use-cache]
+allowed-tools: Read, Glob, Grep, Bash
 user-invocable: true
 ---
 
 指定された実装コードとテストコードを分析し、リスクの高いテストギャップを特定・提案する。
 
-分析は3段階のパイプラインで実行する。Stage1/2 は claude 経路の Haiku 固定（機械的列挙・集計）、Stage3 のみ `--model` 引数で委任先を切り替える（後述「Stage3 のエンジン選択ルール」を参照）。各段は入力が有限の列挙集合かつスキーマで完了判定でき、確実に終了する。Claude 主スレッドはオーケストレーションと最終レポート整形のみを担当し、open-ended な再帰的分析を行わない。
+分析は3段階のパイプラインで実行する。Stage1/2 は機械的な列挙・集計、Stage3 が判断を伴う抽出である（後述「各 Stage の実行」を参照）。各段は入力が有限の列挙集合かつスキーマで完了判定でき、確実に終了する。Claude 主スレッドはオーケストレーションと最終レポート整形のみを担当し、open-ended な再帰的分析を行わない。
 
 ## 引数
 
@@ -17,7 +17,6 @@ $ARGUMENTS
 
 形式：
 - 第1引数（必須、ただし `--use-cache` 指定時は省略可）: 分析対象のパス（ファイル / ディレクトリ / glob）
-- `--model <name>`: **Stage3 の委任先エンジン選択**。Stage1/2 は常に claude 経路の Haiku 固定であり、本引数の影響を受けない。未指定なら `haiku`。詳細ルールは後述「Stage3 のエンジン選択ルール」を参照
 - `--handler-pattern <pattern,...>`: ハンドラ判定用パターン（カンマ区切り）。パス glob、import 名、デコレータ、関数 export 形のいずれも可
 - `--analyze-low`: **対象リスク選択フラグ**。Stage3 の対象を `risk == "low"` のみに切り替える（既定は `high + medium`）。`--use-cache` の有無とは独立
 - `--use-cache`: **中間ファイル再利用フラグ**。`.claude/test-analyze/` 配下の既存 `stage1-files.json` / `stage2-triage.ndjson` をそのまま使い、Stage1 と Stage2 をスキップする。`--analyze-low` の有無とは独立
@@ -37,7 +36,6 @@ $ARGUMENTS
 ### 0. 事前検証・モード判定（Claude 主スレッド）
 
 #### 0.0 フラグ解釈
-- `--model <name>` が指定されている → Stage3 の委任先エンジンを切り替える（Stage1/2 は常に claude/Haiku 固定で影響を受けない。後述「Stage3 のエンジン選択ルール」）。未指定なら `haiku`
 - `--use-cache` が指定されている → Stage1 と Stage2 を**スキップ**し、`.claude/test-analyze/stage1-files.json` と `.claude/test-analyze/stage2-triage.ndjson` を再利用する
   - 必須前提: 両ファイルが存在すること。どちらか欠けていれば reject し「先に `--use-cache` 無しで実行してください」と案内
   - `--use-cache` 指定時は handler-pattern の解決（0.1）も省略可（Stage2 を再実行しないため必要ない）。引数 / CLAUDE.md の解決を試み、見つからなくても reject せず処理を継続する
@@ -65,24 +63,13 @@ $ARGUMENTS
 - プロジェクト直下に `.claude/test-analyze/` ディレクトリを用意（無ければ作成）
 - 既存の `stage*.{json,ndjson}` は前回キャッシュとして残置（再実行時の再開判断に使う）
 
-#### 0.3 Stage3 のエンジン選択ルール
+#### 0.3 各 Stage の実行
 
-各 Stage の「委任」は、以下に従って委任先を決定する。プロンプト本体（read-only 制約・入出力スキーマ・完了判定）は委任先によらず共通。
+**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。
 
-- **Stage1 / Stage2**: 常に `Agent(subagent_type="general-purpose", model="haiku", prompt=<Stage プロンプト>)` に委任。`--model` の値に依存しない（機械的列挙・集計のため Haiku で十分）
-- **Stage3**: `--model` の値に応じて以下のように切り替える
+各 Stage は、このスキルを実行しているエンジンの中で順に処理する。プロンプト本体（read-only 制約・入出力スキーマ・完了判定）は Stage ごとに定義され、実行エンジンによらず共通である。
 
-| `--model` 値 | 委譲先 | 備考 |
-|---|---|---|
-| `haiku` （デフォルト） | `Agent(subagent_type="general-purpose", model="haiku", prompt=<Stage3 プロンプト>)` | claude 経路 |
-| `sonnet` / `opus` | `Agent(subagent_type="general-purpose", model="<指定>", prompt=<Stage3 プロンプト>)` | claude 経路 |
-| `gpt` / `gpt-*` | `Skill("codex:rescue", args: ...)` | codex 経路。素の `gpt` ならモデル指定なし、`gpt-*` なら argsに `--model <name>` を含める |
-| `co-opus` | Bashで `copilot --model claude-opus-4.6 -p "<Stage3 プロンプト>" --yolo` | copilot 経路 |
-| `co-gpt-*` | Bashで `copilot --model gpt-* -p "<Stage3 プロンプト>" --yolo`（`co-` を除いたモデル名を渡す） | copilot 経路 |
-
-未知のモデル名が指定された場合は実行せず、サポート対象を提示して終了する。
-
-claude / copilot 経路の場合も、read-only であること・中間ファイルへの出力先・完了判定の条件はプロンプトに明記する（codex:rescue と同様の前提を満たすため）。
+Stage1 / Stage2 は機械的な列挙と集計であり、判断を伴わない。サブエージェントを起動できる環境なら、コンテキストを節約するためにこの2段を軽量なワーカーへ切り出してよい。切り出す場合も、read-only であること・中間ファイルの出力先・完了判定の条件をプロンプトへ明記する。
 
 ### 1. Stage1: 対象列挙（read-only）
 
@@ -106,7 +93,7 @@ claude / copilot 経路の場合も、read-only であること・中間ファ�
 ```
 
 #### 委任
-「エンジン選択ルール」（0.3）に従い、claude 経路の Haiku（`Agent(subagent_type="general-purpose", model="haiku", ...)`）に以下の趣旨のプロンプトを渡す（read-only）。
+「各 Stage の実行」（0.3）に従い、以下の趣旨のプロンプトで処理する（read-only）。
 
 > 対象 `<target-path>` 配下の実装ファイルとテストファイルのペアを列挙し、各実装ファイルから関数/メソッドのシグネチャと開始・終了行を抽出してください。
 > - 制約: 対象ファイル自身のみ読む。import 先は辿らない。read-only（ファイル書き換え禁止）。
@@ -159,7 +146,7 @@ Stage1 の列挙結果に対し、機械的シグナルだけを集計してリ�
 - 観測されたシグナル名と該当値のみを並べる（自由記述禁止、推論禁止）
 
 #### 委任
-「エンジン選択ルール」（0.3）に従い、claude 経路の Haiku（`Agent(subagent_type="general-purpose", model="haiku", ...)`）に以下の趣旨を渡す（read-only）：
+「各 Stage の実行」（0.3）に従い、以下の趣旨で処理する（read-only）：
 
 > Stage1 の出力 `.claude/test-analyze/stage1-files.json` を入力に、各関数につき 5 シグナル（分岐数 / 外部依存数 / 可逆性キーワード / 影響範囲キーワード / 境界・ハンドラ判定）を機械的に集計し、決定的規則で high/medium/low をラベリングしてください。
 > - 集計手段は grep / count のみ。判断・推論は禁止。
@@ -209,7 +196,7 @@ Stage2 の粗評価結果に対し、命題抽出・[要確認]タグ・テス�
 ```
 
 #### 委任（バッチごと）
-「Stage3 のエンジン選択ルール」（0.3）に従って委任先を決定し、以下を渡す。codex 経路の場合は codex:rescue の既定が --write のため、本 skill は research/diagnosis 用途で **read-only で実行**する旨をプロンプトに必ず含める：
+「各 Stage の実行」（0.3）に従って処理する。本 skill は research/diagnosis 用途なので、**read-only で実行**する旨をプロンプトに必ず含める：
 
 > 以下の N 件（N ≤ 5）の関数について、命題リスト・[要確認]タグ・テストレベルを抽出してください。
 > - 入力: <Stage2出力からの該当バッチ抜粋>

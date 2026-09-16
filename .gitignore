@@ -11,4 +11,5 @@ agent/
 !.claude/agents/**
 !.claude/skills/
 !.claude/skills/**
+.claude/skills/**/node_modules/
 
