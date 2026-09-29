@@ -40,7 +40,7 @@ test "${HERDR_ENV:-}" = 1
 
 ### 1. 段を決める
 
-`--effort` が渡されていればそれを使う。`--model` はユーザーが明示指定したときだけ渡るので、あればそれに従う。渡されていなければ `references/model-routing.md` を読んで決める。**モデルは `gpt-5.6-luna` 固定、Fast を併用する。**
+`--effort` が渡されていればそれを使う。`--model` はユーザーが明示指定したときだけ渡るので、あればそれに従う。渡されていなければ `references/model-routing.md` を読んで決める。**モデルは `gpt-6-luna` 固定、Fast を併用する。**
 
 **推論量は既定を置かず、発注のたびに分類する。** 成果物が依頼文と既存コードだけで一意に定まるなら `high`、Codex が何かを決める必要があるなら `max`（分類の手続きは `references/model-routing.md`「推論量の決め方」）。規模では決めない。`max` で抜けないなら上位モデルを探さず、依頼文の作り直しかタスクの分割へ戻る。
 
@@ -72,7 +72,7 @@ herdr pane split --current --direction right --cwd "$PWD" --no-focus
 
 ```bash
 herdr agent start <名前> --kind codex --pane <pane_id> --timeout 60000 \
-  -- --model gpt-5.6-luna -c model_reasoning_effort=<推論量> \
+  -- --model gpt-6-luna -c model_reasoning_effort=<推論量> \
      -c service_tier=priority --approve-for-me --no-alt-screen
 ```
 

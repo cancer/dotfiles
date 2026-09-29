@@ -52,7 +52,7 @@
       "files": ["evals/fixtures/rename-type"],
       "expectations": [
         "references/model-routing.md を読んでいる",
-        "gpt-5.6-luna を選んでいる（sol を選んでいない）",
+        "gpt-6-luna を選んでいる（sol を選んでいない）",
         "推論量に high より低い段（none または low）を選び、依頼文に裁量が残っていないことを理由に挙げている",
         "service_tier=priority を明示して起動している",
         "発注前にモデル・推論量・理由の3点をユーザーへ伝えている"
