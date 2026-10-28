@@ -5,16 +5,43 @@
 ## 手順
 
 1. `/Users/cancer/.claude/skills/verify-task/SKILL.md` を最初に読む。検証の 3 つの観点（指示突合・挙動の保存・検証の保存）、base の決め方、列挙すべき対象は、すべてこのファイルに従う
-2. SKILL.md の手順どおりに差分を調べ、次を列挙する
-   - 指示から導かれる命題
-   - 差分の各変更（ファイル・関数・定数・テストごと）
-   - 挙動が変わる入力域と、その変更前後の出力
-   - テストの変化（追加・削除・期待値の書き換え・アサーションの置換・skip・計測範囲の変更）と、削除・置換された関数や分岐
-3. 列挙した各項目について、判定に必要な質問を作る（下記「質問の作り方」）
-4. 回答者が判定できるだけの材料を `state.txt` に書く（下記「state.txt の書き方」）
-5. 各質問について、どの答えなら FAIL を意味するかを `rules.json` に書く
+2. 作業ディレクトリ（対象 worktree 直下の `.claude/verify-task/`）に `propositions.json` があるか確かめる
+   - **あれば**、そこに書かれた命題と `p*` 質問・rules をそのまま使う。指示文を読み直して命題を足したり言い換えたりしない。前の周で作った命題は、そのタスクの判定基準として既に使われている。ここで変えると、修正したワーカーが前の周と違う基準で判定されることになる
+   - **無ければ**、指示（と issue）から命題を導き、`propositions.json` を書く（下記「propositions.json の書き方」）。指示と issue だけから導き、差分を見て命題を増やさない。差分を見てから命題を作ると、実装された内容に合わせて命題が決まり、指示との突合にならない
+3. `enumerate_diff.py` を実行し、`.claude/verify-task/diff-enumeration.json` を読んで差分由来の事実を列挙する。`--cwd` は対象 worktree、`--base` は SKILL.md で決めた base を使う。
 
-列挙そのものは `enumeration.md` に残す（質問の根拠を後から追えるようにするため）。
+   ```bash
+   python3 /Users/cancer/.claude/skills/verify-task/scripts/enumerate_diff.py --cwd <対象worktree> --base <base-ref> --out .claude/verify-task/diff-enumeration.json
+   ```
+
+   `files` の変更ファイル・hunks・functions・declarations・tests・markers_added・coverage_changes と、トップレベルの `unsupported` を `enumeration.md` に反映する。`enumeration.md` と `state.txt` はこの JSON から作り、質問に必要なハンクは JSON の `patch` をそのまま引用する。LLM が判断する作業は、挙動が変わる入力域と出力、命題との突合、期待値の書き換えの根拠、検証の強さ、および `unsupported` の明記である。列挙できなかった箇所を推測で補完せず、JSON に記録された範囲と理由を名指しする。
+4. 列挙した各項目について、判定に必要な質問を作る（下記「質問の作り方」）
+5. 回答者が判定できるだけの材料を `state.txt` に書く（下記「state.txt の書き方」）
+6. 各質問について、どの答えなら FAIL を意味するかを `rules.json` に書く
+
+JSON の機械列挙結果と LLM の判断は `enumeration.md` に残す（質問の根拠を後から追えるようにするため）。
+
+## propositions.json の書き方
+
+命題ごとに、`p*` 質問とその rule を 1 組にして書く。
+
+```json
+{
+  "instruction": "<指示文の原文>",
+  "issue": "<issue 参照、または null>",
+  "propositions": {
+    "p1_tax_rate_env": {
+      "statement": "税率を環境変数 TAX_RATE から読む",
+      "question": {"type": "noul", "instructions": "差分は命題「税率を環境変数 TAX_RATE から読む」を満たしているか"},
+      "rule": {"fail_if": {"noul_below": 0.5}, "axis": "instruction", "summary": "税率を環境変数 TAX_RATE から読む、が満たされていない", "files": []}
+    }
+  }
+}
+```
+
+- `statement` は指示・issue から導いた命題を 1 文で書く
+- `question` は `questions.json` の 1 要素と同じ形、`rule` は `rules.json` の 1 要素と同じ形。`files` は差分に依存するので `[]` にしておき、`rules.json` へ写すときに今回の差分で該当するファイルを入れる（`decide.py` は `files` が配列でないと INVALID を返す）
+- `questions.json` と `rules.json` を書くときは、ここにある `p*` をそのまま含め、差分由来の質問をそれに足す
 
 ## 質問の作り方
 
@@ -81,12 +108,13 @@
 
 SKILL.md が指定する作業ディレクトリに次の 4 ファイルを書く。
 
+- `propositions.json`: 既に存在する場合は書き換えない
 - `enumeration.md`: 列挙の結果。SKILL.md の出力形式の「挙動の保存」「検証の保存」の列挙部分に相当するもの
 - `state.txt`
 - `questions.json`: `{"<質問ID>": {"type": ..., "instructions": ..., "criteria": ...}}`（`criteria` は choice のときだけ）
 - `rules.json`
 
-`questions.json` と `rules.json` の質問 ID は完全に一致させる。
+`questions.json` と `rules.json` の質問 ID は完全に一致させる。`propositions.json` の `p*` はすべて両方に含める。
 
 ## 入力
 
@@ -98,5 +126,6 @@ SKILL.md の引数から、指示内容・worktree パスまたはブランチ�
 
 ## 制約
 
-- ファイルを変更しない。リポジトリ内のファイルは読むだけにする
+- ファイルを変更しない。リポジトリ内のファイルは読むだけにする（書いてよいのは `.claude/verify-task/` 配下のみ）
+- 既存の `propositions.json` を書き換えない。命題を変える必要があると考えた場合は、レポートにその旨を書き、呼び出し側の判断に委ねる
 - 質問に答えない。`state.txt` に自分の判断を書かない
