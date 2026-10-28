@@ -13,3 +13,4 @@ agent/
 !.claude/skills/**
 .claude/skills/**/node_modules/
 
+.claude/skills/*-workspace/
