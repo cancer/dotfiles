@@ -24,7 +24,7 @@ class EnumerateDiffTests(unittest.TestCase):
         self.git("commit", "-qm", "base")
         self.base_head = self.git("rev-parse", "HEAD")
         self.git("switch", "-qc", "change")
-        self.write("src/counter.py", "def main(value):\n    # pragma: no cover\n    return value + 1\n")
+        self.write("src/counter.py", "def main(value):\n    # pragma: no cover\n    return value + 1\n\ndef added():\n    return 2\n")
         self.write("tests/test_counter.py", "import pytest\n@pytest.mark.skip\ndef test_count():\n    label = 'it.skip()'\n    # xfail is only a comment\n    assert main(1) == 2\n")
         self.write("new.txt", "new\n")
         (self.root / "delete.txt").unlink()
@@ -89,6 +89,57 @@ class EnumerateDiffTests(unittest.TestCase):
         self.assertEqual(data["summary"]["test_changes"], sum(len(item["tests"]) for item in data["files"]))
         self.assertEqual(data["summary"]["coverage_changes"], sum(len(item["coverage_changes"]) for item in data["files"]))
         self.assertEqual(data["summary"]["unsupported"], len(data["unsupported"]))
+
+
+    def test_masks_strings_before_comments_without_exposing_string_contents(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import enumerate_diff
+        masked = enumerate_diff.mask_non_code('x = "test.skip // example"')
+        self.assertEqual(len(masked), len('x = "test.skip // example"'))
+        self.assertNotIn('test.skip', masked)
+        self.assertIn('#[ignore]', enumerate_diff.mask_non_code('#[ignore]', 'rust'))
+        source = 'x = "# pragma: no cover" # comment'
+        masked = enumerate_diff.mask_non_code(source, 'python')
+        self.assertEqual(len(masked), len(source))
+        self.assertNotIn('pragma: no cover', masked)
+
+    def test_generic_symbols_ignores_control_keywords_and_braces_in_strings(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import enumerate_diff
+        source = 'function foo(a) {\n  if (a) { return 1 }\n  const s = "}";\n}\n'
+        symbols = enumerate_diff.generic_symbols(source, 'javascript')
+        foo = next(item for item in symbols if item['name'] == 'foo')
+        self.assertEqual(foo['end_line'], 4)
+        self.assertFalse(any(item['name'] == 'if' for item in symbols))
+
+    def test_generic_test_calls_are_named_test_symbols(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import enumerate_diff
+        symbols = enumerate_diff.generic_symbols('it("adds", () => { expect(1).toBe(1) })\ntest.each([1])(\'works\', () => {})', 'javascript')
+        self.assertEqual([(item['kind'], item['name']) for item in symbols if item['kind'] == 'test'], [('test', 'adds'), ('test', 'works')])
+
+    def test_rust_test_attribute_marks_function_as_test(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import enumerate_diff
+        symbols = enumerate_diff.generic_symbols('#[test]\nfn adds() { assert_eq!(1, 1); }', 'rust')
+        self.assertEqual([(item['kind'], item['name']) for item in symbols], [('test', 'adds')])
+
+    def test_coverage_config_scopes_pyproject_and_keeps_unknown_changes(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import enumerate_diff
+        hunks = enumerate_diff.parse_hunks('@@ -1,2 +1,3 @@\n [tool.other]\n-exclude = ["old"]\n+[tool.coverage.run]\n+omit = ["generated/*"]\n')
+        changes = enumerate_diff.coverage_changes('pyproject.toml', hunks)
+        self.assertEqual([(item['category'], item['key']) for item in changes], [('unknown', 'omit')])
+
+    def test_python_function_ranges_include_added_and_both_modified_ends(self):
+        data = self.enumerate()
+        counter = {item['path']: item for item in data['files']}['src/counter.py']
+        main = next(item for item in counter['functions'] if item['name'] == 'main')
+        removed = next(item for item in counter['functions'] if item['name'] == 'removed')
+        added = next(item for item in counter['functions'] if item['name'] == 'added')
+        self.assertEqual((main['base']['end_line'], main['head']['end_line']), (2, 3))
+        self.assertEqual(removed['base']['end_line'], 5)
+        self.assertEqual((added['change'], added['head']['start_line'], added['head']['end_line']), ('added', 5, 6))
 
 
 if __name__ == "__main__":

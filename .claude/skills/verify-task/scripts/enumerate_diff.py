@@ -15,9 +15,16 @@ MARKER_RE = re.compile(r"pytest\.mark\.(skip|skipif|xfail)|unittest\.(skip|skipI
 COVER_RE = re.compile(r"pragma:\s*no cover|istanbul ignore|#\s*\[\s*cfg\s*\(\s*not\s*\(\s*tarpaulin\s*\)\s*\)\s*\]")
 
 
-def mask_non_code(line):
-    line = re.sub(r"//.*|/\*.*?\*/|#(?!\s*\[).*", "", line)
-    return re.sub(r"(['\"`])(?:\\.|(?!\1).)*\1", "", line)
+def mask_strings(line):
+    return re.sub(r"(['\"`])(?:\\.|(?!\1).)*\1", lambda match: " " * len(match.group(0)), line)
+
+
+def mask_non_code(line, lang=None):
+    line = mask_strings(line)
+    line = re.sub(r"//.*|/\*.*?\*/", lambda match: " " * len(match.group(0)), line)
+    if lang != "rust":
+        line = re.sub(r"#.*", lambda match: " " * len(match.group(0)), line)
+    return line
 
 
 def git(cwd, *args):
@@ -72,29 +79,51 @@ def generic_symbols(text, lang):
     if lang == "svelte":
         source = re.sub(r"<script\b[^>]*>(.*?)</script\s*>", lambda match: "\n" * match.group(0).count("\n") + match.group(1), text, flags=re.S | re.I)
         source = re.sub(r"<script\b[^>]*>.*", "", source, flags=re.S | re.I)
+    masked = "\n".join(mask_non_code(line, lang) for line in source.splitlines())
     patterns = [
         ("function", re.compile(r"\b(?:function\s+|fn\s+|(?:async\s+)?)([A-Za-z_$][\w$]*)\s*\([^;{}]*\)\s*(?:->[^{}]+)?\{")),
         ("declaration", re.compile(r"\b(const|let|var|class|struct|enum|type)\s+([A-Za-z_$][\w$]*)")),
     ]
     symbols = []
+    reserved = {"if", "for", "while", "switch", "catch", "match", "return", "else", "do", "try", "new", "throw", "typeof", "await", "yield"}
     for kind, pattern in patterns:
-        for match in pattern.finditer(source):
+        for match in pattern.finditer(masked):
+            if kind == "function" and match[1] in reserved:
+                continue
             start = source.count("\n", 0, match.start()) + 1
             end = match.end()
             if kind == "function" or match[1] in {"class", "struct", "enum", "type"}:
-                opening = source.find("{", match.start(), min(len(source), match.end() + 160))
+                opening = masked.find("{", match.start(), min(len(source), match.end() + 160))
                 if opening >= 0:
                     depth = 0
-                    for offset in range(opening, len(source)):
-                        if source[offset] == "{": depth += 1
-                        elif source[offset] == "}":
+                    for offset in range(opening, len(masked)):
+                        if masked[offset] == "{": depth += 1
+                        elif masked[offset] == "}":
                             depth -= 1
                             if depth == 0:
                                 end = offset + 1
                                 break
             segment = source[match.start():end]
             name = match[1] if kind == "function" else match[2]
-            symbols.append({"kind": kind, "name": name, "start_line": start, "end_line": source.count("\n", 0, end) + 1, "signature": match[0].strip(), "body": segment})
+            symbol_kind = "test" if lang == "rust" and re.search(r"#\s*\[\s*test\s*\]\s*$", source[:match.start()]) else kind
+            symbols.append({"kind": symbol_kind, "name": name, "start_line": start, "end_line": source.count("\n", 0, end) + 1, "signature": match[0].strip(), "body": segment})
+    if lang in {"javascript", "typescript", "svelte"}:
+        test_call = re.compile(r"\b(?:it|test|describe)(?:\.\w+)*(?:\([^()]*\))?\s*\(\s*(['\"`])((?:\\.|(?!\1).)+?)\1")
+        code_for_calls = re.sub(r"//.*|/\*.*?\*/", lambda match: " " * len(match.group(0)), source)
+        for match in test_call.finditer(code_for_calls):
+            start = match.start()
+            opening = masked.find("{", match.end())
+            end = match.end()
+            if opening >= 0:
+                depth = 0
+                for offset in range(opening, len(masked)):
+                    if masked[offset] == "{": depth += 1
+                    elif masked[offset] == "}":
+                        depth -= 1
+                        if depth == 0:
+                            end = offset + 1
+                            break
+            symbols.append({"kind": "test", "name": match[2], "start_line": source.count("\n", 0, start) + 1, "end_line": source.count("\n", 0, end) + 1, "signature": match[0].strip(), "body": source[start:end]})
     return symbols
 
 
@@ -113,20 +142,34 @@ def coverage_changes(path, hunks):
     config_file = Path(path).name in {".coveragerc", "codecov.yml", "codecov.yaml"} or Path(path).name.startswith("vitest.config.") or Path(path).name == "pyproject.toml"
     for hunk in hunks:
         removed, added = [], []
+        section = ""
         for line in hunk["lines"]:
+            if Path(path).name == "pyproject.toml" and line["kind"] != "added":
+                header = re.match(r"\s*\[([^]]+)\]", line["text"])
+                if header:
+                    section = header[1]
+            elif Path(path).name == "pyproject.toml" and line["kind"] == "added":
+                header = re.match(r"\s*\[([^]]+)\]", line["text"])
+                if header:
+                    section = header[1]
             if line["kind"] not in {"added", "removed"}:
                 continue
-            found = COVER_RE.search(line["text"])
+            if Path(path).name == "pyproject.toml" and re.match(r"\s*\[[^]]+\]", line["text"]):
+                continue
+            found = COVER_RE.search(mask_strings(line["text"]))
             if found:
                 (added if line["kind"] == "added" else removed).append(("pragma", "exclusion", found.group(0), line))
                 continue
             if not config_file:
                 continue
+            if Path(path).name == "pyproject.toml" and not section.startswith("tool.coverage"):
+                continue
             name = line["text"].strip()
             category = "threshold" if re.search(r"(?i)(threshold|fail_under|precision|project:|patch:)", name) else ("include" if re.search(r"(?i)include", name) else ("exclude" if re.search(r"(?i)exclude", name) else None))
-            if category:
-                key = name.split("=", 1)[0].split(":", 1)[0].strip(" -")
-                (added if line["kind"] == "added" else removed).append(("config", category, key, line))
+            if not category:
+                category = "unknown"
+            key = name.split("=", 1)[0].split(":", 1)[0].strip(" -")
+            (added if line["kind"] == "added" else removed).append(("config", category, key, line))
         while removed or added:
             before = removed.pop(0) if removed else None
             after = next((item for item in added if before and item[2] == before[2]), None)
@@ -199,8 +242,9 @@ def main():
             changes, match_unsupported = symbol_changes(old_symbols, new_symbols, path) if lang else ([], [])
             functions, declarations = [], []
             for item in changes:
-                destination = functions if item["kind"] == "function" else declarations
-                destination.append({key: value for key, value in item.items() if not key.startswith("_")})
+                if item["kind"] != "test":
+                    destination = functions if item["kind"] == "function" else declarations
+                    destination.append({key: value for key, value in item.items() if not key.startswith("_")})
             unsupported = old_unsupported + new_unsupported + match_unsupported
             if lang is None:
                 unsupported.append({"path": path, "area": "language", "reason": "language is outside the supported set; only diff hunks were enumerated", "base_lines": "file" if old_text else "none", "head_lines": "file" if new_text else "none"})
@@ -212,7 +256,8 @@ def main():
             for change in changes:
                 is_python_test = change["name"].rsplit(".", 1)[-1].startswith("test")
                 is_rust_test = lang == "rust" and is_test
-                if change["kind"] == "function" and (is_python_test or is_rust_test) and is_test:
+                is_generic_test = change["kind"] == "test"
+                if is_test and (is_generic_test or (change["kind"] == "function" and (is_python_test or is_rust_test))):
                     old_symbol = next((s for s in old_symbols if s["name"] == change["name"]), None)
                     new_symbol = next((s for s in new_symbols if s["name"] == change["name"]), None)
                     def test_side(symbol, text):
@@ -221,13 +266,13 @@ def main():
                         start = max(0, symbol["start_line"] - 6)
                         end = min(len(source_lines), symbol["end_line"])
                         marker_text = "\n".join(source_lines[start:end])
-                        markers = [m.group(0) for source_line in marker_text.splitlines() for m in MARKER_RE.finditer(mask_non_code(source_line))]
+                        markers = [m.group(0) for source_line in marker_text.splitlines() for m in MARKER_RE.finditer(mask_non_code(source_line, lang))]
                         return {"start_line": symbol["start_line"], "end_line": symbol["end_line"], "body": symbol["body"], "markers": markers}
                     tests.append({"change": change["change"], "kind": change["kind"], "name": change["name"], "base": test_side(old_symbol, old_text), "head": test_side(new_symbol, new_text), "body_changed": bool(old_symbol and new_symbol and old_symbol["body"] != new_symbol["body"])})
             for hunk_index, hunk in enumerate(hunks):
                 for line in hunk["lines"]:
                     if line["kind"] != "added": continue
-                    for marker in MARKER_RE.finditer(mask_non_code(line["text"])): markers_added.append({"marker": marker.group(0), "test": None, "head_line": line["head_line"]})
+                    for marker in MARKER_RE.finditer(mask_non_code(line["text"], lang)): markers_added.append({"marker": marker.group(0), "test": None, "head_line": line["head_line"]})
             hunks = hunks
             files.append({"path":path, "old_path":old_path, "status":status, "language":lang, "is_test_file":is_test, "hunks":hunks, "functions":functions, "declarations":declarations, "removed_branch_candidates":removed_branches(hunks), "tests":tests, "markers_added":markers_added, "coverage_changes":coverage})
         out = Path(args.out)
