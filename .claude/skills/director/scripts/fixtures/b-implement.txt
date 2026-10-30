@@ -1,0 +1,14 @@
+ユーザー発言の引用
+ユーザー: 「/Users/cancer/dotfiles の .claude/skills/director/scripts に、会話の State を作って Jev で成果物の種類とヒアリング項目を判定する Python スクリプトを実装してください」
+ユーザー: 「完了条件は `python3 -m unittest discover -s .claude/skills/director/scripts/tests -v` が全件 OK で、指定した3 fixture の Jev 判定が期待結果になることです」
+ユーザー: 「gate-catalog にある工程ゲートの実装と director/SKILL.md の変更は今回はやりません」
+ユーザー: 「Python 標準ライブラリだけを使い、既存の verify-task/scripts/judge.py と設計文書は変更しないでください」
+ユーザー: 「成果物は scripts 配下のファイルと、指定パスへのコミットです」
+ユーザー: 「以前の案 A（カタログを別形式にする）は採用せず、JSON カタログで進めると決めました。案 B の JSON カタログで実装してください」
+
+依頼の原文
+上記の発言を依頼として実装する。
+
+事実
+スクリプト収集分:
+- 対象: /Users/cancer/dotfiles/.claude/skills/director/scripts
