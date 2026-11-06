@@ -364,7 +364,9 @@ gh api repos/<owner>/<repo>/issues/<番号> --jq '{type: (if .pull_request then 
 
 機械的チェックの結果（コマンドと合否、失敗時の該当行）を依頼文に貼り、**再実行させない**。`verify-task` に残すのは3軸の列挙と突合（指示突合・挙動の保存・検証の保存）である。判断が要る部分に集中させる。
 
-`verify-task` は Jev API を呼ぶため、`delegate-to-codex` で Codex を起動するときは `-c sandbox_workspace_write.network_access=true` を追加する。
+`verify-task` は Jev API を呼ぶため、`delegate-to-codex` で Codex を起動するときは `-c sandbox_workspace_write.network_access=true` を追加する。作業ディレクトリは worktree 直下の `.claude/verify-task/` なので `-s read-only` は付けず、依頼文で書き込み範囲をそこに縛る。
+
+**差し戻し後の再実行では、命題を作り直させない。** `verify-task` は指示・issue から導いた命題を `.claude/verify-task/propositions.json` に残し、再実行時はそのファイルがあればそのまま使う。周ごとに命題が変わると、前の周に無かった命題で FAIL が出て収束しない。指示や issue 自体を変えたときだけ、発注前にそのファイルを消して作り直させる。依頼文には「`.claude/verify-task/propositions.json` が既にあれば命題を再抽出しない」と書く。
 
 **中断時も片付ける。** ワークフローがエラーで止まったとき、ユーザーが別の作業へ移ったとき、判断を仰いで待ちに入るときも、走っていないペインは閉じる。片付けを「完了時にやること」にすると、完了しなかった場合に誰も片付けない。
 
