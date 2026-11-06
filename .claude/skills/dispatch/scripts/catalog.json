@@ -1,7 +1,7 @@
 {
   "kind": {
     "type": "choice",
-    "instructions": "会話が何で終わるかで",
+    "instructions": "会話が何で終わるかで成果物の種類を判定する",
     "criteria": {
       "implement": "コードが変わる",
       "know": "答えを知って終わる（調査、コードベースの把握、仕様の点検）",

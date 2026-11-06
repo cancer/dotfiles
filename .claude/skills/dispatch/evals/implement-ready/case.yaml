@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: implement-ready
+expected_outcome: |
+  依頼は実装として固まっている。会話をユーザー発言の引用と事実の State に固定し、判定を経て、dev-workflow（または proto-workflow）を読ませるサブエージェントの依頼文を dispatch-plan.md に書く。依頼文は State のパスを渡し、自分の要約で置き換えない。追加で聞くことは無い。
