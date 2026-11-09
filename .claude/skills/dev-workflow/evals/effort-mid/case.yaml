@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: effort-mid
-expected_outcome: |
-  effort mid として verify-task と test-review を指摘0まで回し（上限3周）、code-review と統合後レビューは回さず、重要度 low の指摘は落として完了報告に残す

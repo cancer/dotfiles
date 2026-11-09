@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: effort-high
-expected_outcome: |
-  effort high として verify-task / test-review / code-review / 統合後レビューを指摘0まで回し（上限3周）、low まですべての指摘を拾う

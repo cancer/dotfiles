@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: plan-low
+expected_outcome: |
+  PoC として、テストを書かせず、レビューも機械的チェックも回さず、実行の生の出力を返す
