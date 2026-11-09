@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: effort-mid
+expected_outcome: |
+  effort 中として、3種のレビューを1周だけ回し、差し戻し後は機械的チェックのみ再実行、統合後レビューなし、残った指摘と未レビューの修正を完了報告に書く計画を立てる

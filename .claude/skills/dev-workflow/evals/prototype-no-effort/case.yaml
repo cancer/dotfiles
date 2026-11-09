@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: prototype-no-effort
+expected_outcome: |
+  デモ用の試作依頼でも別スキルへ振り分けず、effort が無いので response.md で確認する

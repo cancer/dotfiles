@@ -62,7 +62,7 @@ Jev API キーはキーチェーン `typesafe-api-key`。スクリプトが失�
 
 | kind | 読ませるスキル | subagent_type / model |
 |---|---|---|
-| implement | `/Users/cancer/.claude/skills/dev-workflow/SKILL.md`（試作・デモと分かっているなら `proto-workflow/SKILL.md`） | general-purpose / opus |
+| implement | `/Users/cancer/.claude/skills/dev-workflow/SKILL.md`。会話から effort（品質の評価・改善の程度: 中 / 高）を判断し、依頼文に `--effort 中|高` として書く | general-purpose / opus |
 | know | `/Users/cancer/.claude/skills/research/skill.md`。コードベース内の把握なら Explore（スキル不要） | tech-researcher / haiku、Explore / sonnet |
 | write | `/Users/cancer/.claude/skills/article-writer/SKILL.md` | general-purpose / opus |
 
