@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: effort-high
 expected_outcome: |
-  effort 高として、3種のレビューを指摘0まで（上限3周）反復し、統合後レビューも行う計画を立てる
+  effort high として verify-task / test-review / code-review / 統合後レビューを指摘0まで回し（上限3周）、low まですべての指摘を拾う

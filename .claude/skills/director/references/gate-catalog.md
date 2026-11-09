@@ -7,9 +7,10 @@
 ユーザーと合意したもの:
 
 - dev-workflow と proto-workflow を 1 本に統合する
-- 統合後のワークフローは引数 effort（中 / 高）を受け取る。effort は品質の評価・改善をどの程度行うかだけを表す
-  - 中: 機械的チェック（lint・型・テスト）と変更ファイルの範囲の突合をスクリプトで通したうえで、verify-task / test-review / code-review を 1 周
-  - 高: 同じ 3 種を指摘 0 まで（上限 3 周）＋統合後レビュー
+- 統合後のワークフローは引数 effort（mid / high）を受け取る。effort は品質をどの軸で評価・改善するかを表す（回数ではない。選んだ軸は指摘 0 まで回す）（2026-11-09 改訂）
+  - verify-task（機能の完了）は effort に依らず常に回す
+  - mid: test-review。拾う指摘は重要度 high / mid（low は落とす）
+  - high: test-review ＋ code-review ＋ 統合後レビュー。low まで拾う
 - effort は呼び出し側の LLM が会話から判断して渡す。Jev は使わない
 - PR は effort に含めない（どこで決めるかは未決定）
 
