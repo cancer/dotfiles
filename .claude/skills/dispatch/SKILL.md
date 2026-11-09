@@ -62,7 +62,7 @@ Jev API キーはキーチェーン `typesafe-api-key`。スクリプトが失�
 
 | kind | 読ませるスキル | subagent_type / model |
 |---|---|---|
-| implement | `/Users/cancer/.claude/skills/dev-workflow/SKILL.md`。会話から effort（品質をどの軸で評価・改善するか: mid = 機能＋テストの妥当性、重要度 high / mid の指摘のみ / high = それに加えて実装品質と統合、low まで）を判断し、依頼文に `--effort mid|high` として書く | general-purpose / opus |
+| implement | `/Users/cancer/.claude/skills/plan/SKILL.md`。dev-workflow へは直接渡さない。計画の承認、PoC での差し戻し、承認後に `dev-workflow --effort low|mid|high` へ渡すまでの流れは `references/implement-loop.md` に従う | Plan / opus |
 | know | `/Users/cancer/.claude/skills/research/skill.md`。コードベース内の把握なら Explore（スキル不要） | tech-researcher / haiku、Explore / sonnet |
 | write | `/Users/cancer/.claude/skills/article-writer/SKILL.md` | general-purpose / opus |
 
@@ -89,7 +89,7 @@ Jev API キーはキーチェーン `typesafe-api-key`。スクリプトが失�
 
 ## 参照
 
-- 設計: `/Users/cancer/.claude/skills/director/references/companion-design.md`
+- 設計: `references/companion-design.md`（implement の流れは `references/implement-loop.md`、検討経緯は `references/gate-catalog.md`）
 - 問いのカタログ: `scripts/catalog.json`（1 層目 `kind`、2 層目 `implement.* / know.* / write.*`、共通 `common.contradiction`）。問いを足す・直すのはここ
 - 閾値: `scripts/thresholds.json`（`yes` 0.7 / `no` 0.3）
 - 判定の記録: `judge-log.jsonl`（閾値を調整するときの材料）
