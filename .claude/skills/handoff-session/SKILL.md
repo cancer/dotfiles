@@ -96,7 +96,7 @@ mkdir -p ~/.claude/handoffs
 
 ## 8. 継続する workflow
 
-- workflow: `/dev-workflow --effort mid|high`（effort は品質をどの軸で評価・改善するか）
+- workflow: `/dev-workflow <承認済み計画のパス> --effort low|mid|high`、または `plan から`（承認済みの計画が無い場合）
 ```
 
 上の `未確定` を、現行セッションで確認できた情報に置き換える。確認できない欄の `未確定` は残す。
@@ -105,7 +105,7 @@ mkdir -p ~/.claude/handoffs
 
 「現在の状態」は、書き出す直前に確認した事実だけで埋める。リポジトリのパス、ブランチ、変更済みファイルは `git -C <cwd>` の結果を使い、関連する issue / PR と起動中のエージェントやペインは現行セッションで確認済みの情報だけを書く。確認していない状態を、依頼文やブランチ名から推測しない。
 
-「継続する workflow」は `/dev-workflow` とし、品質をどの軸で評価・改善するかを会話から判断して `--effort mid|high` を確定する。判断できなければ、引き継ぎ先へ送る前に AskUserQuestion で確認する。
+「継続する workflow」は、残作業にユーザーが承認した計画（`dispatch/references/implement-loop.md`「入力の形」の形式）があれば `/dev-workflow <計画のパス> --effort low|mid|high` とし、effort は品質をどの軸で評価・改善するかを会話から判断して確定する。承認済みの計画が無ければ `plan から` とし、引き継ぎ先の主スレッドが `plan` で計画を作ってユーザーの承認を得るところから始める（dev-workflow は計画の無い依頼を受け付けない）。判断できなければ、引き継ぎ先へ送る前に AskUserQuestion で確認する。
 
 ### 2. ペインを用意する
 
@@ -174,7 +174,7 @@ herdr agent prompt <名前> "$(cat <送る本文のパス>)"
 
 ## 責務の境界
 
-このスキルが担うのは、引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、引き継ぎ本文の受け渡しまでである。残作業の実行・検収・PR 作成は、引き継ぎ文書で指定した `/dev-workflow` の責務であり、ここでは行わない。
+このスキルが担うのは、引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、引き継ぎ本文の受け渡しまでである。残作業の計画は引き継ぎ先の主スレッドと `plan`、実行・検収は `/dev-workflow` の責務であり（PR 作成は含まない）、ここでは行わない。
 
 別モデルへの委任は `delegate-to-codex` の領分である。このスキルは claude の新しい対話セッションへ引き継ぐときだけ使う。
 
