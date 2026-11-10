@@ -155,7 +155,7 @@ scaffolder の tsconfig を書き換えて `test/` を含めるやり方は採�
 - ミューテーションテストを入れていない理由（Stryker が TS 7 未対応）と、対応後に再検討すること
 - Workers 系統なら Workers Builds の接続手順（後述）
 
-開発規律（TDD・実装の進め方・PR の作り方）は**本文をコピーせず、`~/.claude/skills/<name>/SKILL.md` の絶対パスを参照する形で書く**。コピーするとスキル側の更新に追随しなくなる。
+開発規律（テストファースト・実装の進め方・PR の作り方）は**本文をコピーせず、`~/.claude/skills/<name>/SKILL.md` の絶対パスを参照する形で書く**。コピーするとスキル側の更新に追随しなくなる。
 
 **CLAUDE.md は検査より先に書く。** oxfmt は Markdown も整形対象にするため、検査を通したあとに CLAUDE.md を追加すると、その時点から `format:check` が落ちる状態になる（実測で確認した）。
 

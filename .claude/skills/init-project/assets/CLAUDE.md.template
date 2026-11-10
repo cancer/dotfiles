@@ -43,7 +43,7 @@ placeholder テスト（`lib` / `web` 系統は `test/placeholder.test.ts` ま�
 
 - 実装依頼の入口: `~/.claude/skills/dev-workflow/SKILL.md`
 - 実装時の共通方針: `~/.claude/skills/write-code/SKILL.md`
-- テストの書き方: `~/.claude/skills/test-driven-development/SKILL.md`
+- テストの書き方: `~/.claude/skills/write-test/SKILL.md`
 - PR 作成: `~/.claude/skills/create-pr/SKILL.md`
 
 ## Workers Builds（Workers 系統のみ。不要なら削除する）

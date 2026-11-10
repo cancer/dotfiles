@@ -1,6 +1,6 @@
 ---
 name: test-review
-description: テストコードと変更コードを分析し、テスト戦略の妥当性・テスト品質上のリスク・追加確認が必要な箇所を根拠付きのレビュー候補として提示する。機械検出（無効化・focused マーカー・空検証・モック偏重・外部依存・単体テストの分類乖離・重複・未検証の分岐/例外/境界・遅いテスト・不安定なテスト・生き残った変異）はスクリプトで顕出し、テスト戦略とテスト意図の妥当性を LLM がレビューする。「テストをレビューして」「このテストで十分?」「テスト戦略を見て」「テストの品質が不安」「flaky を調べて」「モックばかりのテストを見て」「カバレッジ/ミューテーション結果を読んで」と頼まれた場面では必ず使う。PR 前にテストの妥当性を確かめたい場面、テストが薄い/重い/壊れやすいという懸念が語られた場面でも使う。実装コード起点でテストギャップを探すのは test-analyze、実装コードの設計レビューは code-review、これから書くテストの進め方は test-driven-development の領分
+description: テストコードと変更コードを分析し、テスト戦略の妥当性・テスト品質上のリスク・追加確認が必要な箇所を根拠付きのレビュー候補として提示する。機械検出（無効化・focused マーカー・空検証・モック偏重・外部依存・単体テストの分類乖離・重複・未検証の分岐/例外/境界・遅いテスト・不安定なテスト・生き残った変異）はスクリプトで顕出し、テスト戦略とテスト意図の妥当性を LLM がレビューする。「テストをレビューして」「このテストで十分?」「テスト戦略を見て」「テストの品質が不安」「flaky を調べて」「モックばかりのテストを見て」「カバレッジ/ミューテーション結果を読んで」と頼まれた場面では必ず使う。PR 前にテストの妥当性を確かめたい場面、テストが薄い/重い/壊れやすいという懸念が語られた場面でも使う。実装コード起点でテストギャップを探すのは test-analyze、実装コードの設計レビューは code-review、これから書くテストの進め方は write-test の領分
 argument-hint: "[<path>...] [--base <ref>] [--exclude <pattern>]... [--spec <path>]... [--known-issues <path>] [--answers <path>] [--implementer <agent-name>] [--test-json <file>]... [--nextest-json <file>]... [--coverage-lcov <file>] [--coverage-json <file>] [--mutation-json <file>]"
 model: opus
 allowed-tools: Read, Glob, Grep, Bash, Skill, SendMessage, mcp__knowledge__search_knowledge, mcp__knowledge__read_knowledge
@@ -15,7 +15,7 @@ user-invocable: true
 
 - 実装コード起点で「テストが無い箇所」を網羅列挙したい → `test-analyze`
 - 実装の設計・堅牢性のレビュー → `code-review`
-- これからテストを書く手順 → `test-driven-development`
+- これからテストを書く手順 → `write-test`
 - テストを実行して直したい → このスキルはテストを実行しない（後述の禁止事項）
 
 ## 引数
