@@ -156,7 +156,7 @@ alias rename='noglob zmv -W'
 # any env
 
 ## Node.js
-eval "$(fnm env --use-on-cd)"
+# eval "$(fnm env --use-on-cd)"
 
 ## bun
 export BUN_INSTALL="$HOME/.bun"
@@ -229,18 +229,18 @@ if [ -f '/Users/cancer/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/cancer/g
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/cancer/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/cancer/google-cloud-sdk/completion.zsh.inc'; fi
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 . "$HOME/.local/bin/env"
 
-export PYENV_ROOT="$HOME/.pyenv"
-[ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH"
-if command -v pyenv >/dev/null; then
-  eval "$(pyenv init - zsh)"
-  eval "$(pyenv virtualenv-init -)"
-fi
+# export PYENV_ROOT="$HOME/.pyenv"
+# [ -d "$PYENV_ROOT/bin" ] && export PATH="$PYENV_ROOT/bin:$PATH"
+# if command -v pyenv >/dev/null; then
+#   eval "$(pyenv init - zsh)"
+#   eval "$(pyenv virtualenv-init -)"
+# fi
 
 # for Claude Code
 export LANG="ja_JP.UTF-8"
@@ -249,16 +249,13 @@ export LANG="ja_JP.UTF-8"
 
 source ~/.safe-chain/scripts/init-posix.sh # Safe-chain Zsh initialization script
 
-alias xclaude="claude --permission-mode auto"
-alias xcopilot="copilot --allow-all"
-alias xcodex="codex --dangerously-bypass-approvals-and-sandbox"
-alias xagy="agy --dangerously-skip-permissions"
+alias xclaude="srt claude --permission-mode auto"
+alias xcopilot="srt copilot --allow-all"
+alias xcodex="srt codex --dangerously-bypass-approvals-and-sandbox"
+alias xagy="srt agy --dangerously-skip-permissions"
 
 # zoxide
 eval "$(zoxide init zsh)"
-
-# fzf
-source <(fzf --zsh)
 
 # tmux: 引数なしで呼んだ時、ディレクトリ名をセッション名にして開始
 tmux() {
@@ -281,3 +278,17 @@ export PATH="/Users/cancer/.local/bin:$PATH"
 
 # opencode
 export PATH=/Users/cancer/.opencode/bin:$PATH
+
+# clipboard
+osc52() {
+  printf '\033]52;c;%s\a' "$(base64 | tr -d '\n')"
+}
+
+# Added by cua-driver-rs installer — see https://github.com/trycua/cua
+export PATH="/Users/cancer/.local/bin:$PATH"
+
+# mise は PATH を変更する行より後に置く
+eval "$(mise activate zsh)"
+
+# fzf (mise 管理なので mise activate より後)
+source <(fzf --zsh)
