@@ -45,8 +45,9 @@ Requirements:
 - Use the extracted --max-retries value, or default to unlimited.
 - Fetch PR metadata with gh.
 - Check out the PR branch.
-- Poll CI status using gh pr checks.
-- If checks are pending or in progress, sleep for the configured interval and check again.
+- Wait for CI with a single blocking command: gh pr checks <number> --repo <owner/repo> --watch --fail-fast --interval <interval>. It blocks until the checks finish, so no polling loop is needed.
+- A non-zero exit from that command means at least one check failed; inspect the failed runs.
+- Never write your own polling loop, sleep loop, or watcher script, and never call the GitHub REST API by hand with a token from gh auth token. Use the gh subcommands listed below.
 - If checks fail, inspect failed runs and failed job steps.
 - Classify the failure type: lint, typecheck, test, build, E2E, or other.
 - Identify the concrete root cause from logs.
@@ -62,7 +63,8 @@ Requirements:
 
 Use these commands as needed:
 - gh pr view <number> --repo <owner/repo> --json number,title,headRefName,baseRefName,state,url
-- gh pr checks <number> --repo <owner/repo>
+- gh pr checks <number> --repo <owner/repo> --watch --fail-fast --interval <interval>
+- gh pr checks <number> --repo <owner/repo>   # one-shot status, no waiting
 - gh run view <run-id> --repo <owner/repo> --log-failed
 - gh run list --branch <head-branch> --repo <owner/repo> --limit 5 --json databaseId,status,conclusion,name
 - gh run view <run-id> --repo <owner/repo> --json jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, steps: [.steps[] | select(.conclusion == "failure")]}'
