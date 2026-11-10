@@ -1,0 +1,5 @@
+{
+  "name": "toy",
+  "type": "module",
+  "scripts": { "test": "node --test", "check": "node --check src/*.js" }
+}

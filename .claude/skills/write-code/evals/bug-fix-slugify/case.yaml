@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: bug-fix-slugify
+expected_outcome: |
+  再現テストを書き、修正前に失敗することを確認してから修正し、テストが通る。
+context:
+  scaffold_script: place-files.sh
