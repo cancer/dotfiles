@@ -48,9 +48,17 @@ $ARGUMENTS
 ### 1. 準備
 
 1. `references/prepare.md` を読み、その手順に従う
-2. `mktemp -d -t verify-task` で作業ディレクトリを作る。リポジトリの中には作らない
+2. 作業ディレクトリは対象 worktree 直下の `.claude/verify-task/` に固定する（無ければ作る。`mktemp` は使わない）。場所を固定するのは、周回をまたいで同じ命題を使い続けるためである
 3. 指示内容・worktree パスまたはブランチ・issue 参照・base を引数から確定する。base は呼び出し側の指定を使い、指定が無ければ `git merge-base <デフォルトブランチ> HEAD` で決める
-4. 作業ディレクトリに `enumeration.md`・`state.txt`・`questions.json`・`rules.json` を書く
+4. `propositions.json` が作業ディレクトリに**あればそのまま読み、無ければ作る**。このファイルには指示・issue から導いた命題と、それに対応する `p*` 質問・rules を入れる。再実行時に命題を作り直すと、前の周に無かった命題で FAIL が出て、判定基準が周回ごとに動いてしまう。命題を変えてよいのは指示や issue が変わったときだけで、その判断は呼び出し側がファイルを消すことで表す
+5. 対象 worktree と base が確定したら、差分列挙 JSON を作る。相対出力先は worktree 起点で解決される。
+
+   ```bash
+   python3 /Users/cancer/.claude/skills/verify-task/scripts/enumerate_diff.py --cwd <対象worktree> --base <base-ref> --out .claude/verify-task/diff-enumeration.json
+   ```
+
+   `references/prepare.md` の手順3に従い、JSON を読んで `enumeration.md` と `state.txt` に反映する。`unsupported` は列挙できなかった箇所として名指しする。
+6. 差分由来の項目（範囲 `s*`・挙動 `b*`・テスト `t*`・期待値 `e*`・計測 `m*`）は diff が周回ごとに変わるので毎回列挙し直す。`enumeration.md`・`state.txt`・`questions.json`・`rules.json` を作業ディレクトリに書く（前回のものは上書きする）。`questions.json` と `rules.json` は `propositions.json` の `p*` と、今回列挙した差分由来の質問を合わせたものにする
 
 ### 2. 回答
 
@@ -143,5 +151,6 @@ PASS は `verdict.json` の `verdict` が PASS の場合に限る。FAIL は同�
 ## 注意
 
 - 現在の作業ディレクトリや対象worktreeで検証可能な範囲を前提とする
-- ファイルの修正や問題の修正は行わない。検証レポートのみを出力する
+- ファイルの修正や問題の修正は行わない。検証レポートのみを出力する。書いてよいのは `.claude/verify-task/` 配下だけである
+- 既存の `propositions.json` は書き換えない。命題が指示と合わなくなったと考えた場合は、レポートの冒頭にその旨を書く。消して作り直すかは呼び出し側が決める
 - **`test-review` との境界**: このスキルが見るのは base 比較で**失われた検証**（削除・緩和・回避されたテスト）である。いま存在するテストそのものの妥当性（空検証・モック偏重・テスト戦略）は `test-review` の領分

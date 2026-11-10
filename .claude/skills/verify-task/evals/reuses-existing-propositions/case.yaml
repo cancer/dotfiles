@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: reuses-existing-propositions
+expected_outcome: |
+  .claude/verify-task/propositions.json が既にある2周目の実行で、命題を再抽出せずそのファイルの p1/p2/p3 をそのまま questions.json と rules.json に含め、
+  propositions.json を書き換えず、作業ファイルを .claude/verify-task/ 配下に書く。

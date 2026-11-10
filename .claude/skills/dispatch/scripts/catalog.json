@@ -1,0 +1,26 @@
+{
+  "kind": {
+    "type": "choice",
+    "instructions": "会話が何で終わるかで成果物の種類を判定する",
+    "criteria": {
+      "implement": "コードが変わる",
+      "know": "答えを知って終わる（調査、コードベースの把握、仕様の点検）",
+      "write": "文書が残る",
+      "none": "作業の依頼がまだ形になっていない（感想、質問、思考の途中、雑談）"
+    }
+  },
+  "implement.target": {"type": "noul", "instructions": "作業する対象（リポジトリ、issue、PR、ファイル）が特定されているか", "ask": "どこに対して作業するか"},
+  "implement.completion": {"type": "noul", "instructions": "完了条件が、実行して合否が一つに決まる形で述べられているか", "ask": "何が動けば完成か"},
+  "implement.out_of_scope": {"type": "noul", "instructions": "今回やらないこと（対象外）が述べられているか", "ask": "作らないものは何か"},
+  "implement.constraints": {"type": "noul", "instructions": "守るべき制約（変えないもの、既存の設計、規約）が述べられているか", "ask": "触ってはいけない範囲は"},
+  "implement.deliverable": {"type": "noul", "instructions": "受け取りたい成果物の形（PR / コミット / 動くもの）が述べられているか", "ask": "何を受け取りたいか"},
+  "implement.rejected_policy": {"type": "noul", "instructions": "却下した案と確定した方針が引用で残っているか", "ask": "（復唱して肯定を取る）"},
+  "know.question": {"type": "noul", "instructions": "知りたい問いが 1 文で述べられているか", "ask": "何を知りたいか"},
+  "know.answer_shape": {"type": "noul", "instructions": "答えの形（可否、比較表、手順、原因、該当箇所）が述べられているか", "ask": "どういう形で欲しいか"},
+  "know.scope": {"type": "noul", "instructions": "範囲（リポジトリ、ライブラリ、バージョン、環境）が特定されているか", "ask": "対象は何か"},
+  "write.reader": {"type": "noul", "instructions": "読者が述べられているか", "ask": "誰向けか"},
+  "write.medium": {"type": "noul", "instructions": "媒体（社内ブログ、外部記事、README）が述べられているか", "ask": "どこに載せるか"},
+  "write.topic_conclusion": {"type": "noul", "instructions": "題材と結論が述べられているか", "ask": "何を伝えたいか"},
+  "write.length_deadline": {"type": "noul", "instructions": "分量や締切が述べられているか", "ask": "どのくらいの長さか"},
+  "common.contradiction": {"type": "noul", "instructions": "最新の確定事項は、それ以前の確定事項と矛盾するか", "ask": "前に○○と言われたが変えるか"}
+}

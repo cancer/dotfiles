@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: first-run-creates-propositions
+expected_outcome: |
+  propositions.json が無い初回実行で、.claude/verify-task/propositions.json を作成し、指示から導いた命題と p* 質問・rules を記録する。
+  questions.json/rules.json にその p* が含まれ、mktemp の一時ディレクトリを使わない。

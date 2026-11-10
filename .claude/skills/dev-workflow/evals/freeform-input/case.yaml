@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: freeform-input
+expected_outcome: |
+  承認済みの計画ではない入力なので、自分で分解・計画せずにループを抜けて返す

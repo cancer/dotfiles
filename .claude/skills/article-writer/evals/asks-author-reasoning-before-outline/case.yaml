@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: asks-author-reasoning-before-outline
+expected_outcome: |
+  アウトラインや本文を書く前に、書き手の推論（狙う効果、結論、却下した代替案、読者に要求する前提知識）を引き出す質問を提示して止まる。
