@@ -7,4 +7,5 @@ codex.md
 codex
 agent
 **/_private/
+**/.claude/settings.local.json
 
