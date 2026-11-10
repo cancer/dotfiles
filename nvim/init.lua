@@ -36,33 +36,31 @@ require("lazy").setup({
   {
     "neovim/nvim-lspconfig",
     config = function()
-      local lspconfig = require("lspconfig")
-      local on_attach = function(client, bufnr)
-        client.server_capabilities.positionEncoding = "utf-16"
+      -- キーマップ + positionEncoding は LspAttach で全アタッチに適用する。
+      -- vim.lsp.config("*", {on_attach=...}) はサーバ独自の on_attach（svelte/ts_ls）に
+      -- マージで置換され消えるため、autocmd 方式で共存させる。
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local bufnr = args.buf
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client then
+            client.server_capabilities.positionEncoding = "utf-16"
+          end
 
-        vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<C-CR>", vim.lsp.buf.code_action, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<leader>gD", vim.lsp.buf.declaration, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "<leader>tD", vim.lsp.buf.type_definition, { noremap = true, silent = true, buffer = bufnr })
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, { noremap = true, silent = true, buffer = bufnr })
-      end
-
-      lspconfig.astro.setup({
-        root_dir = require("lspconfig.util").root_pattern("package.json", "svelte.config.js", ".git"),
-        on_attach = on_attach,
+          vim.keymap.set("n", "<F2>", vim.lsp.buf.rename, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<C-CR>", vim.lsp.buf.code_action, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<leader>gi", vim.lsp.buf.implementation, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<leader>gD", vim.lsp.buf.declaration, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "<leader>tD", vim.lsp.buf.type_definition, { noremap = true, silent = true, buffer = bufnr })
+          vim.keymap.set("n", "K", vim.lsp.buf.hover, { noremap = true, silent = true, buffer = bufnr })
+        end,
       })
 
-      lspconfig.svelte.setup({
-        root_dir = require("lspconfig.util").root_pattern("package.json", "svelte.config.js", ".git"),
-        on_attach = on_attach,
-      })
-
-      lspconfig.ts_ls.setup({
-        root_dir = require("lspconfig.util").root_pattern("package.json", "tsconfig.json", ".git"),
-        on_attach = on_attach,
+      -- ts_ls のみ init_options を上書き
+      -- cmd / filetypes / root は nvim-lspconfig 内蔵の lsp/*.lua の既定を使用する
+      vim.lsp.config("ts_ls", {
         init_options = {
           hostInfo = "neovim",
           preferences = {
@@ -70,10 +68,12 @@ require("lazy").setup({
             includeCompletionsForModuleExports = true,
             includeCompletionsForImportStatements = true,
             includePackageJsonAutoImports = "on",
-            importModuleSpecifierPreference = "project-relative"
-          }
-        }
+            importModuleSpecifierPreference = "project-relative",
+          },
+        },
       })
+
+      vim.lsp.enable({ "astro", "svelte", "ts_ls" })
     end,
   },
 
@@ -155,13 +155,17 @@ require("lazy").setup({
   -- Presentation
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "javascript", "typescript", "html", "css", "json", "astro", "svelte", "markdown" },
-        highlight = { enable = true },
-        indent = { enable = true },
-        auto_install = true,
+      local langs = { "javascript", "typescript", "html", "css", "json", "astro", "svelte", "markdown" }
+      require("nvim-treesitter").install(langs)
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = langs,
+        callback = function()
+          pcall(vim.treesitter.start)
+          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
       })
     end,
   },
@@ -239,40 +243,6 @@ require("lazy").setup({
     end,
   },
 
-  -- AI Helper
-  {
-    -- Pure lua replacement for github/copilot
-    "zbirenbaum/copilot.lua",
-    config = function() 
-      require("copilot").setup({
-        suggestion = {
-          auto_trigger = true,
-          keymap = {
-            accept = "<D-l>",
-            accept_word = "<D-S-l>",
-          },
-        },
-        filetypes = {
-          markdown = true,
-        }
-      })
-    end,
-  },
-  {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    dependencies = {
-      { "zbirenbaum/copilot.lua" },
-      { "nvim-lua/plenary.nvim", branch = "master" },
-    },
-    build = "make tiktoken",
-    opts = {
-    },
-    prompts = {
-      MyCustomPrompt  = {
-        system_prompt = "言語を指示したとき以外は常に日本語で答えること",
-      },
-    },
-  },
   {
     "cajames/copy-reference.nvim",
     keys = {
@@ -282,13 +252,34 @@ require("lazy").setup({
   },
   {
     "coder/claudecode.nvim",
-    config = true,
+    opts = { terminal_cmd = "claude --permission-mode auto" },
     keys = {
       { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Claude: Chat" },
       { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
       { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Claude: Send selection" },
       { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
+      { "<leader>aw", "<cmd>ClaudeCode -w<cr>", desc = "Claude: Worktree" },
     }
+  },
+  {
+    "ishiooon/codex.nvim",
+    dependencies = { "folke/snacks.nvim" },
+    config = true,
+    keys = {
+      { "<leader>cc", "<cmd>Codex<cr>", desc = "Codex: Toggle" },
+      { "<leader>cf", "<cmd>CodexFocus<cr>", desc = "Codex: Focus" },
+      { "<leader>cm", "<cmd>CodexMaximizeToggle<cr>", desc = "Codex: Toggle modal" },
+      { "<leader>cs", "<cmd>CodexSend<cr>", mode = "v", desc = "Codex: Send selection" },
+    },
+  },
+  {
+    "NakLast/antigravity-cli.nvim",
+    config = function()
+      require("antigravity").setup({})
+    end,
+    keys = {
+      { "<leader>gc", "<cmd>Antigravity<cr>", desc = "Antigravity: Toggle" },
+    },
   }
 })
 
