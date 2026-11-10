@@ -61,10 +61,10 @@
 	required = true
 [credential "https://github.com"]
 	helper = 
-	helper = !/Users/cancer/.local/share/mise/installs/gh/latest/gh_2.102.0_macOS_arm64/bin/gh auth git-credential
+	helper = !gh auth git-credential
 [credential "https://gist.github.com"]
 	helper = 
-	helper = !/Users/cancer/.local/share/mise/installs/gh/latest/gh_2.102.0_macOS_arm64/bin/gh auth git-credential
+	helper = !gh auth git-credential
 [interactive]
 	diffFilter = delta --color-only
 [delta]
