@@ -7,8 +7,9 @@
 [core]
   excludesfile = ~/dotfiles/.gitignore
 	editor = /usr/bin/vim
-  pager = less -r
+	pager = delta
 	excludesfile = /Users/cancer/dotfiles/.globalignore
+	hooksPath = /Users/cancer/.config/git/hooks
 [alias]
   a = !git add . && git status
   aa = !git add -A && git status
@@ -42,6 +43,7 @@
   email = zodiac.cancer.j6@gmail.com
 [merge]
   ff = false
+	conflictstyle = zdiff3
 [pull]
   rebase = true
 [browse-remote "github.com"]
@@ -57,3 +59,15 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+[credential "https://github.com"]
+	helper = 
+	helper = !/Users/cancer/.local/share/mise/installs/gh/latest/gh_2.102.0_macOS_arm64/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/Users/cancer/.local/share/mise/installs/gh/latest/gh_2.102.0_macOS_arm64/bin/gh auth git-credential
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	dark = true
+	line-numbers = true
