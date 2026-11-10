@@ -60,19 +60,25 @@ const DEP_PATTERNS = {
     ["env", /\benv::var\s*\(|\bstd::env::var\s*\(/g],
   ],
 };
+// .svelte は <script> 内容だけが maskSource でマスクされた ts 相当のテキストになるため、
+// パターン検索も ts と同じものを使う（common.mjs の maskSource 参照）
+DEP_PATTERNS.svelte = DEP_PATTERNS.ts;
 
 const ASSERT_PATTERNS = {
   ts: /\bexpect\s*\(|\bassert(?:\.\w+)?\s*\(|\.should\b|\btoMatchSnapshot\s*\(|\btoMatchInlineSnapshot\s*\(/g,
   rust: /\bassert(?:_eq|_ne|_matches)?!\s*[\(\[]|\bclaim::assert|\binsta::assert/g,
 };
+ASSERT_PATTERNS.svelte = ASSERT_PATTERNS.ts;
 const WEAK_PATTERNS = {
   ts: /\.(toBeDefined|toBeUndefined|toBeTruthy|toBeFalsy|toBeNull|toBeInstanceOf|toBeTypeOf)\s*\(|expect\s*\(\s*(true|false)\s*\)\s*\.toBe\s*\(\s*(true|false)\s*\)|\.not\.toThrow\s*\(\s*\)/g,
   rust: /assert!\s*\(\s*(true|[^)]*\.is_ok\s*\(\s*\)|[^)]*\.is_some\s*\(\s*\))\s*[,)]/g,
 };
+WEAK_PATTERNS.svelte = WEAK_PATTERNS.ts;
 const MOCK_ASSERT_PATTERNS = {
   ts: /\.(toHaveBeenCalled|toHaveBeenCalledTimes|toHaveBeenCalledWith|toHaveBeenNthCalledWith|toHaveBeenLastCalledWith|toHaveReturnedWith)\s*\(|\.mock\.(calls|results)\b|\bverify\s*\(/g,
   rust: /\.times\s*\(|\.checkpoint\s*\(|expect_\w+\s*\(\s*\)\s*\.\s*(times|returning)/g,
 };
+MOCK_ASSERT_PATTERNS.svelte = MOCK_ASSERT_PATTERNS.ts;
 
 const TS_TEST_RE =
   /\b(?<fn>it|test|describe|xit|xtest|xdescribe|fit|fdescribe)\s*(?:\.\s*(?<mod>skip|only|todo|failing|concurrent|sequential|skipIf|runIf|each)\b[^(]*)?\s*\(/g;
@@ -625,7 +631,8 @@ function main() {
     }
     const text = readText(f);
     const masked = maskSource(text, lang);
-    const extracted = lang === "ts" ? extractTsTests(text, masked, f) : extractRustTests(text, masked, f);
+    const extracted =
+      lang === "ts" || lang === "svelte" ? extractTsTests(text, masked, f) : extractRustTests(text, masked, f);
     const moduleEntry = moduleScopeEntry(text, masked, f, extracted);
     for (const t of [...extracted, ...(moduleEntry ? [moduleEntry] : [])]) {
       t.declared_level = declaredLevel(f, lang);

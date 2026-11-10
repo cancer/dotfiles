@@ -15,6 +15,7 @@ import { parseArgs as nodeParseArgs } from "node:util";
 
 export const TS_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"]);
 export const RUST_EXT = new Set([".rs"]);
+export const SVELTE_EXT = new Set([".svelte"]);
 
 export function detectLang(filePath) {
   const suffix = path.extname(filePath);
@@ -24,7 +25,54 @@ export function detectLang(filePath) {
   if (RUST_EXT.has(suffix)) {
     return "rust";
   }
+  if (SVELTE_EXT.has(suffix)) {
+    // "ts" ではなく区別する。.svelte はマークアップと <script> の混在なので、
+    // maskSource 側で先にマークアップを空白化してから ts 相当として字句解析する
+    return "svelte";
+  }
   return null;
+}
+
+const SVELTE_SCRIPT_OPEN_RE = /<script\b[^>]*>/gi;
+const SVELTE_SCRIPT_CLOSE_RE = /<\/script\s*>/i;
+
+/**
+ * .svelte から <script> 要素の内容だけを残し、それ以外（マークアップ・<style> を含む）を
+ * 空白へ置換する。長さと改行位置は保持する（呼び出し元と行番号・オフセットを共有するため）。
+ *
+ * instance/module の 2 つの <script>（`<script>` と `<script context="module">` /
+ * `<script module>`）がある場合は両方を残す。属性（`lang="ts"` 等）は開始タグの
+ * `[^>]*` で読み飛ばすため、内容の判定には影響しない。
+ */
+function blankSvelteMarkup(text) {
+  const ranges = [];
+  SVELTE_SCRIPT_OPEN_RE.lastIndex = 0;
+  let m = SVELTE_SCRIPT_OPEN_RE.exec(text);
+  while (m !== null) {
+    const contentStart = m.index + m[0].length;
+    const closeMatch = SVELTE_SCRIPT_CLOSE_RE.exec(text.slice(contentStart));
+    if (closeMatch === null) {
+      // 閉じタグが無い（壊れたファイル）。ここまでを <script> 内容として扱い打ち切る
+      ranges.push([contentStart, text.length]);
+      break;
+    }
+    const contentEnd = contentStart + closeMatch.index;
+    ranges.push([contentStart, contentEnd]);
+    SVELTE_SCRIPT_OPEN_RE.lastIndex = contentEnd + closeMatch[0].length;
+    m = SVELTE_SCRIPT_OPEN_RE.exec(text);
+  }
+
+  const out = text.split("");
+  for (let i = 0; i < out.length; i += 1) {
+    if (out[i] === "\n") {
+      continue;
+    }
+    const inScript = ranges.some(([s, e]) => i >= s && i < e);
+    if (!inScript) {
+      out[i] = " ";
+    }
+  }
+  return out.join("");
 }
 
 const QUOTE_STATE = { "'": "sq", '"': "dq", "`": "tpl" };
@@ -32,6 +80,13 @@ const STATE_QUOTE = { sq: "'", dq: '"', tpl: "`" };
 
 /** コメントと文字列リテラルを空白へ置換する（長さと改行位置は保持）。 */
 export function maskSource(text, lang) {
+  if (lang === "svelte") {
+    // マークアップ（と <style>）を先に空白化してから、<script> の内容だけを
+    // TypeScript と同じ字句規則でマスクする。同じ関数を "ts" として再帰させることで、
+    // テンプレートリテラルのバックティック判定（下の `lang === "ts"` 分岐）を含め
+    // ts 用のマスク規則をそのまま流用する
+    return maskSource(blankSvelteMarkup(text), "ts");
+  }
   const out = text.split("");
   let i = 0;
   const n = text.length;

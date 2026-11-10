@@ -56,14 +56,19 @@ const BRANCH_PATTERNS = {
   ts: /\bif\s*\(|\belse\b|\bswitch\s*\(|\bcase\b|\bwhile\s*\(|\bfor\s*\(|\?\?|\?\.|&&|\|\||\?[^:]{0,80}:/g,
   rust: /\bif\s+|\belse\b|\bmatch\s+|\bwhile\s+|\bfor\s+|\bloop\b|&&|\|\||\.unwrap_or/g,
 };
+// .svelte は <script> 内容だけが maskSource でマスクされた ts 相当のテキストになるため、
+// パターン検索も ts と同じものを使う（common.mjs の maskSource 参照）
+BRANCH_PATTERNS.svelte = BRANCH_PATTERNS.ts;
 const ERROR_PATTERNS = {
   ts: /\btry\s*\{|\bcatch\s*\(|\bthrow\b|\.catch\s*\(|Promise\.reject|\bfinally\s*\{/g,
   rust: /\bResult<|\bErr\s*\(|\?\s*;|\bpanic!|\.unwrap\s*\(|\.expect\s*\(|\bbail!|\banyhow!/g,
 };
+ERROR_PATTERNS.svelte = ERROR_PATTERNS.ts;
 const BOUNDARY_PATTERNS = {
   ts: /===?\s*0\b|<=|>=|<\s|>\s|\.length\b|\bnull\b|\bundefined\b|\bNaN\b|Number\.(MAX|MIN)\w*|\bslice\s*\(|\bisEmpty\b|\.trim\s*\(\s*\)\s*===/g,
   rust: /==\s*0\b|<=|>=|\.len\s*\(\s*\)|\bNone\b|\bis_empty\s*\(|\bsaturating_|\bchecked_|\b(u|i)(8|16|32|64)::MAX\b|\.first\s*\(|\.last\s*\(/g,
 };
+BOUNDARY_PATTERNS.svelte = BOUNDARY_PATTERNS.ts;
 
 const isFile = (p) => {
   try {
@@ -203,10 +208,11 @@ function functionSpans(text, masked, lang) {
   const idx = new LineIndex(text);
   const excluded = lang === "rust" ? rustTestModRanges(masked, idx) : [];
   const spans = [];
-  const patterns = lang === "ts" ? TS_FN_PATTERNS : [[RUST_FN_PATTERN, "signature"]];
+  const isTsLike = lang === "ts" || lang === "svelte";
+  const patterns = isTsLike ? TS_FN_PATTERNS : [[RUST_FN_PATTERN, "signature"]];
   for (const [pattern] of patterns) {
     for (const m of masked.matchAll(pattern)) {
-      if (lang === "ts" && TS_NOT_FUNCTION_NAMES.has(m.groups.name)) {
+      if (isTsLike && TS_NOT_FUNCTION_NAMES.has(m.groups.name)) {
         continue;
       }
       const close = parenClose(masked, m.index + m[0].length);
