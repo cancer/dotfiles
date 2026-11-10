@@ -113,6 +113,7 @@ Ensure the work naturally follows test-first development without explicitly ment
 - Provide reasoning for technical decisions
 - Ask for clarification when requirements are ambiguous
 - Suggest alternatives when multiple valid approaches exist
+- Prioritize Context7 for technical documentation lookups, use WebSearch as supplementary
 
 ## Before Finalizing
 
