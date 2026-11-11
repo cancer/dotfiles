@@ -63,7 +63,7 @@ Jev API キーはキーチェーン `typesafe-api-key`。スクリプトが失�
 | 判定 | 返す内容 |
 |---|---|
 | `ready` が true | `kind` と `ready`、両方のファイルパス、次に読むスキルを返す。implement は `/Users/cancer/.claude/skills/run-implement/SKILL.md`、know は `/Users/cancer/.claude/skills/research/skill.md`（コードベース内の把握なら Explore）、write は `/Users/cancer/.claude/skills/article-writer/SKILL.md` とする |
-| `ready` が false | `kind` と `ready`、両方のファイルパス、`verdict.json` の `ask`（kind が null の場合）または各項目の `ask` を返す。聞く内容を足したり、判定を自分で補ったりしない |
+| `ready` が false | `kind` と `ready`、両方のファイルパスを返す。kind が null なら top-level の `ask`、それ以外は `items.*.ask` と `contradiction.ask` のうち値があるものを返す。聞く内容を足したり、判定を自分で補ったりしない |
 
 返した `ask` に対する回答や作業係の報告を受けた後、ユーザーが作業の話を続けたら、このスキルを最初からやり直す（State には前回の報告を分けて記録する）。
 
