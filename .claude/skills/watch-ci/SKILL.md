@@ -1,93 +1,74 @@
 ---
 name: watch-ci
-description: GitHub PR の CI を監視し、失敗があれば原因を調べて修正する。「CI を見といて」「CI 通して」「PRのチェックが落ちてる」と頼まれた場面で使う
-argument-hint: <pr-url or number> [--interval <seconds>] [--max-retries <count>]
+description: GitHub PR の CI を監視し、完了結果と失敗時のログに基づく情報を報告する
+argument-hint: <PR URL または番号> [--interval <seconds>]
 model: sonnet
-allowed-tools: Bash, Read, Edit, Write, Glob, Grep
+allowed-tools: Bash, Read
 user-invocable: true
 ---
 
-指定されたPRのCI監視・修正タスクを実行する。
+指定された PR の CI 完了を待ち、結果を報告する。
 
 ## 引数
+
 $ARGUMENTS
 
 ## 引数の形式
 
-- **PR指定**（必須）: 以下のいずれか
-  1. GitHub URL: `https://github.com/owner/repo/pull/123`
-  2. 番号のみ: `123`（現在のリポジトリのPRとして扱う）
-- `--interval <seconds>`: CIのポーリング間隔（デフォルト: 30秒）
-- `--max-retries <count>`: 修正→再チェックの最大試行回数（デフォルト: 無制限）
+- **PR 指定**（必須）: GitHub URL（`https://github.com/owner/repo/pull/123`）または PR 番号（現在のリポジトリの PR として扱う）
+- `--interval <seconds>`: CI の待機時に使う間隔（デフォルト: 30 秒）
 
-**このスキルはどのモデルで実行するかを判断しない。** 実行エンジンと推論量の選択は呼び出し側の責務である（`dev-workflow` は `delegate-to-codex` 経由でこのスキルを Codex に実行させる）。ここに書くのは手順だけとする。
+## 実行手順
 
-## 実行プロンプト（委譲先 / 自身で実行する場合の共通プロンプト）
+1. 引数から PR 番号、`owner/repo`、`--interval` を確定する。URL の場合は URL から番号とリポジトリを得る。番号だけの場合は `gh repo view --json nameWithOwner --jq .nameWithOwner` で現在のリポジトリを得る。`--interval` が省略された場合は 30 を使う。
+2. `gh pr view <番号> --repo <owner/repo> --json number,url,headRefName,headRefOid` で PR の URL、head ブランチ、head commit を得る。
+3. 次の 1 コマンドで CI の完了を待つ。コマンドがチェックの完了まで待機するため、自前のポーリングは行わない。GitHub REST API を直接呼び出さない。
 
-下記の指示に沿ってCI監視・修正を完了させ、最終レポートを日本語で出力する。
+   ```bash
+   gh pr checks <番号> --repo <owner/repo> --watch --fail-fast --interval <interval>
+   ```
 
-```
-You are responsible for watching and fixing CI for a GitHub PR until it is green or clearly unfixable.
+4. すべてのチェックが成功した場合は、C6 の成功形式で報告して終了する。
+5. 失敗したチェックがある場合は、失敗した run と job step のログを調べ、C6 の失敗形式で報告して終了する。コードや PR に手を加える手順は行わない。
 
-Input:
-- Raw arguments: $ARGUMENTS
-- PR target: extract from the raw arguments
-- Poll interval seconds: extract from --interval, default to 30 if omitted
-- Max retries: extract from --max-retries, default to unlimited if omitted
+## 失敗時のログ調査
 
-Complete the entire monitoring and fix cycle in this single execution.
-Do not ask the user for confirmation. Write the final user-facing report in Japanese.
+1. `gh pr checks` の結果から失敗したチェック名を特定する。
+2. PR の head commit に対応する run を次のコマンドで確認する。
 
-Requirements:
-- Parse the raw arguments first and determine the normalized input values before taking action.
-- Support a PR URL or a PR number for the current repository.
-- Use the extracted --interval value, or default to 30.
-- Use the extracted --max-retries value, or default to unlimited.
-- Fetch PR metadata with gh.
-- Check out the PR branch.
-- Wait for CI with a single blocking command: gh pr checks <number> --repo <owner/repo> --watch --fail-fast --interval <interval>. It blocks until the checks finish, so no polling loop is needed.
-- A non-zero exit from that command means at least one check failed; inspect the failed runs.
-- Never write your own polling loop, sleep loop, or watcher script, and never call the GitHub REST API by hand with a token from gh auth token. Use the gh subcommands listed below.
-- If checks fail, inspect failed runs and failed job steps.
-- Classify the failure type: lint, typecheck, test, build, E2E, or other.
-- Identify the concrete root cause from logs.
-- Make only the minimal code change needed to address the CI failure.
-- Preserve the intent of the PR.
-- Do not refactor or make unrelated improvements.
-- Validate locally when possible before committing.
-- Commit with a message like: fix: CI failure - <short summary>
-- Push the change.
-- Continue the loop until all checks pass, the retry limit is reached, or the issue is clearly unfixable.
-- If rerunning CI is needed, use gh run rerun.
-- Never apply the same kind of fix twice for the same recurring error.
+   ```bash
+   gh run list --commit <head-sha> --repo <owner/repo> --json databaseId,status,conclusion,name
+   ```
 
-Use these commands as needed:
-- gh pr view <number> --repo <owner/repo> --json number,title,headRefName,baseRefName,state,url
-- gh pr checks <number> --repo <owner/repo> --watch --fail-fast --interval <interval>
-- gh pr checks <number> --repo <owner/repo>   # one-shot status, no waiting
-- gh run view <run-id> --repo <owner/repo> --log-failed
-- gh run list --branch <head-branch> --repo <owner/repo> --limit 5 --json databaseId,status,conclusion,name
-- gh run view <run-id> --repo <owner/repo> --json jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, steps: [.steps[] | select(.conclusion == "failure")]}'
-- gh run rerun <run-id> --repo <owner/repo>
+3. 失敗した run の job と step を確認し、失敗ログを読む。
 
-Treat the following as unfixable and stop with a clear report:
-- Environment or infrastructure failures
-- Likely flaky tests unrelated to the PR changes
-- Failures whose root cause cannot be determined from logs
-- Fixes that would significantly exceed the PR scope
-- The same error recurring after an attempted fix
+   ```bash
+   gh run view <run-id> --repo <owner/repo> --json jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, steps: [.steps[] | select(.conclusion == "failure")]}'
+   gh run view <run-id> --repo <owner/repo> --log-failed
+   ```
 
-At the start of the report, include the normalized values used for PR target, poll interval seconds, and max retries.
+4. 失敗種別は、チェック名と run・job・step の情報に基づいて `lint` / `typecheck` / `test` / `build` / `E2E` / `other` のいずれかに分類する。分類を特定できない場合は `other` とする。
+5. 原因欄にはログに記載された事実だけを書く。ログから原因を特定できない場合やログを取得できない場合は、その状態を明記し、推測で補わない。ログ抜粋は原因の根拠となる行をそのまま示す。該当するログが無い場合はその旨を記す。
 
-If successful, include PR URL, final CI status, summary of fixes made, and number of fix attempts.
-If unfixable, include PR URL, failed checks, short error summary, why it is unfixable, and recommended next action.
+## 報告形式
+
+成功時:
+
+```text
+結果: 成功
+PR: <PR URL>
 ```
 
-## 実行方針
+失敗時:
 
-- 委譲する場合も自身で実行する場合も、**1回の実行で監視ループを完結させる**こと
-- 監視・修正・commit / push・再確認をすべてその1回の中で完結させる
+```text
+結果: 失敗
+PR: <PR URL>
+失敗したチェック:
+- チェック名: <名前>
+  種別: lint | typecheck | test | build | E2E | other
+  原因: <ログから読み取れた事実、または特定できない旨>
+  ログ抜粋: <該当行、または取得できない旨>
+```
 
-## 注意
-
-- 現在の作業ディレクトリが対象リポジトリであることを前提とする
+失敗したチェックが複数ある場合は、チェックごとに項目を記す。この報告を出して終了する。
