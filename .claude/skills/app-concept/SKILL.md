@@ -1,6 +1,6 @@
 ---
 name: app-concept
-description: アプリのコンセプトを決めたい、「誰向けのアプリか整理したい」「何をして何をしないか決めたい」「CONCEPT.md を作って/直して」という場合に使う。仕様変更・機能追加が既存の CONCEPT.md の内容と食い違う可能性がある場合も使う。実装計画書は plan、仕様書の点検は spec-review、題材を問わない壁打ちは kabeuchi の領分
+description: アプリのコンセプトを決めたい、「誰向けのアプリか整理したい」「何をして何をしないか決めたい」「CONCEPT.md を作って/直して」という場合に使う。仕様変更・機能追加が既存の CONCEPT.md の内容と食い違う可能性がある場合も使う。実装の依頼は内容を固めた後に judge-request が作業可否を判定し、ready なら run-implement が進める。タスク分割は define-tasks、仕様書の点検は spec-review、題材を問わない壁打ちは kabeuchi の領分
 argument-hint: <作りたいアプリの説明、または変更要求>
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 user-invocable: true
@@ -79,6 +79,6 @@ README や既存コードなど、リポジトリ内の事実は自分で調べ�
 
 ## 対象外
 
-- 実装計画書の作成は `plan` の領分である。
+- 実装の依頼を作業に渡す場合は、会話で内容を固めた後に judge-request が作業可否を判定し、ready なら run-implement が進める。タスク分割は define-tasks が担う。
 - 仕様書の点検は `spec-review` の領分である。
 - コンセプト以外の題材を扱う壁打ちは `kabeuchi` の領分である。
