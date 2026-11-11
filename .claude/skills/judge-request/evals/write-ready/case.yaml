@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: write-ready
+expected_outcome: |
+  依頼は文書作成として固まっている。verdict.json は kind write・ready true で contradiction no である。return.md は verdict.json と state.txt の絶対パスを返し、次に読むスキルとして /Users/cancer/.claude/skills/article-writer/SKILL.md を示す。依頼を自分の要約で言い換えず、作業係を起動しない。
