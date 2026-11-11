@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: resume-existing-pr
+expected_outcome: |
+  既存の feature/counter-json ブランチと PR #42 を引き継ぎ、新しい PR は作らない。すでに真である p1_json_output は作業し直さず、偽になっている lint に対応する。修正後は effort mid の Phase 3 を最終ツリーに対してやり直し、機械的チェックを頭脳自身が再実行し、verify-task と test-review を実装者と別の新しいスレッドで再実行する。その後、同じ PR の CI を再確認し、成功するまで完了としない。

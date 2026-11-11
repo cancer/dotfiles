@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: plan-mid
 expected_outcome: |
-  計画の 2 タスクを並列に発注し、完了条件を propositions.json に写し、契約 C1 を両方の依頼文に書き、verify-task と test-review を回す
+  2 タスクのタスク定義から、T1 が提供し T2 が利用する契約 C1 を確認し、指定した T2 だけを発注する。T2 の成果物の命題以外の完了条件を propositions.json に写して契約 C1 を依頼文へ書く。verify-task と test-review で検収し、成果物が PR なら create-pr 後に watch-ci を使う。CI 失敗時は新しいスレッドへ差し戻し、修正後に検収する。
