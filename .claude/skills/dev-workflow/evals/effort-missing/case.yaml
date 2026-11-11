@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: effort-missing
 expected_outcome: |
-  effort が無いので、確認せずにループを抜けて呼び出し側へ返す
+  引数に --effort が無いため、タスクを始めずにループを抜ける。離脱理由と残した worktree・ブランチ（どちらも未作成）を返す。
