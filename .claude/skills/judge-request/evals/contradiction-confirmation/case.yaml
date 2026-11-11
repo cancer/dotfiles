@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: contradiction-confirmation
 expected_outcome: |
-  依頼は実装として特定され、他の必要項目も揃っているが、以前確定した制約と最新の発言が矛盾している。verdict.json は kind implement・ready false で contradiction yes または ask を示す。return.md は verdict.json と state.txt の絶対パスを返し、以前の「src/main.py は変更しない」というユーザー発言を引用したうえで、src/main.py も変更対象に加えるか確認する。次のスキルを示さず、作業係を起動しない。
+  依頼は実装として特定され、他の必要項目も揃っているが、以前確定した制約と最新の発言が矛盾している。verdict.json は kind implement・ready false で contradiction yes または ask を示す。return.md は verdict.json と state.txt の絶対パスを返し、以前の「src/main.py は変更しない」というユーザー発言を引用したうえで、src/main.py も変更対象に加えるか確認する。次のスキルを示さない。
