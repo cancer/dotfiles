@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: unformed-conversation
+expected_outcome: |
+  state.txt はユーザーの発言だけを引用し、verdict.json は kind null・ready false を示す。return.md は verdict.json と state.txt の絶対パスを返し、何を受け取りたいか（実装 / 調査 / 文書）を ask として尋ねる。kind を推測せず、作業係を起動しない。

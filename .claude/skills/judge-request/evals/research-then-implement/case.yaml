@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: research-then-implement
+expected_outcome: |
+  kind は implement、ready は false、contradiction は no である。作業係の報告は state.txt のユーザー発言と分けて記録する。return.md は verdict.json と state.txt の絶対パスを返し、verdict.json の項目に付いた ask に基づき、完了条件・対象外・制約・成果物の形を一度に聞く。作業係を起動しない。

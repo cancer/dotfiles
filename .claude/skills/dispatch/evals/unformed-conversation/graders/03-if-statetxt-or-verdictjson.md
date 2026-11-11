@@ -1,7 +1,0 @@
----
-type: llm
-focus: trace
-weight: 1
----
-
-If state.txt or verdict.json exist, state.txt quotes only the user's utterances and verdict.json reports kind null; not invoking the judgment at all is also acceptable
