@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: implement-ready
+expected_outcome: |
+  依頼は実装として固まっている。state.txt はユーザーの6発言を原文のまま引用し、verdict.json は kind implement・ready true である。return.md は verdict.json と state.txt の絶対パスを返し、次に読むスキルとして /Users/cancer/.claude/skills/run-implement/SKILL.md を示す。依頼を自分の要約で言い換えない。

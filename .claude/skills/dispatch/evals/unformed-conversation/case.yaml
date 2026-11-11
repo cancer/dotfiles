@@ -1,4 +1,0 @@
-schema_version: "1.1"
-name: unformed-conversation
-expected_outcome: |
-  作業に渡さない。ユーザーの依頼はまだ形になっていないので、何を受け取りたいか（実装 / 調査 / 文書）を聞くか、会話を続ける。dispatch-plan.md は作らない。
