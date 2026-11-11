@@ -1,6 +1,6 @@
 ---
 name: handoff-session
-description: 現行の Claude Code セッションで「コンテキストがいっぱいになった」「引き継ぎたい」「別セッションで続けて」と依頼されたときに、作業を新しい Claude Code セッションへ引き継ぐために使う。引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、作業種別に応じた workflow への継続依頼までを扱う。残作業の実行・検収・PR 作成は引き継ぎ文書で指定した workflow、別モデルへの委任は delegate-to-codex の領分である
+description: 現行の Claude Code セッションで「コンテキストがいっぱいになった」「引き継ぎたい」「別セッションで続けて」と依頼されたときに、作業を新しい Claude Code セッションへ引き継ぐために使う。引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、run-implement からの作業継続依頼までを扱う。タスク分割は define-tasks、単一タスクの実装・検収・成果物作成は dev-workflow、PR のマージは merge-prs の領分であり、別モデルへの委任は delegate-to-codex の領分である
 argument-hint: "[引き継ぐ作業の説明] [--multiplexer <名前>] [--mode <権限モード>] [--worktree|--no-worktree] [--cwd <パス>]"
 allowed-tools: Bash, Write, Read, AskUserQuestion
 user-invocable: true
@@ -96,7 +96,9 @@ mkdir -p ~/.claude/handoffs
 
 ## 8. 継続する workflow
 
-- workflow: `/dev-workflow <承認済み計画のパス> --effort low|mid|high`、または `plan から`（承認済みの計画が無い場合）
+- workflow: タスク定義ファイル（`/Users/cancer/.claude/skills/run-implement/references/task-format.md` の形式）が既にある場合は、その絶対パスと各タスクの状態（未着手・dev-workflow 完了・PR 作成済み・マージ済み）を引き継ぎ文書に記し、`/Users/cancer/.claude/skills/run-implement/SKILL.md` から順序の続きへ進む。タスク定義ファイルが無い場合は judge-request で作業可否を判定し、implement が ready なら run-implement へ進む。
+- effort: 会話から判断し、dev-workflow と merge-prs に渡す。判断できずユーザーでなければ決められない場合は、引き継ぎ先へ送る前に AskUserQuestion で確認する。
+- 参照パス: `/Users/cancer/.claude/skills/run-implement/SKILL.md`、`/Users/cancer/.claude/skills/run-implement/references/task-format.md`
 ```
 
 上の `未確定` を、現行セッションで確認できた情報に置き換える。確認できない欄の `未確定` は残す。
@@ -105,7 +107,7 @@ mkdir -p ~/.claude/handoffs
 
 「現在の状態」は、書き出す直前に確認した事実だけで埋める。リポジトリのパス、ブランチ、変更済みファイルは `git -C <cwd>` の結果を使い、関連する issue / PR と起動中のエージェントやペインは現行セッションで確認済みの情報だけを書く。確認していない状態を、依頼文やブランチ名から推測しない。
 
-「継続する workflow」は、残作業にユーザーが承認した計画（`dispatch/references/implement-loop.md`「入力の形」の形式）があれば `/dev-workflow <計画のパス> --effort low|mid|high` とし、effort は品質をどの軸で評価・改善するかを会話から判断して確定する。承認済みの計画が無ければ `plan から` とし、引き継ぎ先の主スレッドが `plan` で計画を作ってユーザーの承認を得るところから始める（dev-workflow は計画の無い依頼を受け付けない）。判断できなければ、引き継ぎ先へ送る前に AskUserQuestion で確認する。
+タスク定義ファイルがあれば、その絶対パスと各タスクの状態をこの引き継ぎ文書に記す。状態は「未着手」「dev-workflow 完了」「PR 作成済み」「マージ済み」のいずれかで示す。引き継ぎ先は `/Users/cancer/.claude/skills/run-implement/SKILL.md` を読み、run-implement の順序の続きから進める。タスク定義ファイルが無ければ judge-request から始め、implement が ready なら run-implement に進む。タスク定義ファイルの形式は `/Users/cancer/.claude/skills/run-implement/references/task-format.md` に従う。effort は品質をどの軸で評価・改善するかを会話から判断して dev-workflow と merge-prs に渡す。判断できずユーザーでなければ決められない場合に限り、引き継ぎ先へ送る前に AskUserQuestion で確認する。
 
 ### 2. ペインを用意する
 
@@ -174,7 +176,7 @@ herdr agent prompt <名前> "$(cat <送る本文のパス>)"
 
 ## 責務の境界
 
-このスキルが担うのは、引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、引き継ぎ本文の受け渡しまでである。残作業の計画は引き継ぎ先の主スレッドと `plan`、実行・検収は `/dev-workflow` の責務であり（PR 作成は含まない）、ここでは行わない。
+このスキルが担うのは、引き継ぎ文書の作成、新しい herdr ペインでの claude 起動、引き継ぎ本文の受け渡しまでである。作業の順序は run-implement、タスク分割は define-tasks、単一タスクの実装・検収・成果物作成は dev-workflow、PR のマージは merge-prs の責務であり、ここでは行わない。dev-workflow はタスク定義の成果物の命題に従って PR を作る。
 
 別モデルへの委任は `delegate-to-codex` の領分である。このスキルは claude の新しい対話セッションへ引き継ぐときだけ使う。
 
