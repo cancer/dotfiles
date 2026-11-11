@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: commit-deliverable
 expected_outcome: |
-  タスク定義から T1 だけを effort mid で扱い、p1_version と p2_deliverable を propositions.json に写して検収する。検収後、成果を feature/counter-version ブランチにコミットして終え、PR は作成しない。完了報告にはブランチ名とコミット、落とした指摘、回さなかった軸を含める。
+  タスク定義から T1 だけを effort mid で扱い、成果物の命題以外の完了条件（p1_version）を propositions.json に写して検収し、成果物の命題 p2_deliverable は Phase 4 で頭脳が確かめる。成果は実装者が feature/counter-version ブランチにコミットし、頭脳は検収後にそのブランチにコミットされていることを確かめて終え、PR は作成しない。完了報告にはブランチ名とコミット、落とした指摘、回さなかった軸を含める。

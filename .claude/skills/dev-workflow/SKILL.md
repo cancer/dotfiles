@@ -23,7 +23,7 @@ $ARGUMENTS
 
 ## effort
 
-effort は**品質をどの軸で評価・改善するか**だけを表す。回数ではなく軸を選ぶ。選んだ軸のレビューは、どれも指摘が無くなるまで反復する（上限3周、「レビューの反復」）。レビューで落ちた状態のまま放置して終えることはできないので、軸を選んだら途中で打ち切らない。委任・統合など他の工程は effort で変えない。
+effort は**品質をどの軸で評価・改善するか**だけを表す。回数ではなく軸を選ぶ。選んだ軸のレビューは、どれも指摘が無くなるまで反復する（上限3周、「レビューの反復」）。レビューで落ちた状態のまま放置して終えることはできないので、軸を選んだら途中で打ち切らない。委任・成果物の確定など他の工程は effort で変えない。
 
 | effort | `verify-task`（機能の完了） | `test-review` | `code-review` | 拾う指摘 | テスト |
 |---|---|---|---|---|---|
@@ -231,7 +231,7 @@ effort は呼び出し側（主スレッド）が会話から判断して渡す�
 
 1. 指定タスクの状態を `TaskCreate` で 1 件作り、頭脳が管理する。Codex は `TaskUpdate` を呼べないため、ワーカーの自己申告に任せる設計は成立しない
 2. そのタスク用に `git worktree` を切る。同じタスクのブランチが既にあれば、それを使う（下記「成果物の確定」の再開）
-3. **effort mid / high では、そのタスクの完了条件をその worktree の `.claude/verify-task/propositions.json` へ `statement` として書く。** 形式は `/Users/cancer/.claude/skills/verify-task/references/prepare.md`「propositions.json の書き方」に従い、各命題に対応する `question`・`rule` を添える。命題はタスク定義で承認済みなので、`verify-task` に導かせない
+3. **effort mid / high では、そのタスクの完了条件をその worktree の `.claude/verify-task/propositions.json` へ `statement` として書く。** 形式は `/Users/cancer/.claude/skills/verify-task/references/prepare.md`「propositions.json の書き方」に従い、各命題に対応する `question`・`rule` を添える。命題はタスク定義で承認済みなので、`verify-task` に導かせない。成果物の命題 `pN_deliverable` は書かない（Phase 3 の時点ではまだ満たせないため。Phase 4 で頭脳が確かめる）
 
 ### Phase 2: 実装委任
 
@@ -385,6 +385,8 @@ Phase 3 の検収を通ったら（effort low では実装報告を受けたら�
 - 成果物がコミット: 検収を通ったツリーがタスクのブランチにコミットされていることを確かめて終える（PR は作らない）
 - effort low（PoC）: 成果物の命題を持たないので、PR もコミットも作らず、実測の生の出力を回収する
 
+成果物の命題は、頭脳が機械的に確かめる。PR なら `gh pr view <PR> --json state,mergeable,headRefName,baseRefName` と watch-ci の報告（全チェック成功）で、ブランチ・base・競合なし・CI 成功を確かめる。コミットならタスクのブランチの `git log` で確かめる。判定が機械的に決まるので委任しない（「機械的チェック（頭脳が自分で実行する）」と同じ理由）。
+
 再開: 同じタスクのブランチや PR が既にあれば（成果物の命題のブランチ名で特定する）、それを引き継ぐ。完了条件のうち既に真のものはやり直さず、偽のもの（base との競合、CI の失敗を含む）だけを、差し戻しのループで満たす。base と競合していれば、競合を指摘として差し戻し、解消後に Phase 3 の検収をやり直す。
 
 ### Phase 5: 完了
@@ -465,7 +467,7 @@ watchdog は一度報告したスレッドを再報告しないため、待ち�
 ## 成果物（完了報告）
 
 - 実施作業の要約と、受け取った effort
-- effort low では、各タスクの実測の生の出力（加工・要約・合否判定をしない）
+- effort low では、そのタスクの実測の生の出力（加工・要約・合否判定をしない）
 - 回さなかった軸（effort low ならすべて、effort mid なら `code-review`）と、effort mid で落とした重要度 low の指摘
 - 各委任の担当と成果、使ったモデルと推論量
 - 機械的チェックの結果（実行したコマンドと合否。実行できなかったものは「未実行」と明記）
