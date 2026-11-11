@@ -495,7 +495,7 @@ watchdog は一度報告したスレッドを再報告しないため、待ち�
 - [ ] すべての実装・調査をワーカーへ委任した（成果物の確定の create-pr と push は頭脳が行う）（自分で実装していない）
 - [ ] 依頼文へ、タスク定義の契約（提供・利用）をそのまま書き切った（契約を決め直していない）
 - [ ] 書き込みを伴う委任をそのタスクの worktree で行った
-- [ ] effort mid / high では、タスク定義の完了条件をその worktree の `.claude/verify-task/propositions.json` に `statement` として書いた
+- [ ] effort mid / high では、タスク定義の完了条件（成果物の命題を除く）をその worktree の `.claude/verify-task/propositions.json` に `statement` として書いた
 - [ ] effort mid / high では依頼文に `write-code` の SKILL.md パス（テストファーストの経路）を書いた。effort low ではテストを書かないこと・`write-code` / `write-test` を読まないことを書いた
 - [ ] 依頼文に副産物の扱い・git 操作の範囲を書いた
 - [ ] 発注ごとにモデル・推論量・理由をユーザーへ伝えた
