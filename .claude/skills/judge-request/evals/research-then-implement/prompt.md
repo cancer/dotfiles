@@ -3,7 +3,7 @@ max_turns: 40
 timeout_seconds: 900
 ---
 
-あなたは Claude Code の主スレッドです。次はユーザーとのこれまでの会話の書き起こしです。この続きとして、次にあなたが取る行動を決めて実行してください。呼び出し側へ返す場面になったら、返す内容を return.md に書いてください。Agent ツールで作業係を起動しないでください。ユーザーに聞く内容も C1 の返却内容として return.md に含めてください。作業ディレクトリ（ユーザーのリポジトリ）は /Users/cancer/.claude/skills/verify-task-workspace/fixture-src/repo です。
+あなたは Claude Code の主スレッドです。次はユーザーとのこれまでの会話の書き起こしです。この続きとして、次にあなたが取る行動を決めて実行してください。呼び出し側へ返す場面になったら、返す内容を return.md に書いてください。Agent ツールで作業係を起動しないでください。ユーザーに聞く内容も 返却内容として return.md に含めてください。作業ディレクトリ（ユーザーのリポジトリ）は /Users/cancer/.claude/skills/verify-task-workspace/fixture-src/repo です。
 
 ユーザー: 「counter.py の出力まわりが今どうなってるか、まず調べて関連ファイルと注意点を教えて」
 あなた: 「調査に出しました」
