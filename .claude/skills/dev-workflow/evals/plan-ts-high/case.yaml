@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: plan-ts-high
+expected_outcome: |
+  機械的チェックの後、レビューの前に diff 限定のミューテーションを頭脳が実行し、生き残りは差し戻し、不当な accept は差し戻す

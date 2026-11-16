@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: plan-ts-mid
+expected_outcome: |
+  effort mid ではミューテーションを回さず、verify-task と test-review だけを回す

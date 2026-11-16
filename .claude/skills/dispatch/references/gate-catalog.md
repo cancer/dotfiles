@@ -13,6 +13,7 @@
   - verify-task（機能の完了）は effort に依らず常に回す
   - mid: test-review。拾う指摘は重要度 high / mid（low は落とす）
   - high: test-review ＋ code-review ＋ 統合後レビュー。low まで拾う
+  - high では、レビューの前にタスクの diff に限ったミューテーションを回す（2026-11-13 追加、2026-11-16 に mid から外す）
 - effort は呼び出し側の LLM が会話から判断して渡す。Jev は使わない
 - PR は effort に含めない。dev-workflow は PR を作らず、作業ブランチへの統合とコミットで終える。PR が要るかは主スレッド（companion）が決め、`create-pr` を呼ぶ。PR と issue は 1:1 ではないので `Closes #` の自動付与はしない（2026-11-09）
 
