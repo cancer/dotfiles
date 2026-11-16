@@ -401,47 +401,65 @@ function parseIstanbul(filePath) {
   return result;
 }
 
-/** Stryker の report JSON と cargo-mutants の outcomes.json に対応。 */
+// 変異の結果を「殺された / 生き残った」に分ける。どちらにも入らない状態
+// （Stryker の CompileError・RuntimeError・Ignored・Pending、cargo-mutants の Unviable・
+// ベースライン）は、テストが振る舞いを固定できているかの判定材料にならないので数えない。
+const STRYKER_KILLED = ["Killed", "Timeout"];
+const STRYKER_SURVIVED = ["Survived", "NoCoverage"];
+const CARGO_KILLED = ["CaughtMutant", "Timeout"];
+const CARGO_SURVIVED = ["MissedMutant"];
+
+/**
+ * Stryker の report JSON（mutation-testing-elements スキーマ。mizchi/mutator も同形式）と
+ * cargo-mutants の outcomes.json に対応。殺された変異と生き残った変異を両方返す。
+ */
 function parseMutation(filePath) {
   const data = loadJson(filePath);
-  const survived = [];
+  const mutants = [];
   if (isDict(data) && "files" in data) {
-    // Stryker
+    // Stryker / mutator
     for (const [file, entry] of Object.entries(data.files)) {
       for (const mutant of get(entry, "mutants", [])) {
-        if (["Survived", "NoCoverage"].includes(get(mutant, "status"))) {
-          survived.push({
-            file,
-            line: get(get(get(mutant, "location", {}), "start", {}), "line"),
-            mutator: get(mutant, "mutatorName"),
-            status: get(mutant, "status"),
-            description: get(mutant, "description") || get(mutant, "replacement"),
-          });
+        const status = get(mutant, "status");
+        const outcome = STRYKER_KILLED.includes(status) ? "killed" : STRYKER_SURVIVED.includes(status) ? "survived" : null;
+        if (outcome === null) {
+          continue;
         }
+        mutants.push({
+          file,
+          line: get(get(get(mutant, "location", {}), "start", {}), "line"),
+          mutator: get(mutant, "mutatorName"),
+          status,
+          outcome,
+          description: get(mutant, "description") || get(mutant, "replacement"),
+        });
       }
     }
   } else if (isDict(data) && "outcomes" in data) {
     // cargo-mutants
-    for (const outcome of data.outcomes) {
-      if (get(outcome, "summary") !== "MissedMutant") {
+    for (const result of data.outcomes) {
+      const summary = get(result, "summary");
+      const outcome = CARGO_KILLED.includes(summary) ? "killed" : CARGO_SURVIVED.includes(summary) ? "survived" : null;
+      if (outcome === null) {
         continue;
       }
-      const mutant = get(get(outcome, "scenario") || {}, "Mutant") || {};
+      const mutant = get(get(result, "scenario") || {}, "Mutant") || {};
       // cargo-mutants は行番号を span.start.line に持つ。バージョン差で
       // トップレベル line を持つ形も許容する（無い側を None にしない）
       const spanLine = get(get(get(mutant, "span") || {}, "start") || {}, "line");
-      survived.push({
+      mutants.push({
         file: get(mutant, "file"),
         line: get(mutant, "line") || spanLine,
         mutator: get(mutant, "genre") || get(mutant, "replacement"),
-        status: "MissedMutant",
+        status: summary,
+        outcome,
         description: isDict(get(mutant, "function"))
           ? get(mutant.function, "function_name")
           : get(mutant, "replacement"),
       });
     }
   }
-  return survived;
+  return mutants;
 }
 
 /** `Path(p).resolve()` 相当。シンボリックリンクを解決する（`/tmp` → `/private/tmp`）。 */
@@ -474,7 +492,7 @@ function normalizePath(p, repoRoot) {
   return rel === null ? p.replace(/^[./]+/, "") : rel;
 }
 
-function intersectWithTargets(coverage, survived, targets) {
+function intersectWithTargets(coverage, mutants, targets) {
   const repoRoot = resolvePath(process.cwd());
   const covByRel = new Map();
   for (const [key, value] of coverage) {
@@ -485,6 +503,7 @@ function intersectWithTargets(coverage, survived, targets) {
       uncovered_changed_lines: [],
       uncovered_changed_branches: [],
       survived_mutants_in_changed: [],
+      mutants_by_function: [],
       note: "targets 未指定のため変更範囲との突き合わせは未実施",
     };
   }
@@ -492,6 +511,7 @@ function intersectWithTargets(coverage, survived, targets) {
   const uncoveredLines = [];
   const uncoveredBranches = [];
   const survivedInChanged = [];
+  const mutantsByFunction = [];
   for (const target of get(targets, "targets", [])) {
     const fileRel = normalizePath(target.file, repoRoot);
     const changed = new Set();
@@ -511,19 +531,41 @@ function intersectWithTargets(coverage, survived, targets) {
         uncoveredBranches.push({ file: fileRel, function: target.function, branches: hitBranches });
       }
     }
-    for (const mutant of survived) {
+    let killed = 0;
+    let survivedCount = 0;
+    for (const mutant of mutants) {
       if (get(mutant, "file") === null || get(mutant, "line") === null) {
         continue;
       }
-      if (normalizePath(mutant.file, repoRoot) === fileRel && changed.has(mutant.line)) {
-        survivedInChanged.push({ ...mutant, file: fileRel, function: target.function });
+      if (normalizePath(mutant.file, repoRoot) !== fileRel || !changed.has(mutant.line)) {
+        continue;
       }
+      if (mutant.outcome === "killed") {
+        killed += 1;
+        continue;
+      }
+      survivedCount += 1;
+      const { outcome: _outcome, ...rest } = mutant;
+      survivedInChanged.push({ ...rest, file: fileRel, function: target.function });
+    }
+    // 変異が 1 件も突き合わなかった関数は載せない。「全て殺された」と
+    // 「突き合わせ無し（変異が生成されない・パス基準のずれ）」を混同させないため
+    if (killed + survivedCount > 0) {
+      mutantsByFunction.push({
+        file: fileRel,
+        function: target.function,
+        total: killed + survivedCount,
+        killed,
+        survived: survivedCount,
+        all_killed: survivedCount === 0,
+      });
     }
   }
   return {
     uncovered_changed_lines: uncoveredLines,
     uncovered_changed_branches: uncoveredBranches,
     survived_mutants_in_changed: survivedInChanged,
+    mutants_by_function: mutantsByFunction,
   };
 }
 
@@ -559,14 +601,15 @@ function main() {
     }
   }
 
-  const survived = [];
+  const mutants = [];
   for (const p of args.mutationJson) {
-    survived.push(...parseMutation(p));
+    mutants.push(...parseMutation(p));
   }
+  const survived = mutants.filter((m) => m.outcome === "survived").map(({ outcome: _outcome, ...rest }) => rest);
 
   const targets = args.targets ? loadJson(args.targets) : null;
   const [tests, findings] = aggregateTests(records, args.slowThresholdMs);
-  const crossed = intersectWithTargets(coverage, survived, targets);
+  const crossed = intersectWithTargets(coverage, mutants, targets);
 
   const notMeasured = [];
   if (records.length === 0) {
@@ -581,11 +624,8 @@ function main() {
   if (coverage.size === 0) {
     notMeasured.push("カバレッジ");
   }
-  if (survived.length === 0) {
-    // --mutation-json を渡したのに生存変異が 0 件なのは「未計測」ではない
-    if (args.mutationJson.length === 0) {
-      notMeasured.push("ミューテーションテスト");
-    }
+  if (args.mutationJson.length === 0) {
+    notMeasured.push("ミューテーションテスト");
   }
 
   const summary = {
@@ -593,6 +633,7 @@ function main() {
     tests: tests.length,
     coverage_files: coverage.size,
     survived_mutants_total: survived.length,
+    killed_mutants_total: mutants.length - survived.length,
   };
   for (const f of findings) {
     summary[f.kind] = get(summary, f.kind, 0) + 1;

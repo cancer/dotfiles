@@ -10,7 +10,8 @@
 | 同（Jest） | `jest --json --outputFile=reports/jest.json` | `--test-json reports/jest.json` |
 | カバレッジ (istanbul) | `vitest run --coverage --coverage.reporter=json` → `coverage/coverage-final.json` | `--coverage-json coverage/coverage-final.json` |
 | カバレッジ (LCOV) | `vitest run --coverage --coverage.reporter=lcov` → `coverage/lcov.info` | `--coverage-lcov coverage/lcov.info` |
-| ミューテーション | `npx stryker run --reporters json` → `reports/mutation/mutation.json` | `--mutation-json reports/mutation/mutation.json` |
+| ミューテーション（mutator） | `npx mutator --since <base> --reporter json` → `.mutator/report/mutation.json`（[mizchi/mutator](https://github.com/mizchi/mutator)。Node 24 以上・Vitest 5。TS 7 も型検査できる） | `--mutation-json .mutator/report/mutation.json` |
+| ミューテーション（Stryker） | `npx stryker run --reporters json` → `reports/mutation/mutation.json` | `--mutation-json reports/mutation/mutation.json` |
 
 `coverage-summary.json`（json-summary）には行情報が無いため、変更行との突き合わせには使えない。`coverage-final.json` か LCOV を使う。
 
@@ -21,7 +22,7 @@
 | 実行結果・実行時間 | `cargo nextest run --message-format libtest-json > reports/nextest.jsonl`（要 `NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1`） | `--nextest-json reports/nextest.jsonl` |
 | 同（標準） | `cargo test -- -Z unstable-options --format json --report-time > reports/test.jsonl`（nightly） | `--nextest-json reports/test.jsonl` |
 | カバレッジ | `cargo llvm-cov --lcov --output-path reports/lcov.info` / `cargo tarpaulin --out Lcov` | `--coverage-lcov reports/lcov.info` |
-| ミューテーション | `cargo mutants --json`（`mutants.out/outcomes.json`） | `--mutation-json mutants.out/outcomes.json` |
+| ミューテーション | `cargo mutants --json`（`mutants.out/outcomes.json`）。diff に限るなら `git diff <base> > x.diff && cargo mutants --in-diff x.diff --json` | `--mutation-json mutants.out/outcomes.json` |
 
 ## 実行間のばらつき・不安定さ
 

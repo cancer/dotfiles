@@ -36,7 +36,7 @@ $ARGUMENTS
 | `--test-json <file>` | Vitest / Jest の JSON レポート。**複数指定すると実行間のばらつき・不安定さを比較する** |
 | `--nextest-json <file>` | cargo nextest / cargo test の libtest JSON。複数指定可 |
 | `--coverage-lcov` / `--coverage-json` | LCOV（llvm-cov, tarpaulin, vitest）/ istanbul coverage-final.json |
-| `--mutation-json <file>` | Stryker の report JSON または cargo-mutants の outcomes.json |
+| `--mutation-json <file>` | mutation-testing-elements 形式の report JSON（mizchi/mutator・Stryker）または cargo-mutants の outcomes.json |
 | `--slow-threshold-ms <n>` | 遅いテストの閾値（既定 1000） |
 
 レポート系引数は任意である。渡されなかった種別はスクリプトが `not_measured` として返すので、**「未計測」と「問題なし」を区別して報告する**。レポートの生成コマンドは `references/report-inputs.md` にまとめてある。レポートが渡されていない場合は、該当コマンドを出力に記載する（実行はしない。実行するかどうかは読み手が決める）。
@@ -134,7 +134,7 @@ node "$SKILL_DIR/scripts/collect_metrics.mjs" [レポート引数...] --targets 
 
 `targets.json` / `scan.json` / `metrics.json` を読み、指摘候補の元になったテストコードと実装コードを実際に開いて確認する。JSON だけで指摘を書くと、根拠の引用が実物と食い違う。
 
-観点と判断基準は `references/review-lenses.md` を読んで適用する（テストの深さとレベル配置、上位テストによる下位ロジックの代替、テスト意図の表現、実装内部手順への結合、生き残った変異の解釈、指摘と質問の切り分け）。
+観点と判断基準は `references/review-lenses.md` を読んで適用する（テストの深さとレベル配置、上位テストによる下位ロジックの代替、テスト意図の表現、実装内部手順への結合、生き残った変異の解釈と、変異が全て殺された関数での推測の省略、指摘と質問の切り分け）。
 
 仕様資料・既知の不具合情報がユーザーから渡されている場合は、テストがその仕様のどの命題を固定しているかを対応付ける。渡されていない場合、仕様の妥当性は判断しない。
 
