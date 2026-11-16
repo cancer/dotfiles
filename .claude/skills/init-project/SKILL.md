@@ -60,7 +60,7 @@ knip は JS/TS を対象とするため、`rust` 系統には置かない。
 
 **設定ファイルが要るのは Workers 系統だけである。** C3 の `vitest.config.mts` は `test` キーを持たないため、knip の Vitest プラグインがテストファイルの entry を導出できず、`test/index.spec.ts` を `Unused files` として報告する（`knip --debug` で、この設定から得られた entry が `src/vite-env.d.ts` だけであることを確認した）。加えて `cloudflare:test` の import が未宣言の依存 `cloudflare` として報告される。両方を `assets/knip-workers.json` で吸収する。`lib` / `web` 系統は設定ファイル無しで exit 0 になる（実測で確認した）。
 
-ミューテーションテストは検査項目に含めない。TypeScript では Stryker が TypeScript 7 に未対応で導入できないという外的制約があり、Rust では `cargo-mutants` を導入するが CI では走らせない（全変異ごとにスイートを回すため実行時間が読めない）。
+ミューテーションテストは検査項目に含めない。実行するのは `dev-workflow` の検収で、タスクの diff に限って頭脳が走らせる（`~/.claude/skills/dev-workflow/SKILL.md` Phase 3「ミューテーション」）。CI では走らせない（全体を対象にすると全変異ごとにスイートを回すため実行時間が読めない）。TypeScript では Stryker が TypeScript 7 に未対応だが、[mizchi/mutator](https://github.com/mizchi/mutator) は TS 7 を native API で型検査でき（同リポジトリ `docs/design.md`）、Node 24 以上・Vitest 5 の `lib` / `web` 系統で使える。`workers` 系統（`@cloudflare/vitest-plugin` で workerd 上に実行）で mutator の計装が効くかは未検証なので、使う前に実測する。Rust では `cargo-mutants` を導入する。
 
 ## 系統
 
@@ -152,7 +152,7 @@ scaffolder の tsconfig を書き換えて `test/` を含めるやり方は採�
 - カバレッジ閾値 90 が保持線であること
 - 未使用検出（knip）も同じ保持線であること。node 系統のみに置いていること
 - placeholder テストは最初の実装で差し替える前提であること
-- ミューテーションテストを入れていない理由（Stryker が TS 7 未対応）と、対応後に再検討すること
+- ミューテーションテストは CI に入れず、`dev-workflow` の検収で diff に限って実行すること（TS は mizchi/mutator、Rust は cargo-mutants。`workers` 系統の mutator は未検証）
 - Workers 系統なら Workers Builds の接続手順（後述）
 
 開発規律（テストファースト・実装の進め方・PR の作り方）は**本文をコピーせず、`~/.claude/skills/<name>/SKILL.md` の絶対パスを参照する形で書く**。コピーするとスキル側の更新に追随しなくなる。

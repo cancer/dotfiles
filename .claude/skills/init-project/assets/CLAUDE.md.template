@@ -31,7 +31,7 @@
 
 カバレッジ・実行結果・ミューテーションのレポートを使ったテストのレビューは `~/.claude/skills/test-review/SKILL.md` の手順で行う。`npm run coverage` が出す `coverage/coverage-final.json` をそのまま `--coverage-json` に渡せる。
 
-ミューテーションテストは**導入していない**。理由は Stryker が TypeScript 7 に対応しておらず、現時点で導入できないことである。価値を否定しての除外ではないので、Stryker が TS 7 に対応したら再検討する。
+ミューテーションテストは **CI に入れていない**。全体を対象にすると実行時間が読めないためである。`~/.claude/skills/dev-workflow/SKILL.md` の検収で、タスクの diff に限って [mizchi/mutator](https://github.com/mizchi/mutator) を実行する（`npx mutator --since <base> --fail-on-survived --reporter json`。出力の `.mutator/report/mutation.json` を `--mutation-json` に渡せる）。Stryker は TypeScript 7 に未対応なので使わない。Workers 系統（workerd 上で実行）で mutator が動くかは未検証である。
 
 ## placeholder テスト
 
