@@ -31,7 +31,7 @@ class JudgeStateTests(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
-    def run_judge(self, answers, kind=None):
+    def run_judge(self, answers, kind=None, interpretation=None, answered=None):
         environment = os.environ.copy()
         environment["DIRECTOR_JUDGE_SCRIPT"] = str(self.stub)
         environment["DIRECTOR_ANSWERS"] = json.dumps(answers)
@@ -39,31 +39,97 @@ class JudgeStateTests(unittest.TestCase):
                    "--thresholds", str(ROOT / "thresholds.json"), "--out", str(self.output), "--log", str(self.log)]
         if kind:
             command.extend(["--kind", kind])
+        if interpretation is not None:
+            path = self.root / "interpretation.json"
+            path.write_text(json.dumps({"items": interpretation}, ensure_ascii=False), encoding="utf-8")
+            command.extend(["--interpretation", str(path)])
+        if answered is not None:
+            path = self.root / "answered.txt"
+            path.write_text("\n".join(answered), encoding="utf-8")
+            command.extend(["--answered-file", str(path)])
         return subprocess.run(command, text=True, capture_output=True, env=environment)
 
-    def test_none_returns_kind_probabilities_and_ask_without_second_query(self):
+    def implement_answers(self, **overrides):
+        catalog = json.loads((ROOT / "catalog.json").read_text())
+        answers = {}
+        for item_id, item in catalog["items"].items():
+            if item_id.startswith("implement."):
+                answers.update({question_id: {"type": "noul", "noul": 0.9} for question_id in item["questions"]})
+                answers.update({f"{item_id}.{name}": {"type": "noul", "noul": 0.9} for name in catalog["item_questions"]})
+        for common in catalog["common"].values():
+            answers.update({question_id: {"type": "noul", "noul": 0.1} for question_id in common["questions"]})
+        answers.update({key: {"type": "noul", "noul": value} for key, value in overrides.items()})
+        return answers
+
+    def test_none_returns_kind_null_with_message_without_second_query(self):
         answers = {"kind": {"type": "choice", "choice": "none", "probabilities": {"none": 0.8, "implement": 0.1, "know": 0.05, "write": 0.05}}}
         result = self.run_judge(answers)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads(self.output.read_text()), {"kind": None, "kind_probabilities": answers["kind"]["probabilities"], "ask": "何を受け取りたいか"})
+        response = json.loads(self.output.read_text())
+        self.assertIsNone(response["kind"])
+        self.assertFalse(response["ready"])
+        self.assertIn("何を受け取りたいですか", response["message"])
 
-    def test_kind_override_uses_empty_probabilities_and_requires_all_items_and_no_contradiction(self):
-        answers = {"implement.target": {"type": "noul", "noul": 0.7}, "implement.completion": {"type": "noul", "noul": 0.9},
-                   "implement.out_of_scope": {"type": "noul", "noul": 0.9}, "implement.constraints": {"type": "noul", "noul": 0.9},
-                   "implement.deliverable": {"type": "noul", "noul": 0.9}, "implement.rejected_policy": {"type": "noul", "noul": 0.9},
-                   "common.contradiction": {"type": "noul", "noul": 0.1}}
-        result = self.run_judge(answers, "implement")
+    def test_kind_without_interpretation_stops_after_layer_one(self):
+        answers = {"kind": {"type": "choice", "choice": "implement", "probabilities": {"implement": 0.9, "know": 0.05, "write": 0.03, "none": 0.02}}}
+        result = self.run_judge(answers)
         self.assertEqual(result.returncode, 0, result.stderr)
         response = json.loads(self.output.read_text())
-        self.assertEqual(response["kind_probabilities"], {})
+        self.assertEqual(response["kind"], "implement")
+        self.assertNotIn("items", response)
+
+    def test_all_questions_pass_makes_ready(self):
+        result = self.run_judge(self.implement_answers(), "implement", {})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
         self.assertTrue(response["ready"])
-        self.assertEqual(response["items"]["implement.target"]["verdict"], "yes")
+        self.assertEqual(response["message"], "")
+
+    def test_failed_question_is_shown_with_value_default_and_ask(self):
+        interpretation = {"implement.completion": {"value": "整理の完了まで", "source": "user"}}
+        result = self.run_judge(self.implement_answers(**{"implement.completion.end_state": 0.21}), "implement", interpretation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
+        self.assertFalse(response["ready"])
+        self.assertEqual(response["items"]["implement.completion"]["status"], "ask")
+        message = response["message"]
+        self.assertIn("implement.completion で止まっています", message)
+        self.assertIn("「整理の完了まで」", message)
+        self.assertIn("範囲語", message)
+        self.assertNotIn("確認手段", message)
+        self.assertIn("既定値: 既存のテストと lint が通る", message)
+        self.assertIn("→ 何ができていれば完了ですか", message)
+
+    def test_answered_item_does_not_block(self):
+        result = self.run_judge(self.implement_answers(**{"implement.completion.end_state": 0.5}), "implement", {}, ["implement.completion"])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
+        self.assertEqual(response["items"]["implement.completion"]["status"], "answered")
+        self.assertTrue(response["ready"])
+
+    def test_unsupported_content_names_the_item(self):
+        interpretation = {"implement.completion": {"value": "追加の 1 件が通る", "source": "推測"}}
+        result = self.run_judge(self.implement_answers(**{"implement.completion.supported": 0.4}), "implement", interpretation)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
+        self.assertEqual(response["items"]["implement.completion"]["status"], "ask")
+        self.assertIn("implement.completion で止まっています", response["message"])
+        self.assertIn("解釈の implement.completion に書かれた内容は", response["message"])
+
+    def test_contradiction_blocks_and_is_shown(self):
+        result = self.run_judge(self.implement_answers(**{"common.contradiction.conflict": 0.8}), "implement", {})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
+        self.assertFalse(response["ready"])
+        self.assertIn("common.contradiction で止まっています", response["message"])
 
     def test_judge_failure_is_reported_without_output(self):
         environment = os.environ.copy()
         environment["DIRECTOR_JUDGE_SCRIPT"] = str(self.root / "missing.py")
+        interpretation = self.root / "interpretation.json"
+        interpretation.write_text('{"items": {}}', encoding="utf-8")
         result = subprocess.run([sys.executable, str(SCRIPT), "--state-file", str(self.state), "--catalog", str(ROOT / "catalog.json"),
-                                 "--thresholds", str(ROOT / "thresholds.json"), "--kind", "implement", "--out", str(self.output), "--log", str(self.log)],
+                                 "--thresholds", str(ROOT / "thresholds.json"), "--kind", "implement", "--interpretation", str(interpretation), "--out", str(self.output), "--log", str(self.log)],
                                 text=True, capture_output=True, env=environment)
         self.assertEqual(result.returncode, 1)
         self.assertIn("judge_state.py:", result.stderr)

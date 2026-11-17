@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Ask Jev to classify a conversation state and assess its declared requirements."""
+"""Ask Jev to classify a conversation state and check each interpreted item against fixed questions."""
 
 import argparse
 import json
@@ -38,6 +38,76 @@ def verdict(probability, thresholds):
     return "ask"
 
 
+def judge_kind(state_file, catalog, thresholds, log_file):
+    answer = call_judge(state_file, {"kind": catalog["kind"]}, log_file)["kind"]
+    choice = answer["choice"]
+    probabilities = answer.get("probabilities")
+    if not isinstance(probabilities, dict):
+        probabilities = choice if isinstance(choice, dict) else {}
+    kind = choice if isinstance(choice, str) else max(probabilities, key=probabilities.get)
+    if kind == "none" or probabilities.get(kind, 0) < thresholds["yes"]:
+        return None, probabilities
+    return kind, probabilities
+
+
+def assess(entries, answers, thresholds, passing):
+    """Return {entry id: {questions, passed}} where passing is the verdict every question must reach."""
+    assessed = {}
+    for entry_id, entry in entries.items():
+        questions = {}
+        for question_id, text in entry["questions"].items():
+            probability = answers[question_id]["noul"]
+            questions[question_id] = {"text": text, "noul": probability, "verdict": verdict(probability, thresholds)}
+        assessed[entry_id] = {"questions": questions, "passed": all(question["verdict"] == passing for question in questions.values())}
+    return assessed
+
+
+def describe_item(item_id, item, catalog_item):
+    lines = [f"{item_id} で止まっています"]
+    if item["value"]:
+        lines.append(f"  解釈の値: 「{item['value']}」（出どころ: {item['source']}）")
+    else:
+        lines.append("  解釈の値: なし")
+    for question in item["questions"].values():
+        if question["verdict"] != "yes":
+            lines.append(f"  満たしていない条件: {question['text']}（{question['verdict']}, noul {question['noul']}）")
+    default = catalog_item["default"]
+    lines.append(f"  既定値: {default['value']}（出どころ: {default['source']}）" if default else "  既定値: なし")
+    lines.append(f"→ {catalog_item['ask']}")
+    return "\n".join(lines)
+
+
+def describe_common(common_id, common, catalog_common):
+    lines = [f"{common_id} で止まっています"]
+    for question in common["questions"].values():
+        if question["verdict"] != "no":
+            lines.append(f"  該当すると判定された条件: {question['text']}（{question['verdict']}, noul {question['noul']}）")
+    lines.append(f"→ {catalog_common['ask']}")
+    return "\n".join(lines)
+
+
+def judge_items(state_file, catalog, thresholds, log_file, kind, interpretation, answered):
+    item_catalog = {item_id: {**item, "questions": {**item["questions"], **{f"{item_id}.{name}": text.format(item=item_id) for name, text in catalog["item_questions"].items()}}}
+                    for item_id, item in catalog["items"].items() if item_id.startswith(kind + ".")}
+    common_catalog = catalog["common"]
+    questions = {question_id: {"type": "noul", "instructions": text}
+                 for entry in [*item_catalog.values(), *common_catalog.values()]
+                 for question_id, text in entry["questions"].items()}
+    answers = call_judge(state_file, questions, log_file)
+    items = {}
+    for item_id, result in assess(item_catalog, answers, thresholds, "yes").items():
+        interpreted = interpretation.get(item_id, {})
+        status = "ok" if result["passed"] else ("answered" if item_id in answered else "ask")
+        items[item_id] = {"value": interpreted.get("value", ""), "source": interpreted.get("source", "none"),
+                          "questions": result["questions"], "status": status}
+    commons = {}
+    for common_id, result in assess(common_catalog, answers, thresholds, "no").items():
+        commons[common_id] = {"questions": result["questions"], "status": "ok" if result["passed"] else "ask"}
+    messages = [describe_item(item_id, item, item_catalog[item_id]) for item_id, item in items.items() if item["status"] == "ask"]
+    messages += [describe_common(common_id, common, common_catalog[common_id]) for common_id, common in commons.items() if common["status"] == "ask"]
+    return {"items": items, "common": commons, "ready": not messages, "message": "\n\n".join(messages)}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state-file", required=True)
@@ -46,39 +116,27 @@ def main(argv=None):
     parser.add_argument("--out", required=True)
     parser.add_argument("--log", required=True)
     parser.add_argument("--kind", choices=("implement", "know", "write"))
+    parser.add_argument("--interpretation", help="interpretation.json。無ければ種類の判定だけ行う")
+    parser.add_argument("--answered-file", help="一度聞いて答えを得た項目 ID を 1 行に 1 つ")
     args = parser.parse_args(argv)
     try:
         catalog = json.loads(Path(args.catalog).read_text(encoding="utf-8"))
         thresholds = json.loads(Path(args.thresholds).read_text(encoding="utf-8"))
         probabilities = {}
-        if args.kind:
-            kind = args.kind
+        kind = args.kind
+        if not kind:
+            kind, probabilities = judge_kind(args.state_file, catalog, thresholds, args.log)
+        if kind is None:
+            output = {"kind": None, "kind_probabilities": probabilities, "ready": False,
+                      "message": "成果物の種類が決まっていません\n→ 何を受け取りたいですか（実装 / 調査結果 / 文書）"}
+        elif not args.interpretation:
+            output = {"kind": kind, "kind_probabilities": probabilities, "ready": False,
+                      "message": "種類が決まりました。interpretation.json を書いて、--kind と --interpretation を付けて判定し直してください"}
         else:
-            answer = call_judge(args.state_file, {"kind": {key: value for key, value in catalog["kind"].items() if key != "ask"}}, args.log)["kind"]
-            choice = answer["choice"]
-            probabilities = answer.get("probabilities")
-            if not isinstance(probabilities, dict):
-                probabilities = choice if isinstance(choice, dict) else {}
-            kind = choice if isinstance(choice, str) else max(probabilities, key=probabilities.get)
-            if kind == "none" or probabilities.get(kind, 0) < thresholds["yes"]:
-                output = {"kind": None, "kind_probabilities": probabilities, "ask": "何を受け取りたいか"}
-                Path(args.out).write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-                return 0
-        item_ids = [key for key in catalog if key.startswith(kind + ".")] + ["common.contradiction"]
-        questions = {key: {name: value for name, value in catalog[key].items() if name != "ask"} for key in item_ids}
-        answers = call_judge(args.state_file, questions, args.log)
-        items = {}
-        for key in item_ids:
-            probability = answers[key]["noul"]
-            decision = verdict(probability, thresholds)
-            ask = catalog[key]["ask"] if (key == "common.contradiction" and decision in ("yes", "ask")) or (key != "common.contradiction" and decision in ("no", "ask")) else None
-            entry = {"noul": probability, "verdict": decision, "ask": ask}
-            if key == "common.contradiction":
-                contradiction = entry
-            else:
-                items[key] = entry
-        output = {"kind": kind, "kind_probabilities": probabilities, "items": items, "contradiction": contradiction,
-                  "ready": all(item["verdict"] == "yes" for item in items.values()) and contradiction["verdict"] == "no"}
+            interpretation = json.loads(Path(args.interpretation).read_text(encoding="utf-8"))["items"]
+            answered = set(Path(args.answered_file).read_text(encoding="utf-8").split()) if args.answered_file else set()
+            output = {"kind": kind, "kind_probabilities": probabilities,
+                      **judge_items(args.state_file, catalog, thresholds, args.log, kind, interpretation, answered)}
         Path(args.out).write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return 0
     except (OSError, UnicodeError, json.JSONDecodeError, KeyError, TypeError, ValueError, RuntimeError) as error:

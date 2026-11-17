@@ -28,12 +28,34 @@ class BuildStateTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             state = output.read_text(encoding="utf-8")
-            self.assertLess(state.index("ユーザー発言の引用"), state.index("依頼の原文"))
+            self.assertLess(state.index("解釈"), state.index("ユーザー発言の引用"))
+            self.assertLess(state.index("ユーザー発言の引用"), state.index("ユーザーが承認した提案"))
+            self.assertLess(state.index("ユーザーが承認した提案"), state.index("依頼の原文"))
             self.assertLess(state.index("依頼の原文"), state.index("事実"))
             self.assertIn(".git: あり", state)
             self.assertIn("マニフェスト: pyproject.toml", state)
             self.assertIn("既存テスト: あり", state)
             self.assertIn('「この範囲だけ」', state)
+
+    def test_renders_interpretation_and_approved_proposal(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            quotes = root / "quotes.txt"
+            quotes.write_text("ユーザー: 「じゃぁそれを採用しようか」\n", encoding="utf-8")
+            approved = root / "approved.txt"
+            approved.write_text("提案: Zettelkasten で整理する\n承認: 「じゃぁそれを採用しようか」\n", encoding="utf-8")
+            interpretation = root / "interpretation.json"
+            interpretation.write_text('{"items": {"implement.deliverable": {"value": "PR", "source": "default"}}}', encoding="utf-8")
+            output = root / "state.txt"
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--user-quotes", str(quotes), "--approved", str(approved),
+                 "--interpretation", str(interpretation), "--out", str(output)],
+                text=True, capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = output.read_text(encoding="utf-8")
+            self.assertIn("- implement.deliverable: PR（出どころ: default）", state)
+            self.assertIn("提案: Zettelkasten で整理する", state)
 
     def test_queries_github_reference_through_gh(self):
         with tempfile.TemporaryDirectory() as temporary:

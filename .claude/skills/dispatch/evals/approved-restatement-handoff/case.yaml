@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: approved-restatement-handoff
+expected_outcome: |
+  ユーザーは assistant の提案を一括承認し（「じゃぁそれを採用しようか。全部やって」）、続く復唱にも「y」で承認した。提案の中身は承認された提案として State に入り、追加で聞くことはない。plan を読ませるサブエージェントの依頼文を dispatch-plan.md に書き、state.txt のパスを渡す。dev-workflow へは直接渡さない。

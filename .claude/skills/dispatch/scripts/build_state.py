@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Build a source-only companion state from supplied text and repository facts."""
+"""Build the companion state: interpreted items, the user's quotes and approved proposals as evidence, and repository facts."""
 
 import argparse
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -39,7 +40,6 @@ def issue_kind(reference):
     endpoint = f"repos/{owner}/{repository}/issues/{number}"
     try:
         result = subprocess.run(["gh", "api", endpoint], text=True, capture_output=True, check=True)
-        import json
         return "PR" if json.loads(result.stdout).get("pull_request") else "issue"
     except (OSError, subprocess.CalledProcessError, ValueError):
         print("build_state.py: gh api で issue / PR 種別を確認できませんでした", file=sys.stderr)
@@ -65,9 +65,18 @@ def collect_facts(cwd_arg, reference, plan):
     ]
 
 
+def render_interpretation(path):
+    if not path:
+        return ""
+    items = json.loads(Path(path).read_text(encoding="utf-8"))["items"]
+    return "\n".join(f"- {item_id}: {item.get('value') or 'なし'}（出どころ: {item.get('source', 'none')}）" for item_id, item in items.items())
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--user-quotes", required=True)
+    parser.add_argument("--approved", help="ユーザーが承認した提案の原文と、承認した発言の引用")
+    parser.add_argument("--interpretation", help="interpretation.json")
     parser.add_argument("--request")
     parser.add_argument("--worker-report")
     parser.add_argument("--cwd")
@@ -76,18 +85,21 @@ def main(argv=None):
     parser.add_argument("--out", required=True)
     args = parser.parse_args(argv)
     try:
-        sections = ["ユーザー発言の引用\n" + read_optional(args.user_quotes).rstrip(),
-                    "依頼の原文\n" + read_optional(args.request).rstrip(),
-                    "事実\nスクリプト収集分:\n- " + "\n- ".join(collect_facts(args.cwd, args.ref, args.plan))]
+        facts = "事実\nスクリプト収集分:\n- " + "\n- ".join(collect_facts(args.cwd, args.ref, args.plan))
         report = read_optional(args.worker_report).rstrip()
         if report:
-            sections[2] += "\n作業係の報告:\n" + report
+            facts += "\n作業係の報告:\n" + report
+        sections = ["解釈（companion がユーザー発言から書いた項目。下の引用・承認された提案・既定値が根拠）\n" + render_interpretation(args.interpretation),
+                    "ユーザー発言の引用\n" + read_optional(args.user_quotes).rstrip(),
+                    "ユーザーが承認した提案\n" + read_optional(args.approved).rstrip(),
+                    "依頼の原文\n" + read_optional(args.request).rstrip(),
+                    facts]
         state = "\n\n".join(sections) + "\n"
         if len(state) > MAX_STATE_LENGTH:
             raise ValueError(f"State が {MAX_STATE_LENGTH} 字を超えています")
         Path(args.out).write_text(state, encoding="utf-8")
         return 0
-    except (OSError, UnicodeError, ValueError) as error:
+    except (OSError, UnicodeError, ValueError, KeyError) as error:
         print(f"build_state.py: {error}", file=sys.stderr)
         return 1
 

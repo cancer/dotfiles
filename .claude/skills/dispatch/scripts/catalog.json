@@ -1,7 +1,7 @@
 {
   "kind": {
     "type": "choice",
-    "instructions": "会話が何で終わるかで成果物の種類を判定する",
+    "instructions": "会話が何で終わるかで成果物の種類を判定する。ユーザー発言の引用と、ユーザーが承認した提案を読む",
     "criteria": {
       "implement": "コードが変わる",
       "know": "答えを知って終わる（調査、コードベースの把握、仕様の点検）",
@@ -9,18 +9,137 @@
       "none": "作業の依頼がまだ形になっていない（感想、質問、思考の途中、雑談）"
     }
   },
-  "implement.target": {"type": "noul", "instructions": "作業する対象（リポジトリ、issue、PR、ファイル）が特定されているか", "ask": "どこに対して作業するか"},
-  "implement.completion": {"type": "noul", "instructions": "完了条件が、実行して合否が一つに決まる形で述べられているか", "ask": "何が動けば完成か"},
-  "implement.out_of_scope": {"type": "noul", "instructions": "今回やらないこと（対象外）が述べられているか", "ask": "作らないものは何か"},
-  "implement.constraints": {"type": "noul", "instructions": "守るべき制約（変えないもの、既存の設計、規約）が述べられているか", "ask": "触ってはいけない範囲は"},
-  "implement.deliverable": {"type": "noul", "instructions": "受け取りたい成果物の形（PR / コミット / 動くもの）が述べられているか", "ask": "何を受け取りたいか"},
-  "implement.rejected_policy": {"type": "noul", "instructions": "却下した案と確定した方針が引用で残っているか", "ask": "（復唱して肯定を取る）"},
-  "know.question": {"type": "noul", "instructions": "知りたい問いが 1 文で述べられているか", "ask": "何を知りたいか"},
-  "know.answer_shape": {"type": "noul", "instructions": "答えの形（可否、比較表、手順、原因、該当箇所）が述べられているか", "ask": "どういう形で欲しいか"},
-  "know.scope": {"type": "noul", "instructions": "範囲（リポジトリ、ライブラリ、バージョン、環境）が特定されているか", "ask": "対象は何か"},
-  "write.reader": {"type": "noul", "instructions": "読者が述べられているか", "ask": "誰向けか"},
-  "write.medium": {"type": "noul", "instructions": "媒体（社内ブログ、外部記事、README）が述べられているか", "ask": "どこに載せるか"},
-  "write.topic_conclusion": {"type": "noul", "instructions": "題材と結論が述べられているか", "ask": "何を伝えたいか"},
-  "write.length_deadline": {"type": "noul", "instructions": "分量や締切が述べられているか", "ask": "どのくらいの長さか"},
-  "common.contradiction": {"type": "noul", "instructions": "最新の確定事項は、それ以前の確定事項と矛盾するか", "ask": "前に○○と言われたが変えるか"}
+  "items": {
+    "implement.target": {
+      "ask": "どこに対して作業しますか",
+      "default": {
+        "value": "事実の「対象ディレクトリ」のリポジトリ",
+        "source": "build_state.py が集めた対象ディレクトリと .git"
+      },
+      "questions": {
+        "implement.target.named": "解釈の implement.target に、作業対象のリポジトリまたはディレクトリが特定できる形で書かれているか"
+      }
+    },
+    "implement.completion": {
+      "ask": "何ができていれば完了ですか",
+      "default": {
+        "value": "既存のテストと lint が通る（依頼固有の終わりの状態は既定値なし）",
+        "source": "build_state.py が集めた既存テストの有無"
+      },
+      "questions": {
+        "implement.completion.check_method": "解釈の implement.completion に、確認手段（テスト、コマンド、目視で確認する対象）が書かれているか",
+        "implement.completion.end_state": "解釈の implement.completion に、この依頼に固有の終わりの状態が、「全部」「完了まで」のような範囲語ではなく具体的な状態で書かれているか"
+      }
+    },
+    "implement.out_of_scope": {
+      "ask": "今回やらないことは何ですか",
+      "default": {
+        "value": "依頼で言及していないものはやらない",
+        "source": "~/.claude/CLAUDE.md・write-code スキル"
+      },
+      "questions": {
+        "implement.out_of_scope.stated": "解釈の implement.out_of_scope に、今回やらないことが書かれているか"
+      }
+    },
+    "implement.constraints": {
+      "ask": "触ってはいけない範囲はありますか",
+      "default": {
+        "value": "既存の設計と CLAUDE.md の規約に従い、依頼外の箇所は変えない",
+        "source": "~/.claude/CLAUDE.md・write-code スキル"
+      },
+      "questions": {
+        "implement.constraints.stated": "解釈の implement.constraints に、守るべき制約（変えないもの、既存の設計、規約）が書かれているか"
+      }
+    },
+    "implement.deliverable": {
+      "ask": "成果物は PR / コミット / 動くもののどれですか",
+      "default": {
+        "value": "PR",
+        "source": "対象ディレクトリに .git があること。PR 作成は create-pr スキル"
+      },
+      "questions": {
+        "implement.deliverable.form": "解釈の implement.deliverable で、成果物の形（PR / コミット / 動くもの）が 1 つに決まっているか"
+      }
+    },
+    "implement.rejected_policy": {
+      "ask": "採用した方針はどれですか",
+      "default": {
+        "value": "却下した案はない",
+        "source": "ユーザー発言と承認された提案に却下の記述がないこと"
+      },
+      "questions": {
+        "implement.rejected_policy.stated": "解釈の implement.rejected_policy に、確定した方針（却下した案があればそれも）が書かれているか"
+      }
+    },
+    "know.question": {
+      "ask": "何を知りたいですか",
+      "default": null,
+      "questions": {
+        "know.question.one_sentence": "解釈の know.question に、知りたいことが 1 文の問いとして書かれているか"
+      }
+    },
+    "know.answer_shape": {
+      "ask": "答えはどういう形で欲しいですか",
+      "default": {
+        "value": "結論と根拠（ファイルパス・行番号・URL）",
+        "source": "~/.claude/CLAUDE.md「根拠の提示」"
+      },
+      "questions": {
+        "know.answer_shape.form": "解釈の know.answer_shape に、答えの形（可否、比較表、手順、原因、該当箇所、結論と根拠など）が書かれているか"
+      }
+    },
+    "know.scope": {
+      "ask": "調べる対象は何ですか",
+      "default": {
+        "value": "事実の「対象ディレクトリ」のリポジトリ",
+        "source": "build_state.py が集めた対象ディレクトリ"
+      },
+      "questions": {
+        "know.scope.named": "解釈の know.scope に、調べる範囲（リポジトリ、ライブラリ、バージョン、環境）が特定できる形で書かれているか"
+      }
+    },
+    "write.reader": {
+      "ask": "誰向けですか",
+      "default": null,
+      "questions": {
+        "write.reader.named": "解釈の write.reader に、読者が書かれているか"
+      }
+    },
+    "write.medium": {
+      "ask": "どこに載せますか",
+      "default": null,
+      "questions": {
+        "write.medium.named": "解釈の write.medium に、媒体（社内ブログ、外部記事、README など）が書かれているか"
+      }
+    },
+    "write.topic_conclusion": {
+      "ask": "何を伝えたいですか",
+      "default": null,
+      "questions": {
+        "write.topic_conclusion.topic": "解釈の write.topic_conclusion に、題材が書かれているか",
+        "write.topic_conclusion.conclusion": "解釈の write.topic_conclusion に、読者に持ち帰ってほしい結論が書かれているか"
+      }
+    },
+    "write.length_deadline": {
+      "ask": "どのくらいの長さですか",
+      "default": {
+        "value": "媒体ごとの執筆ルールに従う",
+        "source": "article-writer が読む writing 系 knowledge"
+      },
+      "questions": {
+        "write.length_deadline.stated": "解釈の write.length_deadline に、分量か締切、または従うべきルールが書かれているか"
+      }
+    }
+  },
+  "item_questions": {
+    "supported": "解釈の {item} に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか"
+  },
+  "common": {
+    "common.contradiction": {
+      "ask": "以前の発言と食い違っています。どちらを採りますか",
+      "questions": {
+        "common.contradiction.conflict": "解釈のいずれかの項目が、ユーザー発言の引用または承認された提案と矛盾するか"
+      }
+    }
+  }
 }
