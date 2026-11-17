@@ -34,7 +34,7 @@ python3 "$SKILL_DIR/scripts/build_state.py" --user-quotes quotes.txt [--approved
 python3 "$SKILL_DIR/scripts/judge_state.py" --state-file state.txt --catalog "$SKILL_DIR/scripts/catalog.json" --thresholds "$SKILL_DIR/scripts/thresholds.json" --out verdict.json --log judge-log.jsonl
 ```
 
-ユーザーが種類を明示している（「実装して」「調べるだけでいい」など）なら、ここは飛ばして手順 3 で `--kind implement|know|write` を付ける。`kind` が null なら、`message` をそのまま示して聞き、答えを quotes.txt に追記してやり直す。
+ユーザーが種類を明示している（「実装して」「調べるだけでいい」「新しく立ち上げて」など）なら、ここは飛ばして手順 3 で `--kind implement|know|write|init` を付ける。`kind` が null なら、`message` をそのまま示して聞き、答えを quotes.txt に追記してやり直す。
 
 Jev API キーはキーチェーン `typesafe-api-key`。スクリプトが失敗したら自分で判定せず、失敗した事実をユーザーに伝えて止まる。
 
@@ -78,6 +78,9 @@ state.txt の「解釈」節を項目ごとに示し、既定値を使った項�
 | implement | `/Users/cancer/.claude/skills/plan/SKILL.md`。dev-workflow へは直接渡さない。計画の承認、PoC での差し戻し、承認後に `dev-workflow --effort low|mid|high` へ渡すまでの流れは `references/implement-loop.md` に従う | Plan / opus |
 | know | `/Users/cancer/.claude/skills/research/skill.md`。コードベース内の把握なら Explore（スキル不要） | tech-researcher / haiku、Explore / sonnet |
 | write | `/Users/cancer/.claude/skills/article-writer/SKILL.md` | general-purpose / opus |
+| init | `init-project`。Agent ではなく、主スレッドで Skill ツールから呼ぶ（引数は作成先パス）。init-project は手順 0 で系統と作成先をユーザーに確認するので、サブエージェントでは止まってしまう | 主スレッド |
+
+init の会話で機能の実装まで頼まれていたら、立ち上げが終わってからこのスキルを最初からやり直し、implement として渡す。
 
 依頼文の例:
 

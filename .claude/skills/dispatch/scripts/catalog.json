@@ -6,6 +6,7 @@
       "implement": "コードが変わる",
       "know": "答えを知って終わる（調査、コードベースの把握、仕様の点検）",
       "write": "文書が残る",
+      "init": "新しいプロジェクト（リポジトリ）をゼロから作る。既存リポジトリへの変更は含まない",
       "none": "作業の依頼がまだ形になっていない（感想、質問、思考の途中、雑談）"
     }
   },
@@ -128,6 +129,20 @@
       },
       "questions": {
         "write.length_deadline.stated": "解釈の write.length_deadline に、分量か締切、または従うべきルールが書かれているか"
+      }
+    },
+    "init.target": {
+      "ask": "どこに作りますか（作成先のパス）",
+      "default": null,
+      "questions": {
+        "init.target.path": "解釈の init.target に、新しく作るディレクトリのパスが書かれているか"
+      }
+    },
+    "init.purpose": {
+      "ask": "何を作りますか（Worker / Web アプリ / ライブラリ / CLI など）",
+      "default": null,
+      "questions": {
+        "init.purpose.what": "解釈の init.purpose に、作るものの種類（Worker、Web アプリ、ライブラリ、CLI、MCP サーバなど）が書かれているか"
       }
     }
   },

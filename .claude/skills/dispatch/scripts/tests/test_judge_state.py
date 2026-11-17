@@ -69,6 +69,7 @@ class JudgeStateTests(unittest.TestCase):
         self.assertIsNone(response["kind"])
         self.assertFalse(response["ready"])
         self.assertIn("何を受け取りたいですか", response["message"])
+        self.assertIn("プロジェクトの立ち上げ", response["message"])
 
     def test_kind_without_interpretation_stops_after_layer_one(self):
         answers = {"kind": {"type": "choice", "choice": "implement", "probabilities": {"implement": 0.9, "know": 0.05, "write": 0.03, "none": 0.02}}}
@@ -115,6 +116,19 @@ class JudgeStateTests(unittest.TestCase):
         self.assertEqual(response["items"]["implement.completion"]["status"], "ask")
         self.assertIn("implement.completion で止まっています", response["message"])
         self.assertIn("解釈の implement.completion に書かれた内容は", response["message"])
+
+    def test_init_kind_asks_only_init_items_without_defaults(self):
+        answers = {"init.target.path": {"type": "noul", "noul": 0.1}, "init.target.supported": {"type": "noul", "noul": 0.9},
+                   "init.purpose.what": {"type": "noul", "noul": 0.9}, "init.purpose.supported": {"type": "noul", "noul": 0.9},
+                   "common.contradiction.conflict": {"type": "noul", "noul": 0.1}}
+        result = self.run_judge(answers, "init", {"init.purpose": {"value": "MCP サーバ", "source": "発言"}})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        response = json.loads(self.output.read_text())
+        self.assertEqual(set(response["items"]), {"init.target", "init.purpose"})
+        self.assertFalse(response["ready"])
+        self.assertIn("init.target で止まっています", response["message"])
+        self.assertIn("既定値: なし", response["message"])
+        self.assertIn("→ どこに作りますか", response["message"])
 
     def test_contradiction_blocks_and_is_shown(self):
         result = self.run_judge(self.implement_answers(**{"common.contradiction.conflict": 0.8}), "implement", {})

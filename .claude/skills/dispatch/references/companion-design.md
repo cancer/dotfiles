@@ -34,13 +34,14 @@ Jev と作業係が読む唯一の入力。
 
 ## 1 層目: 成果物の種類（choice 1 問 + none）
 
-会話が何で終わるかで 3 つ。
+会話が何で終わるかで 4 つ。
 
 | 種類 | 会話の終わり方 | その先 |
 |---|---|---|
-| implement | コードが変わる | 統合後のワークフロー。init / plan / spike / review / PR は中の工程ゲート。既存 PR への対応は「対象が PR である implement」 |
+| implement | コードが変わる | 統合後のワークフロー。plan / spike / review / PR は中の工程ゲート。既存 PR への対応は「対象が PR である implement」 |
 | know | 答えを知って終わる（調査、コードベースの把握、仕様の点検） | research / explore / spec-review |
 | write | 文書が残る | 執筆 |
+| init | 新しいプロジェクトができる | init-project。作成先パスと作るものだけを確定し、系統の確認は init-project に任せる |
 
 `none` が最上位、または最上位が閾値未満なら「何を受け取りたいか」を聞く。壁打ちは種類ではなく companion の素の状態。
 

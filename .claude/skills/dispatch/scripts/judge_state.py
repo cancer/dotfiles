@@ -115,7 +115,7 @@ def main(argv=None):
     parser.add_argument("--thresholds", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--log", required=True)
-    parser.add_argument("--kind", choices=("implement", "know", "write"))
+    parser.add_argument("--kind", choices=("implement", "know", "write", "init"))
     parser.add_argument("--interpretation", help="interpretation.json。無ければ種類の判定だけ行う")
     parser.add_argument("--answered-file", help="一度聞いて答えを得た項目 ID を 1 行に 1 つ")
     args = parser.parse_args(argv)
@@ -128,7 +128,7 @@ def main(argv=None):
             kind, probabilities = judge_kind(args.state_file, catalog, thresholds, args.log)
         if kind is None:
             output = {"kind": None, "kind_probabilities": probabilities, "ready": False,
-                      "message": "成果物の種類が決まっていません\n→ 何を受け取りたいですか（実装 / 調査結果 / 文書）"}
+                      "message": "成果物の種類が決まっていません\n→ 何を受け取りたいですか（実装 / 調査結果 / 文書 / プロジェクトの立ち上げ）"}
         elif not args.interpretation:
             output = {"kind": kind, "kind_probabilities": probabilities, "ready": False,
                       "message": "種類が決まりました。interpretation.json を書いて、--kind と --interpretation を付けて判定し直してください"}
