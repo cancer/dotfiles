@@ -78,7 +78,7 @@ state.txt の「解釈」節を項目ごとに示し、既定値を使った項�
 | implement | `/Users/cancer/.claude/skills/plan/SKILL.md`。dev-workflow へは直接渡さない。計画の承認、PoC での差し戻し、承認後に `dev-workflow --effort low|mid|high` へ渡すまでの流れは `references/implement-loop.md` に従う | Plan / opus |
 | know | `/Users/cancer/.claude/skills/research/skill.md`。コードベース内の把握なら Explore（スキル不要） | tech-researcher / haiku、Explore / sonnet |
 | write | `/Users/cancer/.claude/skills/article-writer/SKILL.md` | general-purpose / opus |
-| init | `init-project`。Agent ではなく、主スレッドで Skill ツールから呼ぶ（引数は作成先パス）。init-project は手順 0 で系統と作成先をユーザーに確認するので、サブエージェントでは止まってしまう | 主スレッド |
+| init | `init-project`。主スレッドで Skill ツールから呼ぶ（引数は作成先パスと、init.purpose の用途を含む依頼文）。用途が書かれていれば init-project は確認せずに進む | 主スレッド |
 
 init の会話で機能の実装まで頼まれていたら、立ち上げが終わってからこのスキルを最初からやり直し、implement として渡す。
 
