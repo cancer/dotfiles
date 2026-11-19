@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: starts-proposal-for-sales-slides
+expected_outcome: |
+  商談前の提案スライド作成依頼として proposal を選び、案件ごとの作業を開始する。

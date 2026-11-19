@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: cost-requested
+expected_outcome: |
+  依頼元が概算費用を求めている場合は C1 の cost_requested を true にし、process と questions_next の間に cost の役割を持つスライドを置く。根拠のない金額は作らない。

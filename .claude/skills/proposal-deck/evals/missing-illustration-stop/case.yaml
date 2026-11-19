@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: missing-illustration-stop
+expected_outcome: |
+  S3 の挿絵指定に描く内容がないため、deck-gaps.md に A への差し戻し事項を書いて停止する。デッキのファイルは作られない。Artifact は publish せず、response.md に書いたファイルのパスが記録される。
+max_turns: 30
+timeout_seconds: 900
+allowed_tools: [Read, Glob, Grep, Write, Edit]
+context:
+  scaffold_script: scaffold.sh

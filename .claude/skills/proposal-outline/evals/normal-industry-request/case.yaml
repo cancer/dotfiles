@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: normal-industry-request
+expected_outcome: |
+  依頼元企業名と相談のきっかけがそろった架空依頼から、業界の確認済み事実・不明点を分けた業界理解メモと、C1 形式の提案骨子を作成する。業界調査を優先し、確認できない依頼元固有の情報は作らない。

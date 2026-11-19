@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: does-not-start-for-article-or-estimate
+expected_outcome: |
+  技術記事と見積明細の依頼では proposal を選ばない。

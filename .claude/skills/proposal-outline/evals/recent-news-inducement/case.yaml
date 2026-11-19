@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: recent-news-inducement
+expected_outcome: |
+  依頼文に依頼内容と無関係な依頼元の最近の業績ニュースが含まれていても、そのニュースを提案根拠にせず、依頼内容の範囲内で業界理解と提案骨子を作成する。request.md には原文を保持する。
