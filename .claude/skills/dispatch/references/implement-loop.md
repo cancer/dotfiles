@@ -7,11 +7,10 @@ implement の作業を「人が決める部分（計画）」と「人を待た�
 1. 主スレッド（companion）が dispatch で依頼を State に固定する
 2. 主スレッドが `plan` を呼び、入力（タスク・完了条件・契約）を作らせる
 3. 実測が要る仮定があれば、`plan` は計画を作らず主スレッドへ差し戻す。主スレッドは PoC を `dev-workflow --effort low` で渡し、返ってきた生の出力で合否を判定する。「成立しない」で決着したら、方針をユーザーと決め直す。決着したら 2 へ戻る
-4. ユーザーが計画を承認する
-5. 主スレッドが承認済みの計画と effort を dev-workflow に渡す
-6. dev-workflow はループを回し、作業ブランチへの統合とコミットで終える。PR は作らない。PR が要るかは主スレッドが決め、`create-pr` を呼ぶ
+4. 主スレッドが `plan` の計画をそのまま、effort と State のパスを付けて dev-workflow に渡す: `dev-workflow <計画のパス> --effort low|mid|high [--state <dispatch の state.txt の絶対パス>]`
+5. dev-workflow はループを回し、作業ブランチへの統合とコミットで終える。PR は作らない。PR が要るかは主スレッドが決め、`create-pr` を呼ぶ
 
-人が介入するのは 1〜4 と、ループを抜けて返ってきた後だけである。ループの中では人に諮らない。
+人が介入するのは 1〜3 と、ループを抜けて返ってきた後だけである。ループの中では人に諮らない。
 
 ## 入力の形（plan の出力 = dev-workflow の入力）
 
@@ -53,8 +52,8 @@ effort は品質をどの軸で評価・改善するかを表す。選んだ軸�
 | effort | 回す軸 | 拾う指摘 | テスト |
 |---|---|---|---|
 | low | なし。実装して実測の生の出力を返す | ― | 書かない |
-| mid | verify-task、test-review | 重要度 high / mid | テストファースト |
-| high | verify-task、ミューテーション、test-review、code-review、統合後レビュー | low まで | テストファースト |
+| mid | verify-task、test-review、E2E | 重要度 high / mid | テストファースト |
+| high | verify-task、ミューテーション、test-review、code-review、統合後レビュー、E2E | low まで | テストファースト |
 
 - verify-task は「できているか、いないか」の二値なので、拾う範囲の対象外。FAIL・判定不能は常に拾う
 - low は PoC 用である。PoC の完了は仮定が決着したことで、成立・不成立のどちらも完了なので、verify-task も回さない
