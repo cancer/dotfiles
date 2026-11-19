@@ -1,7 +1,7 @@
 ---
 name: dispatch
 description: 会話の中でユーザーの依頼が「作業として渡せそうだ」と感じたときに、渡す前に必ず使う。会話から依頼を項目ごとに解釈して State に固定し（根拠としてユーザー発言・承認された提案・既定値を添える）、Jev が固定の問いで抜けと矛盾を判定し、既定値でも埋まらない項目だけを聞き、解釈を復唱して承認を得たら作業スキルへ State を渡す。「実装して」「調べて」「書いて」と直接言われていなくても、要件・対象・完了条件が会話に出そろってきた、ユーザーが「じゃあそれで」「進めて」と合意した、調査結果を受けて次に進もうとしている、といった場面で使う。使わないのは、ユーザーが /dev-workflow のようにスキル名で作業を明示したとき（そのまま呼ぶ）、感想・質問・壁打ちだけで作業の話になっていないとき
-allowed-tools: Bash, Read, Write, Agent, AskUserQuestion
+allowed-tools: Bash, Read, Write, Agent, AskUserQuestion, Skill
 user-invocable: false
 ---
 
@@ -23,7 +23,7 @@ State の中心は、ユーザー発言から companion（自分）が解釈し�
 ### 1. 根拠を書き出す
 
 - `quotes.txt`: この会話でのユーザー発言を**原文のまま**並べる。長い会話なら、確定事項と直近の発言を残す
-- `approved.txt`: ユーザーが提案をまとめて承認した場合（「じゃあそれで」「B 案で」「全部」）、承認された提案（自分または作業係の発言）を原文のまま書き写し、承認した発言の引用と組にする。書き写すのは承認の発言が指している提案だけで、範囲を広げない。手順 5 の復唱にユーザーが承認した場合も、その復唱を承認された提案として書く
+- `approved.txt`: ユーザーが提案をまとめて承認した場合（「じゃあそれで」「B 案で」「全部」）、承認された提案（自分または作業係の発言）を原文のまま書き写し、承認した発言の引用と組にする。書き写すのは承認の発言が指している提案だけで、範囲を広げない。手順 6 の復唱にユーザーが承認した場合も、その復唱を承認された提案として書く
 - `worker-report.txt`: 作業係の報告。承認されていない提案は確定事項ではないので、ここに留める
 - `request.txt`: 依頼の原文（issue 本文、貼られた仕様）があれば原文のまま
 
@@ -65,17 +65,24 @@ python3 "$SKILL_DIR/scripts/judge_state.py" ... --kind <種類> --interpretation
 - `ready` が false: `message` を**そのまま**ユーザーに示して聞く。`message` には、止まった項目、解釈の値、満たしていない問いの文、既定値、聞く文が入っている。言い換えたり、スコアだけを示したりしない。複数あれば 1 回でまとめて聞く。答えは quotes.txt に追記し、聞いた項目 ID を `answered.txt` に 1 行ずつ追記し、手順 3 からやり直す。一度聞いて答えを得た項目は、再判定で問いが通らなくても止めない（同じことを聞き続けないため）
 - `ready` が true: 手順 5 へ
 
-### 5. 復唱して承認を得る
+### 5. コンセプトと照合する
 
-state.txt の「解釈」節を項目ごとに示し、既定値を使った項目は既定値だと分かるように示して、「この内容で渡してよいか」を 1 回で聞く。承認されたらその発言を quotes.txt に追記して手順 6 へ。直されたら quotes.txt に追記して手順 3 へ。
+kind が `implement` で対象リポジトリ直下に `CONCEPT.md` がある場合、State の解釈を `CONCEPT.md` の全節（「誰に」「何を」「目的」「すること」「しないこと」）と照合する。「誰に」は、CONCEPT.md に書かれた目的・使う場面・前提として持っている知識や環境と State の解釈を照合する。
 
-### 6. 渡す
+- 食い違う場合、または判定できない場合は、Skill ツールで `app-concept` を照合モードとして呼び、対象リポジトリ直下の `CONCEPT.md` の絶対パスと State の解釈を変更要求として渡す。決着するまで先へ進まない。要求が修正された場合は、その内容を `quotes.txt` に追記し、解釈を書き直す手順 3 からやり直す
+- 対象リポジトリ直下に `CONCEPT.md` が無い場合、または kind が `implement` 以外の場合は、この手順を飛ばす
+
+### 6. 復唱して承認を得る
+
+state.txt の「解釈」節を項目ごとに示し、既定値を使った項目は既定値だと分かるように示して、「この内容で渡してよいか」を 1 回で聞く。承認されたらその発言を quotes.txt に追記して手順 7 へ。直されたら quotes.txt に追記して手順 3 へ。
+
+### 7. 渡す
 
 `kind` に対応するスキルを読ませる Agent を起動する。依頼文には `state.txt` の絶対パスを書き、依頼の内容は State から読ませる。State の外で別の要約を書かない（承認された解釈と食い違うのを避けるため）。
 
 | kind | 読ませるスキル | subagent_type / model |
 |---|---|---|
-| implement | `/Users/cancer/.claude/skills/plan/SKILL.md`。dev-workflow へは直接渡さない。計画の承認、PoC での差し戻し、承認後に `dev-workflow --effort low|mid|high` へ渡すまでの流れは `references/implement-loop.md` に従う | Plan / opus |
+| implement | `/Users/cancer/.claude/skills/plan/SKILL.md`。dev-workflow へは直接渡さない。PoC での差し戻しを含め、`dev-workflow --effort low|mid|high` へ渡すまでの流れは `references/implement-loop.md` に従う | Plan / opus |
 | know | `/Users/cancer/.claude/skills/research/skill.md`。コードベース内の把握なら Explore（スキル不要） | tech-researcher / haiku、Explore / sonnet |
 | write | `/Users/cancer/.claude/skills/article-writer/SKILL.md` | general-purpose / opus |
 | init | `init-project`。主スレッドで Skill ツールから呼ぶ（引数は作成先パスと、init.purpose の用途を含む依頼文）。用途が書かれていれば init-project は確認せずに進む | 主スレッド |
