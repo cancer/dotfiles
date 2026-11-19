@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: normal-deck-build
+expected_outcome: |
+  C1 に従う outline.md の全7スライドが C4 のファイルとして作られる。スライド id と order は outline の順序に従い、見出し・本文の可視文言は outline と完全一致する。Artifact は publish せず、response.md に書いたファイルのパスが記録される。
+max_turns: 30
+timeout_seconds: 900
+allowed_tools: [Read, Glob, Grep, Write, Edit]
+context:
+  scaffold_script: scaffold.sh

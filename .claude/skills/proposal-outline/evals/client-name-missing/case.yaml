@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: client-name-missing
+expected_outcome: |
+  依頼元企業名が不足しているため、入力受領の段階で企業名だけを尋ねて止まる。相談のきっかけと業界は提示済みなので再質問せず、骨子作成を始めない。

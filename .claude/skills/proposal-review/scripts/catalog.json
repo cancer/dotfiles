@@ -1,0 +1,68 @@
+{
+  "J-scope": {
+    "type": "noul",
+    "instructions": "この文書には、依頼に含まれない業務や論点を提案へ加えた問題がありませんか。",
+    "category": "auto",
+    "message": "提案に依頼範囲外の内容が含まれています。"
+  },
+  "J-unrelated": {
+    "type": "noul",
+    "instructions": "この文書は、依頼内容と無関係な企業情報を提案の根拠にしていませんか。",
+    "category": "auto",
+    "message": "依頼内容と無関係な企業情報が提案の根拠になっています。"
+  },
+  "J-industry": {
+    "type": "noul",
+    "instructions": "この文書は確認済みの業界事実と矛盾せず、依頼業務に固有の事情を踏まえていますか。",
+    "category": "auto",
+    "message": "業界理解メモとの矛盾、または依頼業務に固有の事情の不足があります。"
+  },
+  "J-unagreed": {
+    "type": "noul",
+    "instructions": "この文書には、合意されていない作業、保証、費用負担、受注前の無償実データ検証、または否定された指標を約束する問題がありませんか。",
+    "category": "auto",
+    "message": "合意されていない作業、約束、費用負担、または否定された指標が含まれています。"
+  },
+  "J-hypothesis": {
+    "type": "noul",
+    "instructions": "この文書は、事実として確認されていない課題や状況を仮説として示し、断定していませんか。",
+    "category": "auto",
+    "message": "確認されていない課題や状況が事実のように断定されています。"
+  },
+  "J-heading": {
+    "type": "noul",
+    "instructions": "この文書の各スライド見出しは、伝えたい結論を具体的に言い切っていますか。",
+    "category": "auto",
+    "message": "提案の結論が分からないスライド見出しがあります。"
+  },
+  "J-unknown-names": {
+    "type": "noul",
+    "instructions": "この文書には、依頼元が知らない可能性のある製品名や固有名詞を説明なく使った問題がありませんか。",
+    "category": "auto",
+    "message": "依頼元が知らない可能性のある製品名または固有名詞があります。"
+  },
+  "reader.entrust": {
+    "type": "noul",
+    "instructions": "依頼元の担当者と決裁者がそれぞれ読んだとき、両者とも、この提案を示した会社に任せたいと思いますか。",
+    "category": "auto",
+    "message": "依頼元の担当者または決裁者が、この会社に任せたいと思える提案になっていません。"
+  },
+  "reader.understand_problem": {
+    "type": "noul",
+    "instructions": "依頼元の担当者と決裁者は、依頼業務の状況と課題を理解できますか。",
+    "category": "auto",
+    "message": "依頼業務の状況や課題が読者に伝わりにくい状態です。"
+  },
+  "reader.why_us": {
+    "type": "noul",
+    "instructions": "依頼元の担当者と決裁者は、この会社に任せる理由を理解できますか。",
+    "category": "auto",
+    "message": "この会社に任せる理由が読者に伝わりにくい状態です。"
+  },
+  "reader.next_step": {
+    "type": "noul",
+    "instructions": "依頼元の担当者と決裁者には、商談で確認することや次の一歩が分かりますか。",
+    "category": "auto",
+    "message": "商談で確認することや次の一歩が読者に伝わりにくい状態です。"
+  }
+}

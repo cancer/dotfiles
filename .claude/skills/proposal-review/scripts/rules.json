@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "R-format": {"category": "auto", "message": "スライドの役割または順序が提案内容の形式に合っていません。"},
+    "R-points": {"category": "auto", "message": "1枚のスライドに「- 」の要点が4行以上あります。"},
+    "R-cost": {"category": "auto", "message": "費用のスライドが依頼内容で確認されていません。"},
+    "R-words-negative": {"category": "auto", "message": "断る、または追加費用を求める印象の表現が含まれています。"},
+    "R-internal": {"category": "auto", "message": "社内向けの注記が含まれています。"},
+    "R-tech-terms": {"category": "auto", "message": "読者に伝わりにくい技術用語が含まれている可能性があります。"},
+    "R-table-style": {"category": "auto", "message": "表の中で文体が混在しています。"},
+    "R-deck-diff": {"category": "auto", "message": "スライドの文言が提案内容と一致しません。"},
+    "R-deck-count": {"category": "auto", "message": "スライドの数または順序が提案内容と一致しません。"}
+  },
+  "negative_words": ["拡張", "対象外", "今回含まないもの", "追加予算でご相談する機能"],
+  "internal_phrases": ["社内検討用", "金額等は調整中"],
+  "technical_terms": ["API", "データベース", "DB", "サーバー", "インフラ", "Webhook", "SDK", "デプロイ", "スキーマ", "エンドポイント", "OAuth", "キャッシュ", "CI/CD"]
+}
