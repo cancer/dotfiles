@@ -7,7 +7,7 @@ implement の作業を「人が決める部分（計画）」と「人を待た�
 1. 主スレッド（companion）が dispatch で依頼を State に固定する
 2. 主スレッドが `plan` を呼び、入力（タスク・完了条件・契約）を作らせる
 3. 実測が要る仮定があれば、`plan` は計画を作らず主スレッドへ差し戻す。主スレッドは PoC を `dev-workflow --effort low` で渡し、返ってきた生の出力で合否を判定する。「成立しない」で決着したら、方針をユーザーと決め直す。決着したら 2 へ戻る
-4. 主スレッドが `plan` の計画をそのまま、effort と State のパスを付けて dev-workflow に渡す: `dev-workflow <計画のパス> --effort low|mid|high [--state <dispatch の state.txt の絶対パス>]`
+4. 主スレッドが `plan` の計画をそのまま、effort を付けて dev-workflow に渡す。State のパスがあれば併せて渡す: `dev-workflow <計画のパス> --effort low|mid|high [--state <dispatch の state.txt の絶対パス>]`
 5. dev-workflow はループを回し、作業ブランチへの統合とコミットで終える。PR は作らない。PR が要るかは主スレッドが決め、`create-pr` を呼ぶ
 
 人が介入するのは 1〜3 と、ループを抜けて返ってきた後だけである。ループの中では人に諮らない。
