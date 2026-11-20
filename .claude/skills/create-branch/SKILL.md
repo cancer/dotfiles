@@ -1,6 +1,6 @@
 ---
 name: create-branch
-description: 依頼内容を受け取り、リポジトリのブランチ戦略から規則を選び、ベースブランチと名前をユーザーに聞かずに決めて作業ブランチを作成する
+description: 依頼内容を受け取り、リポジトリのブランチ戦略から依頼に合う規則を選んで、ベースブランチと名前をユーザーに聞かずに決め、作業ブランチを作成する。実装やissue対応の着手時、「ブランチを切って」と頼まれた場面で使う
 argument-hint: "<State の絶対パス | issue の URL または番号 | 依頼内容>"
 model: haiku
 allowed-tools: Bash, Read, Glob, Grep
