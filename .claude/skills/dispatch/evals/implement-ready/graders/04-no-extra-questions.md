@@ -4,4 +4,4 @@ focus: trace
 weight: 1
 ---
 
-response.md does not ask open questions about completion, out-of-scope, constraints, or deliverable; it only asks for approval of the restatement
+The user is not asked any question (no response.md, or one with no questions about completion, out-of-scope, constraints, deliverable, or approval)

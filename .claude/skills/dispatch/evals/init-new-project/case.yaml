@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: init-new-project
 expected_outcome: |
-  依頼は新しいプロジェクトの立ち上げ（init）。作成先パス（~/repos/knowledge-mcp）と作るもの（MCP サーバ）はユーザーが述べているので、追加で聞かない。系統の確認は init-project に任せる。復唱して承認を求めるか、承認前なら dispatch-plan.md は作らない。ホームディレクトリで既存リポジトリへの実装として扱わない。
+  依頼は新しいプロジェクトの立ち上げ（init）。作成先パス（~/repos/knowledge-mcp）と作るもの（MCP サーバ）はユーザーが述べているので、追加で聞かない。系統の確認は init-project に任せる。判定が通れば復唱せずに init-project を呼ぶ内容を dispatch-plan.md に書く。ホームディレクトリで既存リポジトリへの実装として扱わない。

@@ -1,4 +1,4 @@
 schema_version: "1.1"
 name: implement-ready
 expected_outcome: |
-  依頼は実装として固まっている。項目別の解釈を書き、判定を経て、渡す前に解釈を復唱して承認を求める（response.md）。成果物はユーザーが述べた feat/verbose ブランチへのコミット（PR 不要）であり、既定値の PR で上書きしない。足りない項目を追加で聞かない。承認前なので dispatch-plan.md は作らない。
+  依頼は実装として固まっている。項目別の解釈を書き、Jev の判定が ready になったら、復唱も承認の確認もせずに plan を読ませる依頼文を dispatch-plan.md に書き、state.txt のパスを渡す。成果物はユーザーが述べた feat/verbose ブランチへのコミット（PR 不要）であり、既定値の PR で上書きしない。ユーザーに何も聞かない。
