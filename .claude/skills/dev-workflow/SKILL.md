@@ -1,7 +1,7 @@
 ---
 name: dev-workflow
 description: 実装計画（タスク・完了条件・契約）と effort を受け取り、実装→検収→統合のループを回す入口。主スレッドが plan で計画を作った後に呼ぶ。ループの中ではユーザーに諮らず、回せない事態ではループを抜けて呼び出し側へ返す。自分では実装せず、Codex へ委任して検収する。自由記述の依頼を最初に受ける入口ではない（依頼の整理と計画は主スレッドと plan の領分）。空のディレクトリからの新規プロジェクト初期構築（テスト環境・lint・CI の立ち上げを含む）は init-project の領分。write-code はワーカーが実装時に従う方針であり、本スキルの入口ではない
-argument-hint: <計画のパス> --effort low|mid|high [--state <dispatch の state.txt の絶対パス>]
+argument-hint: <計画のパス> --effort low|mid|high [--state <dispatch の state.txt の絶対パス>] [--branch <name>]
 allowed-tools: Bash, Read, Write, Skill, Agent, SendMessage, TaskCreate, TaskUpdate, TaskGet, TaskList, Monitor, TaskStop
 user-invocable: true
 ---
@@ -13,11 +13,12 @@ $ARGUMENTS
 
 ## 引数の形式
 
-次の2つを必ず受け取る。`--state` は任意で受け取る。
+次の2つを必ず受け取る。`--state` と `--branch` は任意で受け取る。
 
 1. **計画のパス**: `/Users/cancer/.claude/skills/dispatch/references/implement-loop.md`「入力の形」の形式（タスク・完了条件・契約）で書かれたファイル
 2. **`--effort low|mid|high`**（下記「effort」）
 3. **`--state <dispatch の state.txt の絶対パス>`**（任意）。渡された State は E2E のユースケースを導く入力にする。渡されなければ、E2E の入力はリポジトリ直下の `CONCEPT.md`（あれば）と既存アプリだけになる。
+4. **`--branch <name>`**（任意）。ユーザーが指定した作業ブランチ。
 
 計画と全体設計は本スキルの外で決まっている前提とする。本スキルはタスクの分解・依存の判断・設計判断をしない。計画が上記の形式を満たさない（完了条件や契約が欠けている）なら、補わずにループを抜ける（「ループを抜けるとき」）。
 
@@ -227,7 +228,13 @@ effort は呼び出し側（主スレッド）が会話から判断して渡す�
 
 ### Phase 0: 起点の整備
 
-1. 現在のブランチを確認し、デフォルトブランチにいるなら作業ブランチを作成する（`create-branch` 相当）
+1. 作業ブランチを決める。
+   - `--branch <name>` が指定されていれば、そのブランチを作業ブランチにする。`delegate-to-codex` 経由で切り替えを Codex に委任する。ブランチが存在しなければ、入力・環境の不備としてループを抜ける。
+   - 指定がなければ、`delegate-to-codex` 経由で Codex に create-branch を実行させる。
+   - 依頼文は「以下のスキルを読み、その手順に従って作業してください。」の形式にする。`/Users/cancer/.claude/skills/create-branch/SKILL.md` の絶対パスを書く。
+   - `create-branch <依頼内容>` の入力は、`--state` があれば State の絶対パス、なければ計画のパスとする。
+   - C1 の `失敗:` 報告が返ったらループを抜ける。成功時は C1 の `ブランチ:` を作業ブランチ（worktree の分岐元・統合先）にする。
+   - 現在のブランチを作業ブランチの起点にしない。
 2. **プロジェクト規約を読み取る**（Codex へ委任してよい。`-s read-only` で発注する）:
    - ブランチ戦略
    - CLAUDE.md の設計原則・制約・禁止事項・命名規則
