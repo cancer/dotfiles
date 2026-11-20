@@ -27,8 +27,8 @@ $ARGUMENTS
 
 | 対象 | 読む knowledge |
 |---|---|
-| 有料媒体（有料購読・有料連載。CodeGrid 等） | `writing/paid-media-technical-article` |
-| 無料の技術ブログ | `writing/technical-article-structure-and-style` |
+| 有料媒体（有料購読・有料連載。CodeGrid 等） | `entries/paid-media-technical-article.md` |
+| 無料の技術ブログ | `entries/technical-article-structure-and-style.md` |
 | 不明・その他 | `search_knowledge` で近い執筆ルールを探す。見つからなければユーザーに確認する |
 
 ### 2. 媒体固有の具体設定を適用する
@@ -66,7 +66,7 @@ $ARGUMENTS
 
 ### CodeGrid（https://www.codegrid.net/）
 
-有料媒体。普遍ルールは `writing/paid-media-technical-article` を参照。以下は CodeGrid 固有。実例（過去記事）は同梱しないので、必要ならユーザーに直近記事を提示してもらい、文体・構成・トーンを把握する（実例はガイドより優先）。
+有料媒体。普遍ルールは `entries/paid-media-technical-article.md` を参照。以下は CodeGrid 固有。実例（過去記事）は同梱しないので、必要ならユーザーに直近記事を提示してもらい、文体・構成・トーンを把握する（実例はガイドより優先）。
 
 - **独自マーカー**: `[note]`（補足・関連リンク）、`[column]`（高度なトピック・詳細）、`[imgbox]`（図とキャプション）、`[demo]`
 - **改行・空行ルール**（全年代 2014〜2025 で一貫）:

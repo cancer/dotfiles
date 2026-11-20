@@ -48,7 +48,7 @@ user-invocable: false
 書くコードの品質バーは **`code-review` スキルが検査する観点そのもの**とする。品質基準を write-code 側に二重に持たず、単一の情報源に従う。
 
 - 満たすべき観点（堅牢性・変更容易性・低認知負荷・コメント・スタイル・モジュール分割）: `code-review` のレビュー観点
-- 各観点の具体的な判断基準: `mcp__knowledge__get_topic` で `tech/design` の index（各知見の一行要約付き）を読み、該当する知見を `mcp__knowledge__read_knowledge` で読む
+- 各観点の具体的な判断基準: `mcp__knowledge__get_topic` で構造ノート `software-design` を読み（載っている知見の title と description が返る）、該当する知見を `mcp__knowledge__read_knowledge` で読む
 
 判断を確定させる前に、冒頭「ユーザー knowledge の参照」の手順で該当する知見を必ず読み、code-review の観点を満たすコードを書くこと。
 
