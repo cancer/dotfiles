@@ -1,0 +1,4 @@
+[承認された提案]
+src/counter.py に --help を追加します。完了条件は、python3 src/counter.py --help で usage 行が表示されることと、tests/test_counter.py に --help のテストを 1 件追加して既存 3 件と合わせて pytest が通ることです。argparse への移行はしません。
+[承認した発言]
+y

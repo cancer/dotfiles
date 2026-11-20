@@ -1,0 +1,127 @@
+{
+  "kind": "implement",
+  "kind_probabilities": {},
+  "items": {
+    "implement.target": {
+      "value": "src/counter.py の main に --help を追加する",
+      "source": "承認された提案",
+      "questions": {
+        "implement.target.named": {
+          "text": "解釈の implement.target に、作業対象のリポジトリまたはディレクトリが特定できる形で書かれているか",
+          "noul": 0.61,
+          "verdict": "ask"
+        },
+        "implement.target.supported": {
+          "text": "解釈の implement.target に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.97,
+          "verdict": "yes"
+        }
+      },
+      "status": "ask"
+    },
+    "implement.completion": {
+      "value": "--help で usage が出る",
+      "source": "発言「usage が出ればいい」",
+      "questions": {
+        "implement.completion.check_method": {
+          "text": "解釈の implement.completion に、確認手段（テスト、コマンド、目視で確認する対象）が書かれているか",
+          "noul": 0.72,
+          "verdict": "yes"
+        },
+        "implement.completion.end_state": {
+          "text": "解釈の implement.completion に、この依頼に固有の終わりの状態が、「全部」「完了まで」のような範囲語ではなく具体的な状態で書かれているか",
+          "noul": 0.94,
+          "verdict": "yes"
+        },
+        "implement.completion.supported": {
+          "text": "解釈の implement.completion に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.85,
+          "verdict": "yes"
+        }
+      },
+      "status": "ok"
+    },
+    "implement.out_of_scope": {
+      "value": "argparse への移行はしない",
+      "source": "承認された提案",
+      "questions": {
+        "implement.out_of_scope.stated": {
+          "text": "解釈の implement.out_of_scope に、今回やらないことが書かれているか",
+          "noul": 0.97,
+          "verdict": "yes"
+        },
+        "implement.out_of_scope.supported": {
+          "text": "解釈の implement.out_of_scope に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.96,
+          "verdict": "yes"
+        }
+      },
+      "status": "ok"
+    },
+    "implement.constraints": {
+      "value": "既存の設計と CLAUDE.md の規約に従い、依頼外の箇所は変えない",
+      "source": "既定値",
+      "questions": {
+        "implement.constraints.stated": {
+          "text": "解釈の implement.constraints に、守るべき制約（変えないもの、既存の設計、規約）が書かれているか",
+          "noul": 0.98,
+          "verdict": "yes"
+        },
+        "implement.constraints.supported": {
+          "text": "解釈の implement.constraints に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.88,
+          "verdict": "yes"
+        }
+      },
+      "status": "ok"
+    },
+    "implement.deliverable": {
+      "value": "PR",
+      "source": "既定値",
+      "questions": {
+        "implement.deliverable.form": {
+          "text": "解釈の implement.deliverable で、成果物の形（PR / コミット / 動くもの）が 1 つに決まっているか",
+          "noul": 0.81,
+          "verdict": "yes"
+        },
+        "implement.deliverable.supported": {
+          "text": "解釈の implement.deliverable に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.94,
+          "verdict": "yes"
+        }
+      },
+      "status": "ok"
+    },
+    "implement.rejected_policy": {
+      "value": "採用: 現行方式のまま --help を追加。却下: argparse へ移行",
+      "source": "承認された提案",
+      "questions": {
+        "implement.rejected_policy.stated": {
+          "text": "解釈の implement.rejected_policy に、確定した方針（却下した案があればそれも）が書かれているか",
+          "noul": 0.95,
+          "verdict": "yes"
+        },
+        "implement.rejected_policy.supported": {
+          "text": "解釈の implement.rejected_policy に書かれた内容は、すべてユーザー発言の引用・承認された提案・既定値のいずれかに裏付けられているか",
+          "noul": 0.94,
+          "verdict": "yes"
+        }
+      },
+      "status": "ok"
+    }
+  },
+  "common": {
+    "common.contradiction": {
+      "questions": {
+        "common.contradiction.conflict": {
+          "text": "解釈のいずれかの項目が、ユーザー発言の引用または承認された提案と矛盾するか",
+          "noul": 0.16,
+          "verdict": "no"
+        }
+      },
+      "status": "ok"
+    }
+  },
+  "ready": false,
+  "message": "implement.target で止まっています\n  解釈の値: 「src/counter.py の main に --help を追加する」（出どころ: 承認された提案）\n  満たしていない条件: 解釈の implement.target に、作業対象のリポジトリまたはディレクトリが特定できる形で書かれているか（ask, noul 0.61）\n  既定値: 事実の「対象ディレクトリ」のリポジトリ（出どころ: build_state.py が集めた対象ディレクトリと .git）\n→ どこに対して作業しますか"
+}

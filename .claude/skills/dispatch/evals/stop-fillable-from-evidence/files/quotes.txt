@@ -1,0 +1,2 @@
+counter.py に --help を足したい。usage が出ればいい
+y
