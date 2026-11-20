@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: stop-fillable-from-evidence
+expected_outcome: |
+  手順 3 の判定で implement.target が止まったが、止まった問い（作業対象のリポジトリが特定できるか）は State の事実（対象ディレクトリ）と既定値から埋められる。ユーザーには聞かず、interpretation.json の implement.target を根拠付きで書き直して手順 3 から再判定する。自分の答えを quotes.txt に足さない。再判定が通れば plan を読ませる依頼文を書く。

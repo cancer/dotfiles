@@ -1,0 +1,8 @@
+{"items": {
+  "implement.target": {"value": "src/counter.py の main に --help を追加する", "source": "承認された提案"},
+  "implement.completion": {"value": "--help で usage が出る", "source": "発言「usage が出ればいい」"},
+  "implement.out_of_scope": {"value": "argparse への移行はしない", "source": "承認された提案"},
+  "implement.constraints": {"value": "既存の設計と CLAUDE.md の規約に従い、依頼外の箇所は変えない", "source": "既定値"},
+  "implement.deliverable": {"value": "PR", "source": "既定値"},
+  "implement.rejected_policy": {"value": "採用: 現行方式のまま --help を追加。却下: argparse へ移行", "source": "承認された提案"}
+}}

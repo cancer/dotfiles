@@ -1,0 +1,29 @@
+解釈（companion がユーザー発言から書いた項目。下の引用・承認された提案・既定値が根拠）
+- implement.target: src/counter.py の main に --help を追加する（出どころ: 承認された提案）
+- implement.completion: --help で usage が出る（出どころ: 発言「usage が出ればいい」）
+- implement.out_of_scope: argparse への移行はしない（出どころ: 承認された提案）
+- implement.constraints: 既存の設計と CLAUDE.md の規約に従い、依頼外の箇所は変えない（出どころ: 既定値）
+- implement.deliverable: PR（出どころ: 既定値）
+- implement.rejected_policy: 採用: 現行方式のまま --help を追加。却下: argparse へ移行（出どころ: 承認された提案）
+
+ユーザー発言の引用
+counter.py に --help を足したい。usage が出ればいい
+y
+
+ユーザーが承認した提案
+[承認された提案]
+src/counter.py に --help を追加します。完了条件は、python3 src/counter.py --help で usage 行が表示されることと、tests/test_counter.py に --help のテストを 1 件追加して既存 3 件と合わせて pytest が通ることです。argparse への移行はしません。
+[承認した発言]
+y
+
+依頼の原文
+
+
+事実
+スクリプト収集分:
+- 対象ディレクトリ: /Users/cancer/.claude/skills/verify-task-workspace/fixture-src/repo
+- .git: あり
+- マニフェスト: なし
+- issue / PR 種別: 未指定
+- 計画書: 未指定
+- 既存テスト: あり
